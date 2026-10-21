@@ -2,5 +2,1069 @@
   "codex_bin": "/usr/lib/chatgpt/resources/codex",
   "run_timeout_seconds": 14400,
   "test_timeout_seconds": 1800,
-  "phases": []
+  "policy": {
+    "max_phases_per_round": 3,
+    "round_timeout_seconds": 14400,
+    "phase_timeout_seconds": 4200,
+    "test_timeout_seconds": 1200,
+    "primary_used_pause_percent": 90,
+    "secondary_used_pause_percent": 95,
+    "auth_mode": "chatgpt_only",
+    "allow_paid_api": false,
+    "allow_auto_reset_credit": false,
+    "allow_auto_model_upgrade": false
+  },
+  "phases": [
+    {
+      "id": "S00",
+      "title": "加固自动开发调度器",
+      "level": "complex",
+      "depends_on": [],
+      "prompt_file": "tasks/S00.md",
+      "tests": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_scheduler*.py",
+          "-v"
+        ],
+        [
+          "python3",
+          "scheduler.py",
+          "validate"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/S00.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "S01",
+      "title": "项目与可复现工具链",
+      "level": "ordinary",
+      "depends_on": [
+        "S00"
+      ],
+      "prompt_file": "tasks/S01.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "S01"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/S01.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "S02",
+      "title": "领域模型与接口契约",
+      "level": "complex",
+      "depends_on": [
+        "S01"
+      ],
+      "prompt_file": "tasks/S02.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "S02"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/S02.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "S03",
+      "title": "URDF 文件夹与 ZIP 导入",
+      "level": "complex",
+      "depends_on": [
+        "S02"
+      ],
+      "prompt_file": "tasks/S03.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "S03"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/S03.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "S04",
+      "title": "三维查看基础",
+      "level": "complex",
+      "depends_on": [
+        "S03"
+      ],
+      "prompt_file": "tasks/S04.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "S04"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/S04.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "S05",
+      "title": "查看器分析工具",
+      "level": "complex",
+      "depends_on": [
+        "S04"
+      ],
+      "prompt_file": "tasks/S05.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "S05"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/S05.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "S06",
+      "title": "查看模块整体验收",
+      "level": "ordinary",
+      "depends_on": [
+        "S05"
+      ],
+      "prompt_file": "tasks/S06.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "S06"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/S06.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "C00",
+      "title": "STEP 内核与转换原型",
+      "level": "complex",
+      "depends_on": [
+        "S03"
+      ],
+      "prompt_file": "tasks/C00.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "C00"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/C00.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "C01",
+      "title": "质量惯量与坐标变换",
+      "level": "complex",
+      "depends_on": [
+        "C00"
+      ],
+      "prompt_file": "tasks/C01.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "C01"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/C01.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "C02",
+      "title": "关节分组与转换向导",
+      "level": "complex",
+      "depends_on": [
+        "C01",
+        "S04"
+      ],
+      "prompt_file": "tasks/C02.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "C02"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/C02.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "C03",
+      "title": "URDF/ROS 包导出与交叉校验",
+      "level": "complex",
+      "depends_on": [
+        "C02"
+      ],
+      "prompt_file": "tasks/C03.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "C03"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/C03.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "C04",
+      "title": "其他 CAD 和 SolidWorks 互通",
+      "level": "ordinary",
+      "depends_on": [
+        "C03"
+      ],
+      "prompt_file": "tasks/C04.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "C04"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/C04.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "M00",
+      "title": "参数化 CAD 操作核心",
+      "level": "complex",
+      "depends_on": [
+        "C01"
+      ],
+      "prompt_file": "tasks/M00.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "M00"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/M00.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "M01",
+      "title": "交互式机器人建模界面",
+      "level": "complex",
+      "depends_on": [
+        "M00",
+        "S05"
+      ],
+      "prompt_file": "tasks/M01.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "M01"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/M01.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "M02",
+      "title": "FreeCAD 往返与版本差异",
+      "level": "complex",
+      "depends_on": [
+        "M01",
+        "C04"
+      ],
+      "prompt_file": "tasks/M02.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "M02"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/M02.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "A00",
+      "title": "受约束 Agent 工具层",
+      "level": "complex",
+      "depends_on": [
+        "S02",
+        "M00"
+      ],
+      "prompt_file": "tasks/A00.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "A00"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/A00.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "A01",
+      "title": "Agent 辅助建模",
+      "level": "complex",
+      "depends_on": [
+        "A00",
+        "M01"
+      ],
+      "prompt_file": "tasks/A01.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "A01"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/A01.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "A02",
+      "title": "CLI 与 MCP 工具接口",
+      "level": "ordinary",
+      "depends_on": [
+        "A00",
+        "C03"
+      ],
+      "prompt_file": "tasks/A02.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "A02"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/A02.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "E00",
+      "title": "评估方法审查与金标准故障集",
+      "level": "critical",
+      "depends_on": [
+        "S02"
+      ],
+      "prompt_file": "tasks/E00.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "E00"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/E00.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "E01",
+      "title": "静态语义与物理规则",
+      "level": "ordinary",
+      "depends_on": [
+        "E00",
+        "C01"
+      ],
+      "prompt_file": "tasks/E01.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "E01"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/E01.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "E02",
+      "title": "动力学一致性检查",
+      "level": "complex",
+      "depends_on": [
+        "E01"
+      ],
+      "prompt_file": "tasks/E02.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "E02"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/E02.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "E03",
+      "title": "URDF 到 MuJoCo 的可靠编译",
+      "level": "complex",
+      "depends_on": [
+        "E02",
+        "C03"
+      ],
+      "prompt_file": "tasks/E03.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "E03"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/E03.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "E04",
+      "title": "无训练动态探测",
+      "level": "complex",
+      "depends_on": [
+        "E03"
+      ],
+      "prompt_file": "tasks/E04.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "E04"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/E04.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "R00",
+      "title": "参照模型注册表",
+      "level": "ordinary",
+      "depends_on": [
+        "S01",
+        "E00"
+      ],
+      "prompt_file": "tasks/R00.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "R00"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/R00.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "R01",
+      "title": "A1 与 Go2 参照模型",
+      "level": "ordinary",
+      "depends_on": [
+        "R00",
+        "E03"
+      ],
+      "prompt_file": "tasks/R01.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "R01"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/R01.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "R02",
+      "title": "G1 与 H1 参照模型",
+      "level": "ordinary",
+      "depends_on": [
+        "R00",
+        "E03"
+      ],
+      "prompt_file": "tasks/R02.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "R02"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/R02.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "K00",
+      "title": "可扩展技能机制和动力学基础",
+      "level": "ordinary",
+      "depends_on": [
+        "E00",
+        "A02"
+      ],
+      "prompt_file": "tasks/K00.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "K00"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/K00.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "K01",
+      "title": "四足评估技能",
+      "level": "complex",
+      "depends_on": [
+        "K00",
+        "R01",
+        "E04"
+      ],
+      "prompt_file": "tasks/K01.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "K01"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/K01.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "K02",
+      "title": "人形评估技能",
+      "level": "complex",
+      "depends_on": [
+        "K00",
+        "R02",
+        "E04"
+      ],
+      "prompt_file": "tasks/K02.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "K02"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/K02.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "B00",
+      "title": "可恢复实验作业系统",
+      "level": "complex",
+      "depends_on": [
+        "E03",
+        "S01"
+      ],
+      "prompt_file": "tasks/B00.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "B00"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/B00.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "B01",
+      "title": "CPU PPO 训练闭环",
+      "level": "complex",
+      "depends_on": [
+        "B00"
+      ],
+      "prompt_file": "tasks/B01.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "B01"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/B01.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "B02",
+      "title": "四足统一运动任务",
+      "level": "complex",
+      "depends_on": [
+        "B01",
+        "R01"
+      ],
+      "prompt_file": "tasks/B02.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "B02"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/B02.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "B03",
+      "title": "人形统一运动任务",
+      "level": "complex",
+      "depends_on": [
+        "B01",
+        "R02"
+      ],
+      "prompt_file": "tasks/B03.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "B03"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/B03.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "B04",
+      "title": "粗糙地形与鲁棒性条件",
+      "level": "ordinary",
+      "depends_on": [
+        "B02",
+        "B03"
+      ],
+      "prompt_file": "tasks/B04.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "B04"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/B04.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "B05",
+      "title": "统计与公平对照引擎",
+      "level": "complex",
+      "depends_on": [
+        "B04"
+      ],
+      "prompt_file": "tasks/B05.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "B05"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/B05.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "B06",
+      "title": "GPU 加速适配接口",
+      "level": "ordinary",
+      "depends_on": [
+        "B00",
+        "B02"
+      ],
+      "prompt_file": "tasks/B06.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "B06"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/B06.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "B07",
+      "title": "实验媒体与对照视图",
+      "level": "ordinary",
+      "depends_on": [
+        "B05",
+        "S05"
+      ],
+      "prompt_file": "tasks/B07.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "B07"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/B07.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "B08",
+      "title": "两类机器人端到端真实烟测",
+      "level": "ordinary",
+      "depends_on": [
+        "B02",
+        "B03",
+        "B07"
+      ],
+      "prompt_file": "tasks/B08.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "B08"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/B08.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "D00",
+      "title": "受证据约束的诊断引擎",
+      "level": "critical",
+      "depends_on": [
+        "E04",
+        "K01",
+        "K02",
+        "B05"
+      ],
+      "prompt_file": "tasks/D00.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "D00"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/D00.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "D01",
+      "title": "消融与敏感度实验",
+      "level": "complex",
+      "depends_on": [
+        "D00",
+        "B08"
+      ],
+      "prompt_file": "tasks/D01.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "D01"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/D01.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "D02",
+      "title": "机械组报告与 CAD 映射",
+      "level": "ordinary",
+      "depends_on": [
+        "D01",
+        "M02",
+        "B07"
+      ],
+      "prompt_file": "tasks/D02.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "D02"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/D02.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "D03",
+      "title": "Agent 调用技能解释对照",
+      "level": "complex",
+      "depends_on": [
+        "D00",
+        "A01",
+        "D02"
+      ],
+      "prompt_file": "tasks/D03.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "D03"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/D03.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "Q00",
+      "title": "跨模块回归与用户流程",
+      "level": "complex",
+      "depends_on": [
+        "S06",
+        "C04",
+        "M02",
+        "D03"
+      ],
+      "prompt_file": "tasks/Q00.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "Q00"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/Q00.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "Q01",
+      "title": "离线发行包与第三方许可",
+      "level": "complex",
+      "depends_on": [
+        "Q00"
+      ],
+      "prompt_file": "tasks/Q01.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "Q01"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/Q01.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "Q02",
+      "title": "Ubuntu 收藏夹安装",
+      "level": "ordinary",
+      "depends_on": [
+        "Q01"
+      ],
+      "prompt_file": "tasks/Q02.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "Q02"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/Q02.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "Q03",
+      "title": "软件发行验收审查",
+      "level": "ordinary",
+      "depends_on": [
+        "Q02",
+        "B08",
+        "B06"
+      ],
+      "prompt_file": "tasks/Q03.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "Q03"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/Q03.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "X00",
+      "title": "Go2 多种子参考实验",
+      "level": "ordinary",
+      "depends_on": [
+        "Q03",
+        "B05"
+      ],
+      "prompt_file": "tasks/X00.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "X00"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/X00.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "X01",
+      "title": "G1 多种子参考实验",
+      "level": "ordinary",
+      "depends_on": [
+        "Q03",
+        "B05"
+      ],
+      "prompt_file": "tasks/X01.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "X01"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/X01.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "X02",
+      "title": "A1/H1 扩展与变体比较",
+      "level": "ordinary",
+      "depends_on": [
+        "X00",
+        "X01",
+        "D01"
+      ],
+      "prompt_file": "tasks/X02.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "X02"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/X02.md"
+      ],
+      "required": true
+    },
+    {
+      "id": "Q04",
+      "title": "最终全量交付核查",
+      "level": "ordinary",
+      "depends_on": [
+        "X02",
+        "Q03"
+      ],
+      "prompt_file": "tasks/Q04.md",
+      "tests": [
+        [
+          "python3",
+          "scripts/accept_phase.py",
+          "Q04"
+        ]
+      ],
+      "acceptance_artifacts": [
+        "docs/acceptance/Q04.md"
+      ],
+      "required": true
+    }
+  ]
 }

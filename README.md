@@ -1,17 +1,16 @@
-# URDFTools automated development scheduler
+# URDFTools
 
-This directory is the future URDFTools repository and already contains its scheduler. The stage list is intentionally empty until the Astra architecture and acceptance plan are approved. Each six-hour run executes at most one pending stage.
+面向强化学习机器人研发的本地桌面工作台、Python 工具包与 agent 工具。目标功能为 URDF 查看、CAD→URDF 转换、参数化 CAD/机器人建模，以及有证据的训练适用性评估与机械反馈。**当前只有架构和阶段计划，产品功能尚在开发。**
 
-## Commands
+- [需求基线](docs/REQUIREMENTS.md)
+- [技术架构](docs/ARCHITECTURE.md)
+- [评估/对照实验方法](docs/EVALUATION.md)
+- [开源方案检索](docs/RESEARCH.md)
+- [50 个阶段与模型分工](docs/TASKS.md)
+- [自动调度设计](docs/SCHEDULER_DESIGN.md)
+- [运行与交接](docs/OPERATIONS.md)
+- [当前进度](PROGRESS.md)
 
-```bash
-python3 scheduler.py status
-python3 scheduler.py run --dry-run
-python3 scheduler.py run
-```
+开发由已有 `scheduler.py` 与 `urdftools-dev.timer` 驱动，默认每 6 小时尝试下一任务。现有 S00 加固完成前，CLI 仍按初始实现每轮执行一个顺序任务；`scheduler.json` 中的新策略字段供 S00 实现，不应误解为已经生效。真实开发状态可用 `python3 scheduler.py status` 检查。额度、认证、硬件条件不足时保留阶段等待再试。
 
-Add stages to `scheduler.json` in execution order. Each has a unique `id`, a `level` (`ordinary`, `complex`, `critical`, or `critical_xhigh`), a relative `prompt_file`, and optional `tests` as arrays of command arguments. The mapping is Sol Medium, Sol High, Astra High, and Astra xHigh. The scheduler uses the existing ChatGPT CLI login, never an API key. It keeps each attempt in `.scheduler/state.json`, captures CLI output under `.scheduler/runs/`, and commits a successful, tested stage to local Git. Failed stages remain pending; their partial working-tree changes remain for the next attempt.
-
-The timer is supplied in `systemd/`. Install it with `bash install-timer.sh`. Its `OnUnitActiveSec=6h` interval retries after failures; persistent state is in this repository. The timer runs only while the user systemd manager is running. Enable lingering separately if execution while logged out is required.
-
-Limits: Codex CLI does not expose a reliable prepaid remaining-quota value through this script. A quota or rate-limit response stops the current attempt and leaves the stage pending for the next timer. Authentication expiry also stops the attempt until the user signs in again.
+默认模型配置已经下调：50 个阶段中 Sol Medium 20、Sol High 28、Astra High 2、Astra xHigh 0。高难模型仍可作为明示、受预算约束的复核档，但不会自动升级。
