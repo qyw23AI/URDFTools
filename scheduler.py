@@ -100,7 +100,7 @@ def build_codex_command(phase: dict, codex: str) -> list[str]:
     model, effort = LEVELS[phase["level"]]
     return [codex, "exec", "--json", "--model", model,
             "--config", f"model_reasoning_effort={effort}",
-            "--sandbox", "workspace-write", "--approve-for-me", "--cd", str(ROOT), "-"]
+            "--sandbox", "workspace-write", "--cd", str(ROOT), "-"]
 
 
 def classify_failure(output: str) -> str:
