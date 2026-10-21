@@ -46,10 +46,19 @@ def read_json(path: Path, default: object) -> object:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else default
 
 
-def run_command(argv: list[str], cwd: Path, timeout: int, output: Path | None = None) -> tuple[int, str]:
+def chatgpt_environment() -> dict[str, str]:
+    """Prevent an inherited paid API credential from replacing the ChatGPT login."""
+    env = os.environ.copy()
+    for name in ("OPENAI_API_KEY", "CODEX_API_KEY", "OPENAI_BASE_URL", "CODEX_BASE_URL"):
+        env.pop(name, None)
+    return env
+
+
+def run_command(argv: list[str], cwd: Path, timeout: int, output: Path | None = None,
+                env: dict[str, str] | None = None) -> tuple[int, str]:
     try:
         completed = subprocess.run(argv, cwd=cwd, text=True, stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT, timeout=timeout, check=False)
+                                   stderr=subprocess.STDOUT, timeout=timeout, check=False, env=env)
         result = completed.stdout
         if output:
             output.parent.mkdir(parents=True, exist_ok=True)
@@ -139,7 +148,7 @@ def attempt(dry_run: bool = False, codex_override: str | None = None) -> int:
             print(json.dumps({"phase": phase["id"], "command": command,
                               "tests": phase.get("tests", [])}, ensure_ascii=False, indent=2))
             return 0
-        code, logged_in = run_command([codex, "login", "status"], ROOT, 30)
+        code, logged_in = run_command([codex, "login", "status"], ROOT, 30, env=chatgpt_environment())
         if code != 0 or "Logged in" not in logged_in:
             print("Codex ChatGPT login is unavailable; no API-key fallback", file=sys.stderr)
             return 4
@@ -152,7 +161,8 @@ def attempt(dry_run: bool = False, codex_override: str | None = None) -> int:
         try:
             completed = subprocess.run(command, cwd=ROOT, input=prompt, text=True,
                                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                       timeout=int(config.get("run_timeout_seconds", 14400)), check=False)
+                                       timeout=int(config.get("run_timeout_seconds", 14400)), check=False,
+                                       env=chatgpt_environment())
             output, code = completed.stdout, completed.returncode
         except subprocess.TimeoutExpired as exc:
             output = (exc.stdout or b"").decode("utf-8", "replace") if isinstance(exc.stdout, bytes) else (exc.stdout or "")
