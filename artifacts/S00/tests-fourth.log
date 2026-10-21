@@ -1,0 +1,41 @@
+test_429_and_global_backoff (test_scheduler.SchedulerTest) ... ok
+test_all_skipped_rejected (test_scheduler.SchedulerTest) ... ok
+test_changed_wip_not_overwritten (test_scheduler.SchedulerTest) ... ok
+test_chatgpt_only_and_no_inherited_keys (test_scheduler.SchedulerTest) ... ok
+test_commit_done_state_not_saved_recovery (test_scheduler.SchedulerTest) ... ok
+test_commit_failure_recovers_without_new_exec (test_scheduler.SchedulerTest) ... ok
+test_completed_with_blocker_fails (test_scheduler.SchedulerTest) ... ok
+test_concurrent_lock (test_scheduler.SchedulerTest) ... ok
+test_dependency_order (test_scheduler.SchedulerTest) ... ok
+test_existing_user_changes_protected (test_scheduler.SchedulerTest) ... ok
+test_explicit_sol_fallback (test_scheduler.SchedulerTest) ... ok
+test_false_completed_without_commit_rejected (test_scheduler.SchedulerTest) ... ok
+test_four_model_routes (test_scheduler.SchedulerTest) ... ok
+test_gate_counts_numerical_invariants (test_scheduler.SchedulerTest) ... ok
+test_git_success_evidence_and_repeat (test_scheduler.SchedulerTest) ... ok
+test_graph_mutation_rejected (test_scheduler.SchedulerTest) ... ok
+test_graph_validation (test_scheduler.SchedulerTest) ... ok
+test_hardware_wait_does_not_block_independent (test_scheduler.SchedulerTest) ... ok
+test_invalid_result (test_scheduler.SchedulerTest) ... ok
+test_invalid_stream (test_scheduler.SchedulerTest) ... ok
+test_missing_turn_completed (test_scheduler.SchedulerTest) ... ok
+test_model_unavailable_no_downgrade (test_scheduler.SchedulerTest) ... ok
+test_multiple_gates_keep_separate_logs (test_scheduler.SchedulerTest) ... ok
+test_partial_exit_zero (test_scheduler.SchedulerTest) ... ok
+test_primary_quota_boundary (test_scheduler.SchedulerTest) ... ok
+test_quota_threshold_and_model_buckets (test_scheduler.SchedulerTest) ... ok
+test_real_test_failure (test_scheduler.SchedulerTest) ... ok
+test_repository_plan_preserved (test_scheduler.SchedulerTest) ... ok
+test_self_modification_stops_round (test_scheduler.SchedulerTest) ... ok
+test_signal_kills_descendants_and_releases_lock (test_scheduler.SchedulerTest) ... ok
+test_staged_user_changes_protected (test_scheduler.SchedulerTest) ... ok
+test_text_429_does_not_match (test_scheduler.SchedulerTest) ... ok
+test_timeout_kills_descendants (test_scheduler.SchedulerTest) ... ok
+test_unknown_quota_one_bounded_exec (test_scheduler.SchedulerTest) ... ok
+test_unrecognized_zero_exit_is_not_gate (test_scheduler.SchedulerTest) ... ok
+test_zero_tests_rejected (test_scheduler.SchedulerTest) ... ok
+
+----------------------------------------------------------------------
+Ran 36 tests in 6.974s
+
+OK

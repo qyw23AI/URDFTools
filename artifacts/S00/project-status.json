@@ -1,0 +1,15 @@
+{
+  "completed": [],
+  "tasks": {},
+  "next": "S00",
+  "last_attempt": {
+    "phase": "S00",
+    "started": "2026-10-21T17:29:45+00:00",
+    "finished": "2026-10-21T17:29:45+00:00",
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "result": "failed",
+    "exit_code": 2,
+    "log": ".scheduler/runs/20261021T172945Z-S00.jsonl"
+  }
+}

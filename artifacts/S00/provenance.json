@@ -1,0 +1,19 @@
+{
+  "codex_version": "0.160.0",
+  "codex_path": "/usr/lib/chatgpt/resources/codex",
+  "codex_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+  "python_version": "Python 3.10.12",
+  "dependencies": "Python stdlib only; no downloaded/copied third-party code",
+  "sources": [
+    "https://learn.chatgpt.com/docs/app-server",
+    "https://learn.chatgpt.com/docs/config-file/config-reference",
+    "https://learn.chatgpt.com/docs/noninteractive"
+  ],
+  "schema_command": [
+    "/usr/lib/chatgpt/resources/codex",
+    "app-server",
+    "generate-json-schema",
+    "--out",
+    "/tmp/urdftools-codex-schema"
+  ]
+}

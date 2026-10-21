@@ -1,0 +1,41 @@
+{
+  "status": "blocked",
+  "timestamp": "2026-10-21T17:44:21+00:00",
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit=urdftools-s00-probe-0e885d0d7d5b",
+    "--on-active=2s",
+    "--timer-property=AccuracySec=100ms",
+    "--collect",
+    "/usr/bin/python3",
+    "/home/qyw/URDFTools/scripts/verify_scheduler_timer.py",
+    "--probe",
+    "/home/qyw/URDFTools/artifacts/S00/timer/trigger-0e885d0d7d5b4f33992c9362e937342e.json",
+    "110583.441665192",
+    "0e885d0d7d5b4f33992c9362e937342e"
+  ],
+  "process": {
+    "argv": [
+      "systemd-run",
+      "--user",
+      "--unit=urdftools-s00-probe-0e885d0d7d5b",
+      "--on-active=2s",
+      "--timer-property=AccuracySec=100ms",
+      "--collect",
+      "/usr/bin/python3",
+      "/home/qyw/URDFTools/scripts/verify_scheduler_timer.py",
+      "--probe",
+      "/home/qyw/URDFTools/artifacts/S00/timer/trigger-0e885d0d7d5b4f33992c9362e937342e.json",
+      "110583.441665192",
+      "0e885d0d7d5b4f33992c9362e937342e"
+    ],
+    "exit_code": 1,
+    "status": null,
+    "duration_seconds": 0.024
+  },
+  "actual_trigger": null,
+  "source_sha256": "b4cef2983e92a639a1f36b8f1646073daca8e2e208634c28aaeccd76b55d883e",
+  "calendar": "*-*-* 00/6:00:00",
+  "permanent_timer_modified": false
+}

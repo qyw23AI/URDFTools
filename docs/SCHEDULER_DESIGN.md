@@ -1,5 +1,7 @@
 # 开发调度与跨会话恢复设计
 
+S00 实施记录（2026-10-22）：新版源码与本地故障测试已落地，48 项通过；真实 model/list 已返回目录，但身份路由发现失败，真实小任务未到 exec；timer 部署/触发也受当前权限阻塞。详见 `acceptance/S00.md`，仍不得标记 S00 完成。以下保留设计与完整后续约束，首段中的 bootstrap 描述为实施前基线。
+
 现有实现是 bootstrap，仅可执行线性单阶段。首个 S00 由 Sol High 通过现有调度器实现下列加固；当前架构模型不直接编写产品功能或调度器实现。已有 systemd timer 正常工作，沿用一个定时来源，避免同时创建 Codex 自动化和 systemd 重复启动。默认阶段已下调为 Sol Medium 20、Sol High 28、Astra High 2、Astra xHigh 0；xHigh 保留为未来有证据的显式复核档。
 
 ## 模型选择

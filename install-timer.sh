@@ -10,3 +10,4 @@ cp "$root/systemd/urdftools-dev.service" "$root/systemd/urdftools-dev.timer" "$H
 systemctl --user daemon-reload
 systemctl --user enable --now urdftools-dev.timer
 systemctl --user status urdftools-dev.timer --no-pager
+python3 "$root/scripts/verify_scheduler_timer.py"

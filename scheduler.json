@@ -37,6 +37,10 @@
           "python3",
           "scheduler.py",
           "validate"
+        ],
+        [
+          "python3",
+          "scripts/check_s00_acceptance.py"
         ]
       ],
       "acceptance_artifacts": [

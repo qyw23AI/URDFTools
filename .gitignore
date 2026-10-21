@@ -1,3 +1,2 @@
-.scheduler/run.lock
-.scheduler/runs/
+.scheduler/
 __pycache__/

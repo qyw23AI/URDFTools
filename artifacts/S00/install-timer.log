@@ -1,0 +1,2 @@
+cp: 无法创建普通文件 '/home/qyw/.config/systemd/user/urdftools-dev.service': 只读文件系统
+cp: 无法创建普通文件 '/home/qyw/.config/systemd/user/urdftools-dev.timer': 只读文件系统

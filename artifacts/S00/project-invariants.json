@@ -1,0 +1,9 @@
+{
+  "project_state_unchanged": true,
+  "project_head_unchanged": true,
+  "project_head": "d789f33de246c1483a27853bc142a917e64bb55b",
+  "state_sha256": "efbd058647e8be098fcf4193e90837f0128d5bc39c65afaa2359be8d5eb1f270",
+  "phases": 50,
+  "original_phase_requirements_preserved": true,
+  "only_plan_addition": "S00 fail-closed real acceptance gate"
+}
