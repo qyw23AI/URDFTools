@@ -1,0 +1,10 @@
+[Unit]
+Description=Try next URDFTools development stage every six hours
+
+[Timer]
+OnCalendar=*-*-* 00/6:00:00
+Persistent=true
+Unit=urdftools-dev.service
+
+[Install]
+WantedBy=timers.target

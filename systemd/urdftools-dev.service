@@ -1,0 +1,8 @@
+[Unit]
+Description=URDFTools bounded Codex development attempt
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/URDFTools
+ExecStart=/usr/bin/python3 %h/URDFTools/scheduler.py run
+TimeoutStartSec=5h

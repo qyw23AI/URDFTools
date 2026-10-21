@@ -1,0 +1,6 @@
+{
+  "codex_bin": "/usr/lib/chatgpt/resources/codex",
+  "run_timeout_seconds": 14400,
+  "test_timeout_seconds": 1800,
+  "phases": []
+}
