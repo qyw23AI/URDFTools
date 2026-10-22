@@ -6,7 +6,7 @@
     "urdftools-dev.timer",
     "--property=ActiveState,TimersCalendar,Persistent"
   ],
-  "exit_code": 1,
+  "exit_code": 0,
   "status": null,
-  "duration_seconds": 0.005
+  "duration_seconds": 0.006
 }

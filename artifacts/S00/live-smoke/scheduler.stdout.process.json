@@ -1,10 +1,10 @@
 {
   "argv": [
     "/usr/bin/python3",
-    "/tmp/urdftools-live-S00-h5emdaur/scheduler.py",
+    "/home/qyw/URDFTools/.scheduler/live-repositories/urdftools-live-S00-zqkjwcqd/scheduler.py",
     "run"
   ],
-  "exit_code": 75,
+  "exit_code": 0,
   "status": null,
-  "duration_seconds": 3.589
+  "duration_seconds": 63.721
 }

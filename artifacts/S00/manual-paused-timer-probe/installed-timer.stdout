@@ -1,0 +1,3 @@
+TimersCalendar={ OnCalendar=*-*-* 00/6:00:00 ; next_elapse=n/a }
+Persistent=yes
+ActiveState=inactive

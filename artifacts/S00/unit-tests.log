@@ -54,7 +54,7 @@ test_waiting_experiment_poll_avoids_model (test_scheduler.SchedulerTest) ... ok
 test_zero_tests_rejected (test_scheduler.SchedulerTest) ... ok
 
 ----------------------------------------------------------------------
-Ran 54 tests in 9.847s
+Ran 54 tests in 10.191s
 
 OK
-{"status": "no_op", "completed": ["one"], "tasks": {"one": {"status": "completed", "reason": "gates and Git transaction complete", "last_run": "20261022T030815Z-one-3bc1630f"}}, "final_release_path": null}
+{"status": "no_op", "completed": ["one"], "tasks": {"one": {"status": "completed", "reason": "gates and Git transaction complete", "last_run": "20261022T032151Z-one-eae67d31"}}, "final_release_path": null}
