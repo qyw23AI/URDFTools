@@ -29,6 +29,7 @@ report = dict(timestamp=scheduler.now(), command=command, exit_code=completed.re
               errors=0 if completed.returncode == 0 else None, skipped=counts['skipped'] if counts else None,
               source_sha256=scheduler.file_hash(ROOT / 'scheduler.py'),
               tests_sha256=scheduler.file_hash(ROOT / 'tests/test_scheduler.py'),
+              fixture_sha256=scheduler.file_hash(ROOT / 'tests/fixtures/scheduler/codex_fault.py'),
               evidence_sha256=scheduler.file_hash(output / 'fault-evidence.tar.gz'))
 scheduler.atomic_json(output / 'unit-report.json', report)
 print(json.dumps(report, indent=2))

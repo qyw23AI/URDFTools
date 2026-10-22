@@ -1,4 +1,6 @@
 import contextlib
+import configparser
+import datetime as dt
 import fcntl
 import importlib.util
 import json
@@ -11,6 +13,7 @@ import sys
 import tempfile
 import time
 import unittest
+from unittest.mock import patch
 
 SOURCE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SOURCE))
@@ -21,6 +24,13 @@ class SchedulerTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(prefix='urdftools-test-')
         self.addCleanup(self.tmp.cleanup)
+        # Fault peers must never inherit the developer's real ChatGPT identity.
+        auth_tmp = tempfile.TemporaryDirectory(prefix='urdftools-synthetic-auth-')
+        self.addCleanup(auth_tmp.cleanup)
+        (Path(auth_tmp.name) / 'auth.json').write_text('{"fixture":"not a credential"}')
+        env_patch = patch.dict(os.environ, {'CODEX_HOME': auth_tmp.name})
+        env_patch.start()
+        self.addCleanup(env_patch.stop)
         self.root = Path(self.tmp.name)
         shutil.copy2(SOURCE / 'scheduler.py', self.root / 'scheduler.py')
         shutil.copy2(SOURCE / 'tests/fixtures/scheduler/codex_fault.py', self.root / 'codex-fake')
@@ -47,7 +57,9 @@ class SchedulerTest(unittest.TestCase):
             if (self.root / name).exists():
                 shutil.copy2(self.root / name, destination / name)
         if (self.root / '.scheduler').exists():
-            shutil.copytree(self.root / '.scheduler', destination / 'scheduler-evidence', dirs_exist_ok=True)
+            shutil.copytree(self.root / '.scheduler', destination / 'scheduler-evidence',
+                            dirs_exist_ok=True, symlinks=True,
+                            ignore=shutil.ignore_patterns('codex-homes'))
 
     def phase(self, ident, dependencies=None):
         return dict(id=ident, level='ordinary', prompt_file='prompt.md', depends_on=dependencies or [],
@@ -125,6 +137,13 @@ class SchedulerTest(unittest.TestCase):
         calls = self.calls()
         self.assertNotEqual(self.invoke('run').returncode, 0)
         self.assertEqual(self.calls(), calls)
+
+    def test_preflight_429_never_becomes_unknown_quota_exec(self):
+        self.result('quota_wait', rpc_errors={'account/rateLimits/read': {'status': 429, 'code': 'rate_limit_exceeded'}})
+        self.assertNotIn('exec', self.calls())
+        before = self.calls()
+        self.assertNotEqual(self.invoke('run').returncode, 0)
+        self.assertEqual(self.calls(), before)
 
     def test_text_429_does_not_match(self):
         self.assertEqual(self.invoke('run').returncode, 0)
@@ -310,6 +329,22 @@ class SchedulerTest(unittest.TestCase):
     def test_graph_mutation_rejected(self):
         self.result('blocked_input', graph_change=True)
 
+    def test_gate_cannot_replace_plan_before_commit(self):
+        # Real gate process tampers with the next phase after the model finished.
+        command = ('import json; from pathlib import Path; p=Path("scheduler.json"); '
+                   'c=json.loads(p.read_text()); c["phases"][1]["level"]="critical"; '
+                   'p.write_text(json.dumps(c)); '
+                   'print(json.dumps({"scheduler_gate":{"executed":1,"passed":1,"failed":0,"skipped":0}}))')
+        self.config['phases'].append(self.phase('independent'))
+        self.config['phases'][0]['tests'] = [[sys.executable, '-c', command]]
+        self.save_config(commit=True)
+        before_head = self.git('rev-parse', 'HEAD')
+        self.result('blocked_input')
+        self.assertEqual(self.calls().count('exec'), 1)
+        self.assertEqual(self.git('rev-parse', 'HEAD'), before_head)
+        self.assertNotIn('checkpoints', self.state())
+        self.assertEqual(json.loads((self.root / 'scheduler.json').read_text())['phases'][1]['level'], 'critical')
+
     def test_existing_user_changes_protected(self):
         original = (self.root / 'prompt.md').read_bytes()
         (self.root / 'prompt.md').write_bytes(original + b'user edit')
@@ -424,6 +459,25 @@ class SchedulerTest(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(self.calls(), before)
 
+    def test_tampered_raw_test_log_rejected(self):
+        self.assertEqual(self.invoke('run').returncode, 0)
+        log = self.root / self.state()['attempts'][-1]['log']
+        (log / 'test-00.stdout').write_text('altered raw numeric results\n')
+        before = self.calls()
+        self.assertNotEqual(self.invoke('run').returncode, 0)
+        self.assertEqual(self.calls(), before)
+
+    def test_stale_instance_reloads_after_lock(self):
+        stale = scheduler.Scheduler(self.root)
+        self.assertEqual(self.invoke('run').returncode, 0)
+        before = self.calls()
+        state_bytes = (self.root / '.scheduler/state.json').read_bytes()
+        self.assertEqual(stale.run(), 0)
+        self.assertEqual(stale.state['completed'], ['one'])
+        self.assertEqual(self.calls(), before)
+        self.assertEqual((self.root / '.scheduler/state.json').read_bytes(), state_bytes)
+        self.assertEqual(self.git('rev-list', '--count', 'HEAD'), '2')
+
     def test_failed_commit_changed_files_not_committed(self):
         hook = self.root / '.git' / (self.git('symbolic-ref', 'HEAD') + '.lock')
         hook.parent.mkdir(parents=True, exist_ok=True)
@@ -444,13 +498,20 @@ class SchedulerTest(unittest.TestCase):
         self.assertEqual(self.calls(), [])
 
     def test_isolated_codex_home_excludes_provider_and_mcp(self):
-        with scheduler.codex_home() as env:
+        auth_source = self.root / 'auth-source'
+        auth_source.mkdir()
+        (auth_source / 'auth.json').write_text('{"fixture":"synthetic auth, no token"}')
+        with patch.dict(os.environ, {'CODEX_HOME': str(auth_source)}), scheduler.codex_home(self.root) as env:
             home = Path(env['CODEX_HOME'])
-            self.assertEqual(home.parent, Path.home() / '.codex' / 'tmp')
+            self.assertEqual(home.parent, self.root / '.scheduler/codex-homes')
             self.assertEqual(set(home.iterdir()), {home / 'auth.json', home / 'config.toml'})
+            self.assertTrue((home / 'auth.json').is_symlink())
+            self.assertEqual((home / 'auth.json').resolve(), auth_source / 'auth.json')
+            self.assertEqual((home / 'auth.json').read_text(), '{"fixture":"synthetic auth, no token"}')
             self.assertIn('forced_login_method = "chatgpt"', (home / 'config.toml').read_text())
             self.assertNotIn('OPENAI_API_KEY', env)
         self.assertFalse(home.exists())
+        self.assertEqual((auth_source / 'auth.json').read_text(), '{"fixture":"synthetic auth, no token"}')
 
     def test_changed_wip_not_overwritten(self):
         self.result('partial', result='partial')
@@ -490,6 +551,26 @@ class SchedulerTest(unittest.TestCase):
         first['tests'] = first['tests'][:len(baseline['phases'][0]['tests'])]
         self.assertEqual(first, baseline['phases'][0])
 
+    def test_real_systemd_calendar_has_six_hour_intervals(self):
+        timer = configparser.ConfigParser(interpolation=None)
+        timer.read(SOURCE / 'systemd/urdftools-dev.timer')
+        self.assertTrue(timer.getboolean('Timer', 'Persistent'))
+        calendar = timer['Timer']['OnCalendar']
+        self.assertEqual(calendar, '*-*-* 00/6:00:00')
+        command = ['systemd-analyze', 'calendar', '--base-time=2026-10-22 00:00:01', '--iterations=4', calendar]
+        result = subprocess.run(command, env=os.environ | {'TZ': 'Asia/Shanghai', 'LC_ALL': 'C'},
+                                capture_output=True, text=True, timeout=5)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        times = [dt.datetime.strptime(line.split('(in UTC): ', 1)[1], '%a %Y-%m-%d %H:%M:%S UTC')
+                 for line in result.stdout.splitlines() if '(in UTC): ' in line]
+        self.assertEqual(len(times), 4)
+        self.assertEqual(times[0], dt.datetime(2026, 10, 21, 22))
+        self.assertEqual([(b - a).total_seconds() for a, b in zip(times, times[1:])], [21600] * 3)
+        if os.environ.get('S00_EVIDENCE_DIR'):
+            target = Path(os.environ['S00_EVIDENCE_DIR']) / self._testMethodName / 'calendar.json'
+            scheduler.atomic_json(target, {'command': command, 'exit_code': result.returncode,
+                                           'stdout': result.stdout, 'stderr': result.stderr})
+
     def test_s00_acceptance_gate_rejects_missing_or_blocked_live(self):
         spec = importlib.util.spec_from_file_location('s00_gate', SOURCE / 'scripts/check_s00_acceptance.py')
         module = importlib.util.module_from_spec(spec)
@@ -500,6 +581,27 @@ class SchedulerTest(unittest.TestCase):
         live = self.root / 'artifacts/S00/live-smoke/report.json'
         scheduler.atomic_json(live, {'status': 'blocked', 'kind': 'real_codex_cli'})
         self.assertFalse(module.evaluate(self.root)[1]['passed'])
+
+    def test_s00_timer_gate_requires_deployed_units_and_actual_trigger(self):
+        spec = importlib.util.spec_from_file_location('s00_timer_gate', SOURCE / 'scripts/check_s00_acceptance.py')
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        for name in ('systemd/urdftools-dev.service', 'systemd/urdftools-dev.timer', 'scripts/verify_scheduler_timer.py'):
+            target = self.root / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(SOURCE / name, target)
+        path = self.root / 'artifacts/S00/timer/report.json'
+        report = {'status': 'passed', 'actual_trigger': {'token': 'fixture', 'elapsed_seconds': 2.5},
+                  'source_sha256': scheduler.file_hash(self.root / 'systemd/urdftools-dev.service'),
+                  'timer_sha256': scheduler.file_hash(self.root / 'systemd/urdftools-dev.timer'),
+                  'verifier_sha256': scheduler.file_hash(self.root / 'scripts/verify_scheduler_timer.py'),
+                  'deployment_matches': True, 'timer_active': True}
+        scheduler.atomic_json(path, report)
+        self.assertTrue(module.evaluate(self.root)[2]['passed'])
+        for key, value in [('deployment_matches', False), ('timer_active', False),
+                           ('actual_trigger', {}), ('timer_sha256', 'stale')]:
+            scheduler.atomic_json(path, report | {key: value})
+            self.assertFalse(module.evaluate(self.root)[2]['passed'], key)
 
 
 if __name__ == '__main__':

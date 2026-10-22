@@ -20,6 +20,9 @@ if sys.argv[1] == 'app-server':
         method = request['method']
         if method == 'initialized':
             continue
+        if method in fault.get('rpc_errors', {}):
+            print(json.dumps({'id': request['id'], 'error': fault['rpc_errors'][method]}), flush=True)
+            continue
         if method == 'initialize':
             result = {'userAgent': 'fault-peer/1'}
         elif method == 'account/read':

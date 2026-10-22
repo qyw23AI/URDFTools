@@ -24,7 +24,11 @@ def main():
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     # Kept on failure for inspection; no credentials are ever copied here.
-    root = Path(tempfile.mkdtemp(prefix='urdftools-live-S00-'))
+    # This CLI build refuses sandbox helpers beneath /tmp. Keep the disposable
+    # repository inside the writable project, isolated from product Git/state.
+    repositories = SOURCE / '.scheduler/live-repositories'
+    repositories.mkdir(parents=True, exist_ok=True)
+    root = Path(tempfile.mkdtemp(prefix='urdftools-live-S00-', dir=repositories))
     for src, dst in [('scheduler.py', 'scheduler.py'),
                      ('tests/fixtures/scheduler/numeric_gate.py', 'numeric_gate.py')]:
         shutil.copy2(SOURCE / src, root / dst)

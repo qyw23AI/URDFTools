@@ -100,13 +100,13 @@ def chatgpt_environment():
 
 
 @contextlib.contextmanager
-def codex_home():
+def codex_home(root):
     """Discard all user/provider/MCP configuration; use only existing ChatGPT auth."""
+    root = root.resolve()
     auth = Path(os.environ.get('CODEX_HOME', str(Path.home() / '.codex'))) / 'auth.json'
-    # Codex creates its sandbox helper under CODEX_HOME. Recent desktop builds
-    # refuse to create that helper when the isolated home lives beneath /tmp.
-    # Keep the isolated home under the real Codex directory and remove it on exit.
-    isolated_parent = Path.home() / '.codex' / 'tmp'
+    # Stay inside the selected writable workspace, never the global Codex home.
+    # Only an auth symlink is created; credentials do not enter source/evidence.
+    isolated_parent = root / '.scheduler' / 'codex-homes'
     isolated_parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='urdftools-chatgpt-', dir=isolated_parent) as directory:
         home = Path(directory)
@@ -255,6 +255,9 @@ class RPC:
                 except (ValueError, UnicodeDecodeError):
                     continue
                 if event.get('id') == self.seq:
+                    failure = classify_failure([{'type': 'error', 'error': event.get('error', {})}])
+                    if failure in {'quota_wait', 'auth_required'}:
+                        raise Failure(failure, 'preflight RPC rejected: ' + method)
                     return event
                 # No callbacks are serviced: interactive login/approvals cannot proceed.
             if self.selector.select(0.05):
@@ -578,6 +581,9 @@ class Scheduler:
         self.directory = self.root / '.scheduler'
         self.state_path = self.directory / 'state.json'
         self.journal_path = self.directory / 'journal.json'
+        self.reload_state()
+
+    def reload_state(self):
         self.state = read_json(self.state_path, {'completed': [], 'attempts': [], 'tasks': {}, 'completions': {}})
         if not isinstance(self.state, dict):
             raise ValueError('scheduler state must be an object')
@@ -645,6 +651,8 @@ class Scheduler:
     def evidence_hash(self, directory):
         names = ['completion.json', 'gates.json', 'artifacts.json', 'result.json',
                  'request.json', 'session.json', 'stdout.jsonl']
+        names += ['prompt.md', 'result.schema.json', 'preflight.json', 'stdout.jsonl.stderr']
+        names += [p.name for p in directory.glob('test-*') if p.is_file()]
         return digest(json.dumps({name: file_hash(directory / name) for name in names}, sort_keys=True).encode())
 
     def park_wip(self, ident, run_id, base_head):
@@ -905,6 +913,8 @@ class Scheduler:
         state_hash = file_hash(self.state_path)
         original_graph = config['phases']
         task_hashes = {p['prompt_file']: file_hash(self.root / p['prompt_file']) for p in config['phases']}
+        task_hashes.update({name: file_hash(self.root / name)
+                            for name in ('AGENTS.md', 'docs/REQUIREMENTS.md')})
         prompt = ('Work only on phase ' + phase['id'] + '. Read scheduler.json, AGENTS.md, PROGRESS.md and relevant design documents. '
                   'Implement and test the phase. Do not edit .scheduler/state.json or create Git commits. '
                   'Return the required structured result. Never declare future phases completed.\n\n' +
@@ -919,8 +929,15 @@ class Scheduler:
                        prompt_sha256=digest(prompt.encode()), config_sha256=file_hash(self.root / 'scheduler.json'),
                        base_head=base_head, started=now(), executed=False)
         atomic_json(directory / 'request.json', request)
+        def verify_inputs():
+            if file_hash(self.state_path) != state_hash:
+                raise Failure('blocked_input', 'protected scheduler state changed; manual review required')
+            if (load_config(self.root)['phases'] != original_graph or self.head() != base_head or any(
+                    file_hash(self.root / name) != value for name, value in task_hashes.items())):
+                raise Failure('blocked_input', 'protected phase graph/gates, task inputs or Git HEAD changed')
+
         try:
-            with codex_home() as env:
+            with codex_home(self.root) as env:
                 preflight_policy = self.policy | {'preflight_timeout_seconds': min(
                     self.policy['preflight_timeout_seconds'], max(0.01, deadline - time.monotonic()))}
                 snapshot = preflight(codex, self.root, env, preflight_policy, directory)
@@ -936,17 +953,12 @@ class Scheduler:
                 atomic_json(directory / 'request.json', request)
                 process = run_process(command, self.root, max(0.01, deadline - time.monotonic()),
                                       directory / 'stdout.jsonl', env=env, input_text=prompt)
-                if file_hash(self.state_path) != state_hash:
-                    raise Failure('internal_error', 'model modified protected scheduler state; manual review required')
-                updated = load_config(self.root)
-                graph = updated['phases']
-                if (graph != original_graph or self.head() != base_head or any(
-                        file_hash(self.root / name) != value for name, value in task_hashes.items())):
-                    raise Failure('blocked_input', 'model changed protected phase graph/gates or Git HEAD')
+                verify_inputs()
                 result = parse_result(directory, process)
                 for artifact in result['artifacts']:
                     safe_path(self.root, artifact)
                 self.gates(phase, directory, deadline)
+                verify_inputs()
                 files = self.manifest()
                 journal.update(stage='prepared', files=files)
                 atomic_json(directory / 'completion.json', journal)
@@ -955,6 +967,15 @@ class Scheduler:
                 return 'completed'
         except (Failure, ValueError, OSError, subprocess.SubprocessError) as exc:
             status = exc.status if isinstance(exc, Failure) else 'internal_error'
+            try:
+                if journal['stage'] == 'running':
+                    verify_inputs()
+            except (Failure, ValueError, OSError):
+                # Never park/restore protected edits or continue an independent phase
+                # after a task/gate changed the plan or state. Preserve it for review.
+                status = 'blocked_input'
+                self.protected_input_changed = True
+                atomic_json(directory / 'protected-input-change.json', {'manual_review_required': True})
             if STOP:
                 status = 'interrupted'
             if journal.get('stage') == 'running':
@@ -976,6 +997,9 @@ class Scheduler:
             except BlockingIOError:
                 print('another run is active', file=sys.stderr)
                 return 3
+            # An instance can predate a competing run. Only the lock owner reads
+            # authoritative state, including any commit completed while we waited.
+            self.reload_state()
             config = load_config(self.root)
             self.policy = config['policy']
             if not dry_run:
@@ -1010,6 +1034,8 @@ class Scheduler:
                     break
                 result = self.one(phase, config, codex, deadline)
                 print(json.dumps(self.state['attempts'][-1], ensure_ascii=False))
+                if getattr(self, 'protected_input_changed', False):
+                    return 1
                 if result in {'blocked_hardware', 'blocked_input', 'waiting_experiment'}:
                     self.park_wip(phase['id'], self.state['attempts'][-1]['run_id'], self.head())
                     if getattr(self, 'unknown_quota_used', False):
@@ -1047,6 +1073,7 @@ class Scheduler:
                 fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
             except BlockingIOError:
                 raise Failure('interrupted', 'cannot retry while another process owns the lock')
+            self.reload_state()
             if ident not in self.state['tasks'] or ident in self.state['completed']:
                 raise ValueError('retry requires an existing unfinished task')
             self.state['tasks'][ident]['status'] = 'retry_requested'
@@ -1081,7 +1108,7 @@ def main():
             return 0
         if args.command == 'doctor':
             # Read-only w.r.t. repository/state; auth metadata contains no email/token.
-            with tempfile.TemporaryDirectory(prefix='urdftools-doctor-') as tmp, codex_home() as env:
+            with tempfile.TemporaryDirectory(prefix='urdftools-doctor-') as tmp, codex_home(args.root) as env:
                 result = preflight(config.get('codex_bin') or shutil.which('codex'), args.root,
                                    env, config['policy'], Path(tmp))
                 print(json.dumps(result, ensure_ascii=False))

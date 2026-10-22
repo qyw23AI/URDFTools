@@ -30,6 +30,8 @@ python3 scripts/check_s00_acceptance.py
 
 本地测试使用故障 peer，但进程、数值断言和 Git 事务实际运行；逐例输入和日志压缩在 `artifacts/S00/fault-evidence.tar.gz`。真实烟测只针对独立临时 Git 仓库；预检失败不会绕过身份检查调用 exec。安装脚本保留原六小时 timer，重载后另用一个短临时 timer 实际触发无模型的 probe；不会将手动启动 service 算作自动触发。当前部署及触发均受权限阻塞，S00 附加 gate 因此返回非零，详见 `docs/acceptance/S00.md`。
 
+隔离登录目录位于所选工作区 `.scheduler/codex-homes`，仅链接现有 auth.json，不写全局配置；故障测试只用自制身份且归档排除登录目录。真实烟测仓库位于项目 `.scheduler/live-repositories`，避开当前 CLI 的 /tmp helper 限制；成功/失败都保留独立仓库供复核。timer 证据必须同时包含部署 unit 哈希一致、已启用的六小时持久 calendar 和实际短 timer 触发；通过 calendar 数值测试或仅触发无关 probe 均不能替代完整运行验收。
+
 每阶段的验收记录在 `docs/acceptance/<id>.md`，总进度在 `PROGRESS.md`，机器状态在 `.scheduler/state.json`。源码本地 Git 提交是断点；日志在 `.scheduler/runs/`。用户可手动停止 service 保留 checkpoint；暂停定时器使用 `systemctl --user stop urdftools-dev.timer`（停止 timer 不会自动杀死正在运行的 service）。
 
 认证：使用现有 `codex login` 的 ChatGPT 会话。会话过期需用户自行重新登录；不得把 token 写进项目。CLI app-server 额度读取由 S00 实测，无法读取时明确显示 unavailable，按实际限额事件退出。不要自动兑换重置次数。

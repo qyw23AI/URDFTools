@@ -15,5 +15,12 @@
     "generate-json-schema",
     "--out",
     "/tmp/urdftools-codex-schema"
-  ]
+  ],
+  "revision_sources_checked_at": "2026-10-22",
+  "revision_sources": [
+    "https://learn.chatgpt.com/docs/auth",
+    "https://learn.chatgpt.com/docs/app-server",
+    "https://learn.chatgpt.com/docs/non-interactive-mode"
+  ],
+  "runtime_dependencies": "Python stdlib, existing git and systemd tools; no packages installed"
 }
