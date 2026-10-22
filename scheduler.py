@@ -30,7 +30,7 @@ LEVELS = {
 }
 POLICY = dict(max_phases_per_round=3, round_timeout_seconds=14400,
               phase_timeout_seconds=4200, test_timeout_seconds=1200,
-              preflight_timeout_seconds=45, primary_used_pause_percent=90,
+              preflight_timeout_seconds=45, primary_used_pause_percent=95,
               secondary_used_pause_percent=95, retry_seconds=14400)
 RESULT_SCHEMA = {
     'type': 'object', 'additionalProperties': False,

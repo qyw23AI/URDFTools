@@ -233,7 +233,7 @@ class SchedulerTest(unittest.TestCase):
         self.assertNotIn('exec', self.calls())
 
     def test_primary_quota_boundary(self):
-        self.result('quota_wait', primary=90)
+        self.result('quota_wait', primary=95)
         self.assertNotIn('exec', self.calls())
 
     def test_chatgpt_only_and_no_inherited_keys(self):
@@ -338,7 +338,7 @@ class SchedulerTest(unittest.TestCase):
         first = self.state()['checkpoints']['one']
         self.assertEqual(self.git('status', '--porcelain'), '')
         self.assertEqual(self.invoke('retry', 'one').returncode, 0)
-        self.fault(primary=90)
+        self.fault(primary=95)
         stopped = self.invoke('run')
         self.assertEqual(stopped.returncode, 75, stopped.stderr + stopped.stdout)
         self.assertEqual(self.state()['attempts'][-1]['result'], 'quota_wait')
