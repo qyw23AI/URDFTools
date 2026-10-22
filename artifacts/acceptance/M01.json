@@ -1,0 +1,36 @@
+{
+  "phase": "M01",
+  "timestamp": "20261022T183959756067Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "model-assembly-contracts",
+      "command": [
+        ".tools/model-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/m01",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/M01/runs/20261022T183959756067Z/model-assembly-contracts.log",
+      "log_sha256": "1526c31becad7aef3021599761ebb46b4b89a4239db1f1adbe97bfef0c1520f1",
+      "status": "passed"
+    },
+    {
+      "id": "model-desktop",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/m01_desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/M01/runs/20261022T183959756067Z/model-desktop.log",
+      "log_sha256": "55864d6036a7b8f451d4b2ac7458cdfd47f43b3fe1073a017a6cb73e62c92584",
+      "status": "passed"
+    }
+  ]
+}

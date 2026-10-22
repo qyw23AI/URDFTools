@@ -210,7 +210,7 @@ function physicsFingerprint(rows: PhysicsRow[]): string {
   ].join(':')).join('|');
 }
 
-export function RobotViewer({ report }: { report: RobotImport }) {
+export function RobotViewer({ report, showJointGizmos = false }: { report: RobotImport; showJointGizmos?: boolean }) {
   const host = useRef<HTMLDivElement>(null);
   const robotRef = useRef<URDFRobot | null>(null);
   const focusObjectRef = useRef<((selected: SelectedObject) => void) | null>(null);
@@ -244,6 +244,7 @@ export function RobotViewer({ report }: { report: RobotImport }) {
   const [screenshotMessage, setScreenshotMessage] = useState('');
   const [viewResetCount, setViewResetCount] = useState(0);
   const [jointRotation, setJointRotation] = useState('');
+  const [jointGizmoCount, setJointGizmoCount] = useState(0);
   visualVisibleRef.current = visualVisible;
   collisionVisibleRef.current = collisionVisible;
   isolatedLinkRef.current = isolatedLink;
@@ -258,6 +259,7 @@ export function RobotViewer({ report }: { report: RobotImport }) {
     let renderer: THREE.WebGLRenderer | undefined;
     let controls: OrbitControls | undefined;
     const owned: THREE.Object3D[] = [];
+    const gizmos: THREE.AxesHelper[] = [];
     const element = host.current;
     robotRef.current = null;
     focusObjectRef.current = null;
@@ -407,6 +409,12 @@ export function RobotViewer({ report }: { report: RobotImport }) {
         robotRef.current = robot;
         owned.push(robot);
         scene.add(robot);
+        if (showJointGizmos) for (const [name, joint] of Object.entries(robot.joints)) {
+          const axes = new THREE.AxesHelper(0.08);
+          axes.name = `Joint gizmo: ${name}`;
+          joint.add(axes); gizmos.push(axes);
+        }
+        setJointGizmoCount(gizmos.length);
         robot.updateMatrixWorld(true);
         setCollisionStyledMeshCount(styleCollisionMeshes(robot));
         resetViewRef.current = () => fitView(robot);
@@ -452,6 +460,9 @@ export function RobotViewer({ report }: { report: RobotImport }) {
       focusObjectRef.current = null;
       resetViewRef.current = null;
       refreshModelAnalysisRef.current = null;
+      for (const axes of gizmos) { axes.removeFromParent(); axes.geometry.dispose();
+        const materials = Array.isArray(axes.material) ? axes.material : [axes.material];
+        materials.forEach(material => material.dispose()); }
       for (const root of owned) root.traverse(object => {
         if (object instanceof THREE.Mesh) {
           object.geometry?.dispose();
@@ -463,7 +474,7 @@ export function RobotViewer({ report }: { report: RobotImport }) {
       renderer?.domElement.remove();
       robotRef.current = null;
     };
-  }, [report.operation_id, report.selected_model, ready]);
+  }, [report.operation_id, report.selected_model, ready, showJointGizmos]);
 
   useEffect(() => {
     const robot = robotRef.current;
@@ -550,6 +561,7 @@ export function RobotViewer({ report }: { report: RobotImport }) {
   return <section aria-label="三维机器人查看器" className="robot-viewer"
     data-mesh-count={meshCount} data-joint-quaternion={jointRotation} data-assets-loaded={String(assetsLoaded)}
     data-tree-link-count={linkCount} data-tree-joint-count={Object.keys(robotRef.current?.joints ?? {}).length}
+    data-joint-gizmo-count={jointGizmoCount}
     data-visual-count={visualCount} data-collision-count={collisionCount}
     data-collision-styled-mesh-count={collisionStyledMeshCount}
     data-visible-visual-count={visibleVisualCount} data-visible-collision-count={visibleCollisionCount}

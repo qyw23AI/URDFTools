@@ -64,7 +64,8 @@ function importRequest(request) {
       clearTimeout(deadline);
       importWorker = null;
       if (code !== 0) return reject(new Error(errors || '导入进程失败或超时'));
-      try { resolve(JSON.parse(output)); } catch (error) { reject(error); }
+      try { resolve(JSON.parse(output.trim().split(/\r?\n/).find(line => line.trim().startsWith('{')))); }
+      catch (error) { reject(new Error(`Python worker returned invalid JSON: ${String(error)}; stdout tail: ${output.slice(-1000)}`)); }
     });
     worker.stdin.end(JSON.stringify(request));
   }).finally(() => { importBusy = false; });
@@ -100,7 +101,8 @@ function runPythonWorker(python, script, args, timeoutMs = 120000) {
     child.on('close', code => {
       clearTimeout(deadline);
       if (code !== 0) return reject(new Error(errors || 'Python worker failed or timed out'));
-      try { resolve(JSON.parse(output)); } catch (error) { reject(error); }
+      try { resolve(JSON.parse(output.trim().split(/\r?\n/).find(line => line.trim().startsWith('{')))); }
+      catch (error) { reject(new Error(`Python worker returned invalid JSON: ${String(error)}; stdout tail: ${output.slice(-1000)}`)); }
     });
   });
 }
@@ -110,6 +112,36 @@ function cadWorker(args) {
 function assertRenderer(event) {
   if (!window || event.sender !== window.webContents) throw new Error('无效窗口');
 }
+const modelProject = () => path.join(app.getPath('userData'), 'modeling', 'project');
+ipcMain.handle('model-current', async event => {
+  assertRenderer(event);
+  const project = modelProject();
+  const pointer = path.join(project, 'current.json');
+  if (!fs.existsSync(pointer)) return { revision: 0, recipe: { schema_version: 1, parts: [] } };
+  const current = JSON.parse(await fs.promises.readFile(pointer, 'utf-8'));
+  const revision = path.join(project, 'revisions', String(current.revision).padStart(6, '0'));
+  const recipe = JSON.parse(await fs.promises.readFile(path.join(revision, 'recipe.json'), 'utf-8'));
+  return { revision: current.revision, recipe };
+});
+ipcMain.handle('model-apply', async (event, recipe, expectedRevision) => {
+  assertRenderer(event);
+  if (!recipe || typeof recipe !== 'object' || !Number.isSafeInteger(expectedRevision) || expectedRevision < 0) throw new Error('无效建模请求');
+  const encoded = JSON.stringify(recipe);
+  if (encoded.length > 4 * 1024 * 1024) throw new Error('建模配方过大');
+  const temporary = await fs.promises.mkdtemp(path.join(app.getPath('userData'), 'model-request-'));
+  try {
+    const recipePath = path.join(temporary, 'recipe.json');
+    await fs.promises.writeFile(recipePath, encoded, { mode: 0o600 });
+    const result = await runPythonWorker('.tools/model-venv/bin/python', 'scripts/model_project.py',
+      [recipePath, '--project', modelProject(), '--expected-revision', String(expectedRevision)], 300000);
+    const step = path.join(result.package, 'assembly.step');
+    const assembly = await runPythonWorker('.tools/cad-venv/bin/python', 'scripts/model_assembly.py',
+      [result.package, '--output', step], 180000);
+    const discovery = await cadWorker([step]);
+    cadSource = step;
+    return { ...result, assembly, discovery };
+  } finally { await fs.promises.rm(temporary, { recursive: true, force: true }); }
+});
 ipcMain.handle('choose-cad-step', async event => {
   assertRenderer(event);
   const fixture = smoke ? (process.env.URDFTOOLS_CAD_EXCHANGE_SMOKE || process.env.URDFTOOLS_CAD_WIZARD_SMOKE) : null;
@@ -274,6 +306,10 @@ app.whenReady().then(() => {
         if (title !== '查看') throw new Error('Renderer did not mount');
         const isolated = await window.webContents.executeJavaScript(`typeof require === 'undefined' && window.urdftools.version === '0.1.0'`);
         if (!isolated) throw new Error('Renderer isolation/preload failed');
+        if (process.env.URDFTOOLS_MODEL_SMOKE) {
+          const runModelSmoke = require(path.join(root, 'scripts/m01_desktop_smoke_hook.cjs'));
+          await runModelSmoke(window, process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR);
+        }
         if (process.env.URDFTOOLS_IMPORT_SMOKE) {
           const fixture = process.env.URDFTOOLS_IMPORT_SMOKE;
           const waitFor = async expression => {

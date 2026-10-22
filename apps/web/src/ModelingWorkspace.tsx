@@ -1,0 +1,112 @@
+import { useEffect, useState } from 'react';
+import { CadWizard, type Discovery } from './CadWizard';
+
+type Part = { name: string; material: string; density_kg_m3: number;
+  profile: { kind: string; width_mm?: number; height_mm?: number; radius_mm?: number; holes?: unknown[] };
+  operation: { kind: string; distance_mm?: number; angle_deg?: number };
+  modifiers?: unknown[]; placement_mm?: number[] };
+export type ModelRecipe = { schema_version: number; parts: Part[] };
+export type ModelApplyResult = { revision: number; package: string; report: { parts: {name: string; step_sha256: string}[] };
+  assembly: {path: string; sha256: string; parts: string[]}; discovery: Discovery };
+const empty: ModelRecipe = { schema_version: 1, parts: [] };
+const clone = (value: ModelRecipe): ModelRecipe => JSON.parse(JSON.stringify(value));
+
+export function ModelingWorkspace() {
+  const [history, setHistory] = useState<ModelRecipe[]>([empty]);
+  const [cursor, setCursor] = useState(0);
+  const [revision, setRevision] = useState(0);
+  const [built, setBuilt] = useState<ModelApplyResult | null>(null);
+  const [name, setName] = useState('Base');
+  const [width, setWidth] = useState(20);
+  const [height, setHeight] = useState(10);
+  const [depth, setDepth] = useState(5);
+  const [density, setDensity] = useState(2700);
+  const [json, setJson] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const recipe = history[cursor];
+  useEffect(() => {
+    let cancelled = false;
+    window.urdftools?.modelCurrent().then(current => {
+      if (cancelled) return;
+      setRevision(current.revision); setHistory([current.recipe]); setCursor(0);
+    }).catch(cause => { if (!cancelled) setError(String(cause)); });
+    return () => { cancelled = true; };
+  }, []);
+  function edit(next: ModelRecipe) {
+    setHistory(previous => [...previous.slice(0, cursor + 1), clone(next)]);
+    setCursor(previous => previous + 1); setBuilt(null); setJson(''); setError('');
+  }
+  function addPart() {
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name) || recipe.parts.some(part => part.name === name)) {
+      setError('零件名须唯一，且只含字母、数字、下划线'); return;
+    }
+    if (![width, height, depth, density].every(value => Number.isFinite(value) && value > 0)) {
+      setError('尺寸与密度必须为正数'); return;
+    }
+    edit({ ...recipe, parts: [...recipe.parts, { name, material: '用户指定材料', density_kg_m3: density,
+      profile: { kind: 'rectangle', width_mm: width, height_mm: height },
+      operation: { kind: 'extrude', distance_mm: depth }, placement_mm: [0, 0, 0] }] });
+  }
+  function mirrorPart(part: Part) {
+    const nextName = `${part.name}_mirror`;
+    if (recipe.parts.some(item => item.name === nextName)) { setError('镜像零件已存在'); return; }
+    const copy = clone({ schema_version: 1, parts: [part] }).parts[0];
+    copy.name = nextName;
+    copy.placement_mm = [-(part.placement_mm?.[0] || 0), part.placement_mm?.[1] || 0, part.placement_mm?.[2] || 0];
+    edit({ ...recipe, parts: [...recipe.parts, copy] });
+  }
+  function applyJson() {
+    try {
+      const parsed = JSON.parse(json);
+      if (parsed.schema_version !== 1 || !Array.isArray(parsed.parts)) throw new Error('配方需要 schema_version=1 和 parts 数组');
+      edit(parsed);
+    } catch (cause) { setError(String(cause)); }
+  }
+  async function build() {
+    if (!window.urdftools) { setError('需要桌面应用中的本地建模 worker'); return; }
+    if (!recipe.parts.length) { setError('至少添加一个零件'); return; }
+    setBusy(true); setError('');
+    try {
+      const result = await window.urdftools.modelApply(recipe, revision);
+      setRevision(result.revision); setBuilt(result);
+    } catch (cause) {
+      setError(String(cause));
+      try { const current = await window.urdftools.modelCurrent(); setRevision(current.revision); } catch { /* retain the visible error */ }
+    } finally { setBusy(false); }
+  }
+  return <section aria-label="机器人建模工作台" className="cad-wizard">
+    <p>在本机编辑参数化 CAD 配方。尺寸用 mm，密度用 kg/m³；导出前需人工确认关节及材料。每次生成保存不可变版本。</p>
+    <p>当前版本 {revision}；编辑历史 {cursor + 1}/{history.length}。</p>
+    <button disabled={cursor === 0 || busy} onClick={() => { setCursor(cursor - 1); setBuilt(null); }}>撤销</button>{' '}
+    <button disabled={cursor >= history.length - 1 || busy} onClick={() => { setCursor(cursor + 1); setBuilt(null); }}>重做</button>
+    <h2>新增 CAD 零件</h2>
+    <label>名称 <input aria-label="零件名称" value={name} onChange={event => setName(event.target.value)} /></label>{' '}
+    <label>宽 mm <input aria-label="宽度 mm" type="number" value={width} onChange={event => setWidth(Number(event.target.value))} /></label>{' '}
+    <label>高 mm <input aria-label="高度 mm" type="number" value={height} onChange={event => setHeight(Number(event.target.value))} /></label>{' '}
+    <label>厚 mm <input aria-label="厚度 mm" type="number" value={depth} onChange={event => setDepth(Number(event.target.value))} /></label>{' '}
+    <label>密度 kg/m³ <input aria-label="建模密度" type="number" value={density} onChange={event => setDensity(Number(event.target.value))} /></label>{' '}
+    <button disabled={busy} onClick={addPart}>添加零件</button>
+    <h2>零件与位置</h2>
+    {recipe.parts.map((part, index) => <div key={part.name} className="cad-row">
+      <strong>{part.name}</strong> · {part.profile.kind} / {part.operation.kind}
+      {([0, 1, 2] as const).map(axis => <label key={axis}>{'xyz'[axis]} mm <input type="number" aria-label={`${part.name} ${'xyz'[axis]} mm`}
+        value={part.placement_mm?.[axis] || 0} onChange={event => {
+          const next = clone(recipe); next.parts[index].placement_mm ||= [0, 0, 0];
+          next.parts[index].placement_mm![axis] = Number(event.target.value); edit(next);
+        }} /></label>)}
+      <button onClick={() => mirrorPart(part)}>镜像 X 位置</button>{' '}
+      <button onClick={() => edit({ ...recipe, parts: recipe.parts.filter((_, i) => i !== index) })}>删除</button>
+    </div>)}
+    <details><summary>高级 CAD 配方编辑（允许列表：草图、拉伸、旋转、布尔、圆角）</summary>
+      <button onClick={() => setJson(JSON.stringify(recipe, null, 2))}>载入当前配方</button>
+      <textarea aria-label="CAD 配方 JSON" rows={14} value={json} onChange={event => setJson(event.target.value)} />
+      <button onClick={applyJson}>应用配方编辑</button>
+    </details>
+    <p><button disabled={busy} onClick={() => void build()}>生成 CAD 与 URDF 预览来源</button></p>
+    {busy && <p role="status">正在生成并重新载入 STEP 装配…</p>}
+    {error && <p role="alert">{error}</p>}
+    {built && <><p role="status">版本 {built.revision}：{built.assembly.parts.join('、')}；STEP SHA-256 {built.assembly.sha256}</p>
+      <CadWizard key={built.revision} initialDiscovery={built.discovery} modeling /></>}
+  </section>;
+}

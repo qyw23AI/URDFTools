@@ -1,5 +1,9 @@
 # URDFTools 项目进度
 
+## 2026-10-23 — M01 建模工作台验收通过
+
+已实现 Electron 建模工作区、命名 STEP 装配桥、关节轴显示、空配方新增零件/镜像/撤销重做、C02/C03 预览和导出连接。正式 `.venv/bin/python scripts/accept_phase.py M01` **2/2 gate 通过**：真实双连杆 STEP→URDF ZIP→MuJoCo，Electron 从空项目完成新增、位移编辑、撤销/重做、关节确认、预览、导出；版本恢复核对资产哈希。M00 3/3、C02 2/2、C03 4/4 回归通过，生产构建通过。详见 `docs/acceptance/M01.md`。下一阶段 M02 FreeCAD 往返与版本差异；镜像目前仅对称复制位置，任意不对称几何的真正镜像仍有限制。
+
 ## 2026-10-22 — M00 参数化 CAD 核心验收通过
 
 build123d 0.13.0 独立建模 worker 已实现允许列表配方、草图/拉伸/旋转/布尔/圆角、材料密度、STEP/STL、精确质量惯量和不可变版本事务。`.venv/bin/python scripts/accept_phase.py M00`：**3/3 gate 通过，0 failed，0 skipped**；支架与两连杆、参数重算、错误草图回滚的真实测试通过。详见 `docs/acceptance/M00.md`、`docs/MODELING_GUIDE.md`。下一阶段 M01 交互式建模界面；评估模块仍未实现。

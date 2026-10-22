@@ -17,11 +17,12 @@ function parseVector(raw: string): number[] | null {
 }
 function join(values: number[]): string { return values.map(value => Number(value.toPrecision(8))).join(' '); }
 
-export function CadWizard() {
-  const [draft, setDraft] = useState<Draft | null>(null);
+export function CadWizard({ initialDiscovery, modeling = false }: { initialDiscovery?: Discovery; modeling?: boolean } = {}) {
+  const [draft, setDraft] = useState<Draft | null>(initialDiscovery?.draft || null);
   const [exchangeReport, setExchangeReport] = useState<Discovery['exchangeReport']>(null);
-  const [config, setConfig] = useState<Configuration | null>(null);
-  const [groupNames, setGroupNames] = useState<Record<string, string>>({});
+  const [config, setConfig] = useState<Configuration | null>(initialDiscovery?.configuration || null);
+  const [groupNames, setGroupNames] = useState<Record<string, string>>(
+    Object.fromEntries((initialDiscovery?.configuration.links || []).flatMap(link => link.parts.map(part => [part, link.name]))));
   const [preview, setPreview] = useState<RobotImport | null>(null);
   const [densities, setDensities] = useState<Record<string, string>>({});
   const [exportReport, setExportReport] = useState<{path: string; sha256: string; validation: {mujoco_raw: {fixed_base_mass_excluded_kg: number}; mujoco_floating: {mass_kg: number}; training_ready: boolean}} | null>(null);
@@ -119,7 +120,7 @@ export function CadWizard() {
   }
   return <section aria-label="STEP 转换向导" className="cad-wizard">
     <p>选择 STEP、FreeCAD FCStd、IGES 或 BREP，人工分组并确认关节。三维预览使用包围盒，仅用于检查关节关系与运动，不包含可制造几何或真实物理属性。</p>
-    <button disabled={busy} onClick={() => void chooseStep()}>选择 CAD 文件</button>
+    {!modeling && <button disabled={busy} onClick={() => void chooseStep()}>选择 CAD 文件</button>}
     {busy && <p role="status">正在读取 STEP 装配…</p>}
     {draft && config && <>
       <h2>{draft.source_name}</h2>{exchangeReport && <aside role="status">
@@ -180,7 +181,7 @@ export function CadWizard() {
         原始固定基座编译排除质量 {exportReport.validation.mujoco_raw.fixed_base_mass_excluded_kg.toPrecision(8)} kg。
         训练就绪：{exportReport.validation.training_ready ? '是' : '尚未验证'}。</p>}
       {previewBusy && <p role="status">正在更新三维预览…</p>}
-      {preview?.status === 'ready' && <RobotViewer report={preview} />}
+      {preview?.status === 'ready' && <RobotViewer report={preview} showJointGizmos={modeling} />}
     </>}
     {error && <p role="alert">{error}</p>}
   </section>;

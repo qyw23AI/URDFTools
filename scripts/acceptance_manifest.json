@@ -280,6 +280,28 @@
         ]
       }
     ],
+    "M01": [
+      {
+        "id": "model-assembly-contracts",
+        "kind": "command",
+        "argv": [
+          ".tools/model-venv/bin/python",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests/m01",
+          "-p",
+          "test_*.py",
+          "-v"
+        ]
+      },
+      {
+        "id": "model-desktop",
+        "kind": "command",
+        "argv": ["{python}", "scripts/m01_desktop_smoke.py"]
+      }
+    ],
     "M00": [
       {
         "id": "model-worker-lock",

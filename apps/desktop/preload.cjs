@@ -5,6 +5,8 @@ contextBridge.exposeInMainWorld('urdftools', Object.freeze({
   chooseImport: kind => ipcRenderer.invoke('choose-import', kind),
   selectImport: (operation, model) => ipcRenderer.invoke('select-import', operation, model),
   chooseCadStep: () => ipcRenderer.invoke('choose-cad-step'),
+  modelCurrent: () => ipcRenderer.invoke('model-current'),
+  modelApply: (recipe, expectedRevision) => ipcRenderer.invoke('model-apply', recipe, expectedRevision),
   cadPreview: config => ipcRenderer.invoke('cad-preview', config),
   saveCadConfig: config => ipcRenderer.invoke('save-cad-config', config),
   loadCadConfig: () => ipcRenderer.invoke('load-cad-config'),
