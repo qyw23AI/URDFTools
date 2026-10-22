@@ -2,16 +2,16 @@
   "argv": [
     "systemd-run",
     "--user",
-    "--unit=urdftools-s00-probe-a020ea55f313",
+    "--unit=urdftools-s00-probe-87d647acb826",
     "--on-active=2s",
     "--timer-property=AccuracySec=100ms",
     "--collect",
     "/usr/bin/python3",
     "/home/qyw/URDFTools/scripts/verify_scheduler_timer.py",
     "--probe",
-    "/home/qyw/URDFTools/artifacts/S00/timer/trigger-a020ea55f31347e6b20a56b9acaec4a7.json",
-    "147036.024418016",
-    "a020ea55f31347e6b20a56b9acaec4a7"
+    "/home/qyw/URDFTools/artifacts/S00/timer/trigger-87d647acb8264c94b9ff1169399967d2.json",
+    "147501.494127604",
+    "87d647acb8264c94b9ff1169399967d2"
   ],
   "exit_code": 0,
   "status": null,

@@ -612,12 +612,12 @@ class SchedulerTest(unittest.TestCase):
         first['tests'] = first['tests'][:len(baseline['phases'][0]['tests'])]
         self.assertEqual(first, baseline['phases'][0])
 
-    def test_real_systemd_calendar_has_four_hour_intervals(self):
+    def test_real_systemd_calendar_has_hourly_intervals(self):
         timer = configparser.ConfigParser(interpolation=None)
         timer.read(SOURCE / 'systemd/urdftools-dev.timer')
         self.assertTrue(timer.getboolean('Timer', 'Persistent'))
         calendar = timer['Timer']['OnCalendar']
-        self.assertEqual(calendar, '*-*-* 00/4:00:00')
+        self.assertEqual(calendar, '*-*-* *:00:00')
         command = ['systemd-analyze', 'calendar', '--base-time=2026-10-22 00:00:01', '--iterations=4', calendar]
         result = subprocess.run(command, env=os.environ | {'TZ': 'Asia/Shanghai', 'LC_ALL': 'C'},
                                 capture_output=True, text=True, timeout=5)
@@ -625,8 +625,8 @@ class SchedulerTest(unittest.TestCase):
         times = [dt.datetime.strptime(line.split('(in UTC): ', 1)[1], '%a %Y-%m-%d %H:%M:%S UTC')
                  for line in result.stdout.splitlines() if '(in UTC): ' in line]
         self.assertEqual(len(times), 4)
-        self.assertEqual(times[0], dt.datetime(2026, 10, 21, 20))
-        self.assertEqual([(b - a).total_seconds() for a, b in zip(times, times[1:])], [14400] * 3)
+        self.assertEqual(times[0], dt.datetime(2026, 10, 21, 17))
+        self.assertEqual([(b - a).total_seconds() for a, b in zip(times, times[1:])], [3600] * 3)
         if os.environ.get('S00_EVIDENCE_DIR'):
             target = Path(os.environ['S00_EVIDENCE_DIR']) / self._testMethodName / 'calendar.json'
             scheduler.atomic_json(target, {'command': command, 'exit_code': result.returncode,

@@ -9,6 +9,7 @@
     "test_timeout_seconds": 1200,
     "primary_used_pause_percent": 90,
     "secondary_used_pause_percent": 95,
+    "retry_seconds": 3000,
     "auth_mode": "chatgpt_only",
     "allow_paid_api": false,
     "allow_auto_reset_credit": false,

@@ -35,7 +35,7 @@ test_preflight_nested_http_429_stops_before_exec (test_scheduler.SchedulerTest) 
 test_primary_quota_boundary (test_scheduler.SchedulerTest) ... ok
 test_project_provider_config_refused (test_scheduler.SchedulerTest) ... ok
 test_quota_threshold_and_model_buckets (test_scheduler.SchedulerTest) ... ok
-test_real_systemd_calendar_has_four_hour_intervals (test_scheduler.SchedulerTest) ... ok
+test_real_systemd_calendar_has_hourly_intervals (test_scheduler.SchedulerTest) ... ok
 test_real_test_failure (test_scheduler.SchedulerTest) ... ok
 test_repository_plan_preserved (test_scheduler.SchedulerTest) ... ok
 test_s00_acceptance_gate_rejects_missing_or_blocked_live (test_scheduler.SchedulerTest) ... ok
@@ -59,7 +59,7 @@ test_waiting_experiment_poll_avoids_model (test_scheduler.SchedulerTest) ... ok
 test_zero_tests_rejected (test_scheduler.SchedulerTest) ... ok
 
 ----------------------------------------------------------------------
-Ran 59 tests in 10.583s
+Ran 59 tests in 11.000s
 
 OK
-{"status": "no_op", "completed": ["one"], "tasks": {"one": {"status": "completed", "reason": "gates and Git transaction complete", "last_run": "20261022T034002Z-one-08b2ed59"}}, "final_release_path": null}
+{"status": "no_op", "completed": ["one"], "tasks": {"one": {"status": "completed", "reason": "gates and Git transaction complete", "last_run": "20261022T035851Z-one-143f966f"}}, "final_release_path": null}
