@@ -1,0 +1,47 @@
+{
+  "phase": "C04",
+  "timestamp": "20261022T141107295617Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "freecad-worker-lock",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/setup_freecad_worker.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C04/runs/20261022T141107295617Z/freecad-worker-lock.log",
+      "log_sha256": "9e1decd9cb9868bc17d3dd69e3e23de2acef733d3aeb146795d066b68e380baa",
+      "status": "passed"
+    },
+    {
+      "id": "cad-exchange-contracts",
+      "command": [
+        ".tools/cad-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/c04",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C04/runs/20261022T141107295617Z/cad-exchange-contracts.log",
+      "log_sha256": "890a77c4e8c61e686b3198673f7eb2315f8ff8bd11314ba48c73cf711ddc96b3",
+      "status": "passed"
+    },
+    {
+      "id": "freecad-desktop",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/c04_desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C04/runs/20261022T141107295617Z/freecad-desktop.log",
+      "log_sha256": "603f4ef9ed611d4ae91d7a04da431fe96098b15d022cfea174afa564ebcb46cc",
+      "status": "passed"
+    }
+  ]
+}

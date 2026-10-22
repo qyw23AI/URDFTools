@@ -29,7 +29,7 @@
 - 首批任务：站立/平衡、平地速度跟踪、转向、坡面、台阶/障碍、推扰恢复；四足与人形各自配置，不混排单一排行榜。
 - MuJoCo/Pinocchio 仅用于可选无训练物理探测。SB3、RSL-RL、Isaac Lab 等通过结果文件适配，不安装其训练器。
 - 参考数据来自用户上传或来源/许可可核验的公开结果；软件可验收空库/导入流程，真实数据覆盖单独记录。不得把 synthetic fixture 冒充参考训练成绩。
-- SolidWorks 原生装配提取需要 Windows + SolidWorks 的导出桥，Ubuntu 支持导出后的 STEP/URDF/graph 包；不承诺无依赖直接读取所有专有 CAD。
+- 本机 Ubuntu 以 FreeCAD FCStd、STEP、IGES/BREP 为优先 CAD 路线；SolidWorks 原生装配提取需要 Windows + SolidWorks，Ubuntu 不承诺直接读取 `.sldasm`，已有 STEP/URDF 可导入。
 - 每个已授权开发阶段内允许本地安装项目依赖、读取官方源、获取有许可的开源代码、运行测试和本地 Git 提交。禁止自动购买额度、兑换额度重置、调用新增付费 API、发布远程仓库或修改系统 GPU 驱动。
 - 应用仅生成外部复验建议和数据模板；训练由用户的外部平台完成后再次导入。本地后台作业限于导入、媒体和分析，资源有界、可取消恢复。
 

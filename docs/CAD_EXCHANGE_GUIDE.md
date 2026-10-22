@@ -1,14 +1,19 @@
-# IGES/BREP 到 STEP 几何桥（C04 开发中）
+# Ubuntu CAD 互通：FreeCAD、IGES、BREP
 
-本地 OCP worker 可把闭合 `.igs` / `.iges` / `.brep` / `.brp` 实体转换为新 STEP 文件，供现有 STEP 检查和 C02/C03 向导使用：
+桌面应用“转换”工作区可选择 STEP/STP、FreeCAD FCStd、IGES/IGS 或 BREP/BRP。非 STEP 输入在本机隔离进程中转为临时 STEP，再进入现有 Link/关节分组向导；界面显示转换损失，用户需重新确认关节、密度和驱动参数。源文件不改写。
+
+## FreeCAD 安装与离线准备
+
+本项目使用官方 [FreeCAD 1.1.4 Linux x86_64 AppImage](https://github.com/FreeCAD/FreeCAD/releases/tag/1.1.4)，放在 `.tools/FreeCAD_1.1.4-Linux-x86_64-py311.AppImage`（项目忽略，不随源码分发）。程序只接受发布方 SHA-256 `f6dc6ba676e5ac96a565ebc8d657232f94c6158e85b4352141bd1a46f6b43434`。运行 `.venv/bin/python scripts/setup_freecad_worker.py` 会验 hash、解压到 `.tools/freecad-appdir`，不需要修改系统 FreeCAD 或 Python。离线使用已验过的包和目录。
+
+命令行示例：
 
 ```bash
+.tools/cad-venv/bin/python scripts/freecad_bridge.py bracket.FCStd --output bracket.step
 .tools/cad-venv/bin/python scripts/cad_exchange.py part.iges --output part.step
 .tools/cad-venv/bin/python scripts/cad_exchange.py part.brep --brep-unit mm --output part.step
 ```
 
-BREP 无单位，必须由操作者声明 `mm` 或 `m`；IGES 源单位由 OpenCascade 读入后规范化为 mm。转换后重新载入 STEP，比较实体个数、体积和几何质心，输出 JSON 损失报告。输出路径必须是新文件，源数据不会改写。开放曲面不能产生可靠体积/惯量，故会拒绝进入物理导出链。
+FreeCAD 桥调用 FreeCAD 自己的无头进程，挑选文档中的有效闭合实体，用 FreeCAD 的 Import 模块导出带多个零件的 STEP；随后现有 STEP 读取器重新导入并校验零件数与单位。BREP 无单位，必须由操作者声明 `mm` 或 `m`；IGES 由 OpenCascade 读取源单位并规范化到 mm。IGES/BREP 桥比较重新导入前后的实体个数、体积和几何质心，并拒绝开放曲面进入物理导出链。所有输出路径必须是尚不存在的新文件。
 
-**转换损失：** 当前桥只保留实体几何，不保留原装配层级、名称、颜色、材料或关节；需要人工重新分组、填写密度/驱动和确认物理属性。输出是几何中间件，不代表原 CAD 机械设计已无损转换。
-
-本机未安装 FreeCAD 与 sw2robot，因此 `.FCStd`、`.sldasm` 和 `.sldprt` 原生提取目前明确拒绝。FreeCAD 用户可在 FreeCAD 中导出 STEP 后走上述已验证链路。SolidWorks 原生抽取须在 Windows + SolidWorks 上完成；[sw2robot 官方 README](https://github.com/jsk-ros-pkg/solidworks_urdf_exporter2/blob/main/README.md) 说明它可以先提取 `graph.json` 和网格，再于非 Windows 系统做构建/编辑。此项目尚未完成实际 graph 包适配及往返验收，因此 C04 阶段仍在开发中。
+**损失与边界：** FCStd→STEP 会失去 FreeCAD 的草图、约束及特征历史；IGES/BREP 简化桥会失去装配层级、名称、颜色和材料。任何桥都不能凭几何推断真实关节、密度、电机或训练表现，须人工核对。Ubuntu 上的 `.sldasm` / `.sldprt` 不支持原生提取；用户已选择以 FreeCAD 作为主要 CAD 工具。已从其他软件导出的 STEP/URDF 仍可正常使用。

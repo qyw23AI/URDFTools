@@ -246,6 +246,39 @@
           "scripts/c03_desktop_smoke.py"
         ]
       }
+    ],
+    "C04": [
+      {
+        "id": "freecad-worker-lock",
+        "kind": "command",
+        "argv": [
+          "{python}",
+          "scripts/setup_freecad_worker.py"
+        ]
+      },
+      {
+        "id": "cad-exchange-contracts",
+        "kind": "command",
+        "argv": [
+          ".tools/cad-venv/bin/python",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests/c04",
+          "-p",
+          "test_*.py",
+          "-v"
+        ]
+      },
+      {
+        "id": "freecad-desktop",
+        "kind": "command",
+        "argv": [
+          "{python}",
+          "scripts/c04_desktop_smoke.py"
+        ]
+      }
     ]
   }
 }

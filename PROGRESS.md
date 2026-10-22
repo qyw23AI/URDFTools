@@ -1,8 +1,8 @@
 # URDFTools 项目进度
 
-## 2026-10-22 — C04 几何交换桥开发中（未完成阶段验收）
+## 2026-10-22 — C04 Ubuntu FreeCAD/IGES/BREP 互通验收通过
 
-已实现 IGES/BREP 闭合实体到 STEP 的本地转换，显式处理无单位 BREP、回读比较实体数/体积/几何质心、输出损失报告；4 个真实 OCP 文件流程测试通过。开放曲面和 Ubuntu 上的原生 SolidWorks/FCStd 文件会明确拒绝。尚缺 FreeCAD 和 sw2robot graph 实际适配与其往返测试，不能标记 C04 完成。详见 `docs/CAD_EXCHANGE_GUIDE.md`。
+按用户要求改为 FreeCAD 优先。本机官方 FreeCAD 1.1.4 AppImage 通过 SHA-256 校验，FCStd→STEP 的真实无头导出与桌面入口均运行通过；IGES/BREP 闭合实体桥保留并覆盖显式单位、几何损失报告和开放曲面拒绝。`.venv/bin/python scripts/accept_phase.py C04`：**3/3 gate 通过，0 failed，0 skipped**，含 5 个真实 CAD 文件流程测试及 Electron E2E。C02 2/2、C03 4/4 与生产构建回归通过。详见 `docs/acceptance/C04.md`、`docs/CAD_EXCHANGE_GUIDE.md`。下一阶段可推进 M00 建模核心；训练结果评估仍未实现。
 
 
 ## 2026-10-22 — C03 STEP 到 URDF/ROS 包技术验收通过

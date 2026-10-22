@@ -84,6 +84,7 @@ ipcMain.handle('select-import', (event, operation_id, model) => {
   return importRequest({ action: 'select', operation_id, model });
 });
 let cadSource = null;
+let cadExchangeDirectory = null;
 function runPythonWorker(python, script, args, timeoutMs = 120000) {
   return new Promise((resolve, reject) => {
     const child = spawn(path.join(root, python), [path.join(root, script), ...args],
@@ -111,18 +112,47 @@ function assertRenderer(event) {
 }
 ipcMain.handle('choose-cad-step', async event => {
   assertRenderer(event);
-  const fixture = smoke ? process.env.URDFTOOLS_CAD_WIZARD_SMOKE : null;
-  let source;
-  if (fixture) source = fixture;
+  const fixture = smoke ? (process.env.URDFTOOLS_CAD_EXCHANGE_SMOKE || process.env.URDFTOOLS_CAD_WIZARD_SMOKE) : null;
+  let original;
+  if (fixture) original = fixture;
   else {
     const choice = await dialog.showOpenDialog(window, { properties: ['openFile'],
-      filters: [{ name: 'STEP / STP', extensions: ['step', 'stp'] }] });
+      filters: [{ name: 'STEP / STP / FreeCAD / IGES / BREP', extensions: ['step', 'stp', 'FCStd', 'igs', 'iges', 'brep', 'brp'] }] });
     if (choice.canceled) return null;
-    source = choice.filePaths[0];
+    original = choice.filePaths[0];
   }
-  const result = await cadWorker([source]);
-  cadSource = source;
-  return result;
+  const extension = path.extname(original).toLowerCase();
+  if (!['.step', '.stp', '.fcstd', '.igs', '.iges', '.brep', '.brp'].includes(extension)) throw new Error('不支持的 CAD 格式');
+  let source = original;
+  let generatedDirectory = null;
+  let exchangeReport = null;
+  try {
+    if (!['.step', '.stp'].includes(extension)) {
+      generatedDirectory = await fs.promises.mkdtemp(path.join(app.getPath('userData'), 'cad-exchange-'));
+      source = path.join(generatedDirectory, 'converted.step');
+      if (extension === '.fcstd') {
+        exchangeReport = await runPythonWorker('.tools/cad-venv/bin/python', 'scripts/freecad_bridge.py',
+          [original, '--output', source], 300000);
+      } else {
+        const args = [original, '--output', source];
+        if (['.brep', '.brp'].includes(extension)) {
+          const choice = await dialog.showMessageBox(window, { type: 'question', buttons: ['毫米 mm', '米 m', '取消'],
+            cancelId: 2, defaultId: 0, message: 'BREP 文件没有单位，请选择原文件使用的长度单位' });
+          if (choice.response === 2) return null;
+          args.push('--brep-unit', choice.response === 0 ? 'mm' : 'm');
+        }
+        exchangeReport = await runPythonWorker('.tools/cad-venv/bin/python', 'scripts/cad_exchange.py', args, 180000);
+      }
+    }
+    const result = await cadWorker([source]);
+    if (cadExchangeDirectory) await fs.promises.rm(cadExchangeDirectory, { recursive: true, force: true });
+    cadSource = source;
+    cadExchangeDirectory = generatedDirectory;
+    generatedDirectory = null;
+    return { ...result, exchangeReport };
+  } finally {
+    if (generatedDirectory) await fs.promises.rm(generatedDirectory, { recursive: true, force: true });
+  }
 });
 ipcMain.handle('cad-preview', async (event, config) => {
   assertRenderer(event);
@@ -458,6 +488,29 @@ app.whenReady().then(() => {
           const runS06ViewerSmoke = require(path.join(root, 'scripts/s06_desktop_smoke_hook.cjs'));
           await runS06ViewerSmoke(window, path, fs, process.env.URDFTOOLS_VIEWER_S06_SMOKE);
         }
+        if (process.env.URDFTOOLS_CAD_EXCHANGE_SMOKE) {
+          const waitForExchange = async expression => {
+            const until = Date.now() + 90000;
+            while (Date.now() < until) {
+              if (await window.webContents.executeJavaScript(expression)) return;
+              await new Promise(resolve => setTimeout(resolve, 80));
+            }
+            throw new Error('FreeCAD exchange UI timeout: ' + expression + ' | ' +
+              await window.webContents.executeJavaScript("document.querySelector('main').textContent.slice(-1000)"));
+          };
+          await window.webContents.executeJavaScript(`document.querySelectorAll('nav button')[1].click()`);
+          await waitForExchange(`[...document.querySelectorAll('button')].some(b => b.textContent === '选择 CAD 文件')`);
+          await window.webContents.executeJavaScript(`([...document.querySelectorAll('button')].find(b => b.textContent === '选择 CAD 文件')).click()`);
+          await waitForExchange(`document.querySelector('.cad-wizard aside')?.textContent.includes('STEP drops FreeCAD feature history') === true`);
+          const details = await window.webContents.executeJavaScript(`document.querySelector('.cad-wizard').textContent`);
+          if (!details.includes('BaseBracket') || !details.includes('ArmLink') || !details.includes('未确认关节：1')) {
+            throw new Error('FreeCAD exchange failed to show two parts and explicit loss report');
+          }
+          const png = (await window.webContents.capturePage()).toPNG();
+          fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'freecad-exchange.png'), png);
+          console.log(JSON.stringify({ event: 'desktop_freecad_exchange_smoke', partCount: 2,
+            lossVisible: true, screenshotBytes: png.length }));
+        }
         if (process.env.URDFTOOLS_CAD_WIZARD_SMOKE) {
           const waitForCad = async expression => {
             const until = Date.now() + 60000;
@@ -469,8 +522,8 @@ app.whenReady().then(() => {
               await window.webContents.executeJavaScript("document.querySelector('main').textContent.slice(-800)"));
           };
           await window.webContents.executeJavaScript(`document.querySelectorAll('nav button')[1].click()`);
-          await waitForCad(`document.querySelector('button') && [...document.querySelectorAll('button')].some(b => b.textContent === '选择 STEP / STP')`);
-          await window.webContents.executeJavaScript(`([...document.querySelectorAll('button')].find(b => b.textContent === '选择 STEP / STP')).click()`);
+          await waitForCad(`document.querySelector('button') && [...document.querySelectorAll('button')].some(b => b.textContent === '选择 CAD 文件')`);
+          await window.webContents.executeJavaScript(`([...document.querySelectorAll('button')].find(b => b.textContent === '选择 CAD 文件')).click()`);
           await waitForCad(`document.querySelector('[aria-label="OffsetPart_joint type"]') !== null`);
           const discovered = await window.webContents.executeJavaScript(`document.querySelector('.cad-wizard').textContent`);
           if (!discovered.includes('BasePart') || !discovered.includes('OffsetPart') ||

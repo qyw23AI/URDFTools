@@ -9,7 +9,7 @@ type Joint = { name: string; parent: string; child: string; type: 'fixed' | 'rev
   effort?: number | null; velocity?: number | null };
 export type Configuration = { schema_version: number; source_sha256: string; root: string;
   links: {name: string; parts: string[]}[]; joints: Joint[]; densities_kg_m3?: Record<string, string> };
-export type Discovery = { draft: Draft; configuration: Configuration };
+export type Discovery = { draft: Draft; configuration: Configuration; exchangeReport?: { source?: string; losses: string[]; unit_handling?: string; objects?: {name: string; volume_mm3: number}[] } | null };
 
 function parseVector(raw: string): number[] | null {
   const values = raw.trim().split(/[\s,]+/).map(Number);
@@ -19,6 +19,7 @@ function join(values: number[]): string { return values.map(value => Number(valu
 
 export function CadWizard() {
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [exchangeReport, setExchangeReport] = useState<Discovery['exchangeReport']>(null);
   const [config, setConfig] = useState<Configuration | null>(null);
   const [groupNames, setGroupNames] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState<RobotImport | null>(null);
@@ -34,7 +35,7 @@ export function CadWizard() {
     try {
       const result = await window.urdftools.chooseCadStep();
       if (!result) return;
-      setDraft(result.draft); setConfig(result.configuration); setPreview(null); setDensities({}); setExportReport(null);
+      setDraft(result.draft); setConfig(result.configuration); setExchangeReport(result.exchangeReport); setPreview(null); setDensities({}); setExportReport(null);
       setGroupNames(Object.fromEntries(result.configuration.links.flatMap(link => link.parts.map(part => [part, link.name]))));
     } catch (cause) { setError(String(cause)); }
     finally { setBusy(false); }
@@ -117,11 +118,15 @@ export function CadWizard() {
     finally { setBusy(false); }
   }
   return <section aria-label="STEP 转换向导" className="cad-wizard">
-    <p>选择 STEP 装配，人工分组并确认关节。三维预览使用包围盒，仅用于检查关节关系与运动，不包含可制造几何或真实物理属性。</p>
-    <button disabled={busy} onClick={() => void chooseStep()}>选择 STEP / STP</button>
+    <p>选择 STEP、FreeCAD FCStd、IGES 或 BREP，人工分组并确认关节。三维预览使用包围盒，仅用于检查关节关系与运动，不包含可制造几何或真实物理属性。</p>
+    <button disabled={busy} onClick={() => void chooseStep()}>选择 CAD 文件</button>
     {busy && <p role="status">正在读取 STEP 装配…</p>}
     {draft && config && <>
-      <h2>{draft.source_name}</h2><p>源单位：{draft.source_length_unit}；内部预览统一为 m。</p><p>来源 SHA-256：<code>{draft.source_sha256}</code></p>
+      <h2>{draft.source_name}</h2>{exchangeReport && <aside role="status">
+        <strong>来源格式转换：{exchangeReport.source || '本地 CAD 文件'}</strong>
+        <p>已重新载入 STEP；请核对转换损失并重新确认关节和材料。</p>
+        <ul>{exchangeReport.losses.map(loss => <li key={loss}>{loss}</li>)}</ul>
+      </aside>}<p>源单位：{draft.source_length_unit}；内部预览统一为 m。</p><p>来源 SHA-256：<code>{draft.source_sha256}</code></p>
       <h3>零件与 Link 分组</h3>
       {draft.parts.map(part => <label key={part.name} className="cad-row">
         <span>{part.name} · 几何轴线提示 {part.axis_hints.length} 个</span>

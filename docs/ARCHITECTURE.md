@@ -92,7 +92,7 @@ RobotDocument 持有稳定 UUID 的 link/joint/material/geometry，SI 单位，�
 
 STEP 转换分为读装配/单位 → 零件分组 → 密度/质量确认 → 关节父子与轴定义 → CAD 质量/质心/惯量 → visual/碰撞代理 → URDF/ROS2 包导出 → 独立解析/FK/仿真编译验证。AP214/AP242 装配/颜色保留尽力而为，每个丢失项列入报告。仅有 STEP 不足以确定可动关节、电机、材料和闭环约束；几何圆柱/同轴证据产生候选及置信依据，由用户确认，不能自动宣称完整机构复原。
 
-第一版格式必需 STEP/STP，IGES/BREP 通过 OCP 适配；FreeCAD FCStd 通过可选安装桥。SolidWorks 支持现成 URDF、STEP 和 `sw2robot` graph 包导入；原生提取流程留给 Windows 工具并给出操作指南。Onshape 适配是可选、需用户既有账户，不作为离线必需功能。
+第一版格式必需 STEP/STP，IGES/BREP 通过 OCP 适配；FreeCAD FCStd 通过可选安装桥。Ubuntu 优先通过本地 FreeCAD FCStd 与 STEP 往返；SolidWorks 原生文件在 Ubuntu 上明确拒绝，已有 URDF/STEP 可走通用导入。sw2robot graph 可选研究，不是 C04 的必需依赖。Onshape 适配是可选、需用户既有账户，不作为离线必需功能。
 
 建模提供草图基本几何/尺寸约束、拉伸/旋转/布尔/圆角、参数化零件、材质、装配刚体分组、joint origin/axis gizmo、限位、mirror、质量属性和实时 URDF 预览。高级形状编辑交给 FreeCAD，回流时执行来源匹配。用于 agent 的主操作为 schema 验证的建模命令；受限 Python CAD 脚本是高级模式，独立进程有资源/文件权限边界。
 
