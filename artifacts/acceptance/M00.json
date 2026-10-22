@@ -1,0 +1,48 @@
+{
+  "phase": "M00",
+  "timestamp": "20261022T142459402327Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "model-worker-lock",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/setup_model_worker.py",
+        "--verify"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/M00/runs/20261022T142459402327Z/model-worker-lock.log",
+      "log_sha256": "bcdde4b6c23f3242d461b1fdc55969e9da86c6b1c9cbb63a7071640b3dadc643",
+      "status": "passed"
+    },
+    {
+      "id": "parametric-contracts",
+      "command": [
+        ".tools/model-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/m00",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/M00/runs/20261022T142459402327Z/parametric-contracts.log",
+      "log_sha256": "f6059adf624054dc53f338a4593236327796ac9621bd295ca608f3f2ea565162",
+      "status": "passed"
+    },
+    {
+      "id": "model-cli-transaction",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/m00_cli_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/M00/runs/20261022T142459402327Z/model-cli-transaction.log",
+      "log_sha256": "cd215e66e689cfd96a8720ae8edc2d7cb94eae92e3fa3622bed0ab185604afbb",
+      "status": "passed"
+    }
+  ]
+}

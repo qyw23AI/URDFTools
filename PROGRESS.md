@@ -1,5 +1,10 @@
 # URDFTools 项目进度
 
+## 2026-10-22 — M00 参数化 CAD 核心验收通过
+
+build123d 0.13.0 独立建模 worker 已实现允许列表配方、草图/拉伸/旋转/布尔/圆角、材料密度、STEP/STL、精确质量惯量和不可变版本事务。`.venv/bin/python scripts/accept_phase.py M00`：**3/3 gate 通过，0 failed，0 skipped**；支架与两连杆、参数重算、错误草图回滚的真实测试通过。详见 `docs/acceptance/M00.md`、`docs/MODELING_GUIDE.md`。下一阶段 M01 交互式建模界面；评估模块仍未实现。
+
+
 ## 2026-10-22 — C04 Ubuntu FreeCAD/IGES/BREP 互通验收通过
 
 按用户要求改为 FreeCAD 优先。本机官方 FreeCAD 1.1.4 AppImage 通过 SHA-256 校验，FCStd→STEP 的真实无头导出与桌面入口均运行通过；IGES/BREP 闭合实体桥保留并覆盖显式单位、几何损失报告和开放曲面拒绝。`.venv/bin/python scripts/accept_phase.py C04`：**3/3 gate 通过，0 failed，0 skipped**，含 5 个真实 CAD 文件流程测试及 Electron E2E。C02 2/2、C03 4/4 与生产构建回归通过。详见 `docs/acceptance/C04.md`、`docs/CAD_EXCHANGE_GUIDE.md`。下一阶段可推进 M00 建模核心；训练结果评估仍未实现。

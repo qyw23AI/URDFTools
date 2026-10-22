@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "parts": [
+    {
+      "name": "Bracket",
+      "material": "Aluminium 6061 (user declared)",
+      "density_kg_m3": 2700,
+      "profile": {
+        "kind": "rectangle",
+        "width_mm": 20,
+        "height_mm": 10,
+        "holes": [
+          {
+            "center_mm": [
+              0,
+              0
+            ],
+            "radius_mm": 2
+          }
+        ]
+      },
+      "operation": {
+        "kind": "extrude",
+        "distance_mm": 5
+      },
+      "modifiers": [
+        {
+          "kind": "fillet",
+          "parallel_axis": "Z",
+          "radius_mm": 0.5
+        }
+      ]
+    },
+    {
+      "name": "ArmLink",
+      "material": "Steel (user declared)",
+      "density_kg_m3": 7800,
+      "profile": {
+        "kind": "rectangle",
+        "width_mm": 30,
+        "height_mm": 4
+      },
+      "operation": {
+        "kind": "extrude",
+        "distance_mm": 4
+      },
+      "modifiers": [
+        {
+          "kind": "subtract_cylinder",
+          "center_mm": [
+            0,
+            0,
+            2
+          ],
+          "radius_mm": 1,
+          "height_mm": 6
+        }
+      ]
+    }
+  ]
+}
