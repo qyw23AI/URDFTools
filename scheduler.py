@@ -410,10 +410,15 @@ def classify_failure(events):
 def build_codex_command(phase, codex, root=ROOT, directory=None, model=None):
     requested, effort = LEVELS[phase['level']]
     directory = directory or root / '.scheduler' / 'preview'
+    # S01 must bind loopback ports and download pinned public toolchain packages.
+    # Scope network access to this bootstrap phase; keep the filesystem sandbox.
+    network = (['--config', 'sandbox_workspace_write.network_access=true']
+               if phase['id'] == 'S01' else [])
     return [codex, 'exec', '--ignore-user-config', '--ephemeral', '--json',
             '--model', model or requested, '--config', 'model_reasoning_effort=' + effort,
             '--config', 'forced_login_method="chatgpt"', '--config', 'model_provider="openai"',
-            '--config', 'approval_policy="never"', '--sandbox', 'workspace-write', '--cd', str(root),
+            '--config', 'approval_policy="never"', *network,
+            '--sandbox', 'workspace-write', '--cd', str(root),
             '--output-schema', str(directory / 'result.schema.json'),
             '--output-last-message', str(directory / 'result.json'), '-']
 
@@ -965,6 +970,8 @@ class Scheduler:
 
         try:
             with codex_home(self.root) as env:
+                if phase['id'] == 'S01':
+                    env['ELECTRON_CACHE'] = str(self.root / '.tools' / 'electron-cache')
                 preflight_policy = self.policy | {'preflight_timeout_seconds': min(
                     self.policy['preflight_timeout_seconds'], max(0.01, deadline - time.monotonic()))}
                 snapshot = preflight(codex, self.root, env, preflight_policy, directory)
