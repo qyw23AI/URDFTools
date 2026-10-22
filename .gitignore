@@ -6,5 +6,10 @@ node_modules/
 dist/
 *.egg-info/
 build/
-artifacts/S01/clean-room/
-artifacts/S01/
+
+# Keep concise machine acceptance summaries; retain bulky run evidence locally.
+/artifacts/*
+!/artifacts/README.md
+!/artifacts/acceptance/
+/artifacts/acceptance/*
+!/artifacts/acceptance/*.json
