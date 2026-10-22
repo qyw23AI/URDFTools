@@ -87,10 +87,10 @@ ipcMain.handle('select-import', (event, operation_id, model) => {
 let cadSource = null;
 let cadExchangeDirectory = null;
 let pendingCadReturn = null;
-function runPythonWorker(python, script, args, timeoutMs = 120000) {
+function runPythonWorker(python, script, args, timeoutMs = 120000, extraEnv = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(path.join(root, python), [path.join(root, script), ...args],
-      { cwd: root, env: { PATH: process.env.PATH }, stdio: ['ignore', 'pipe', 'pipe'] });
+      { cwd: root, env: { PATH: process.env.PATH, ...extraEnv }, stdio: ['ignore', 'pipe', 'pipe'] });
     let output = ''; let errors = '';
     const deadline = setTimeout(() => child.kill('SIGKILL'), timeoutMs);
     child.stdout.on('data', data => {
@@ -114,6 +114,38 @@ function assertRenderer(event) {
   if (!window || event.sender !== window.webContents) throw new Error('无效窗口');
 }
 const modelProject = () => path.join(app.getPath('userData'), 'modeling', 'project');
+let agentBusy = false;
+async function agentRequest(action, payload) {
+  if (agentBusy) throw new Error('已有建模建议正在处理');
+  agentBusy = true;
+  let temporary;
+  try {
+    temporary = await fs.promises.mkdtemp(path.join(app.getPath('userData'), 'agent-request-'));
+    const request = path.join(temporary, 'request.json');
+    await fs.promises.writeFile(request, JSON.stringify(payload), { mode: 0o600 });
+    return await runPythonWorker('.tools/model-venv/bin/python', 'scripts/a01_agent_model.py',
+      [action, '--project', modelProject(), '--request', request], 240000,
+      { HOME: process.env.HOME, CODEX_HOME: process.env.CODEX_HOME });
+  } finally { agentBusy = false; if (temporary) await fs.promises.rm(temporary, { recursive: true, force: true }); }
+}
+ipcMain.handle('agent-suggest', async (event, instruction, expectedRevision) => {
+  assertRenderer(event);
+  if (typeof instruction !== 'string' || !instruction.trim() || instruction.length > 2000 ||
+      !Number.isSafeInteger(expectedRevision) || expectedRevision < 1) throw new Error('无效的建模指令或版本');
+  return agentRequest('suggest', { instruction, expected_revision: expectedRevision });
+});
+ipcMain.handle('agent-apply', async (event, proposalId) => {
+  assertRenderer(event);
+  if (typeof proposalId !== 'string' || !/^[0-9a-f]{32}$/.test(proposalId)) throw new Error('无效建议编号');
+  const result = await agentRequest('apply', { proposal_id: proposalId, human_confirmed: true });
+  const step = path.join(result.package, 'assembly.step');
+  const assembly = await runPythonWorker('.tools/cad-venv/bin/python', 'scripts/model_assembly.py',
+    [result.package, '--output', step], 180000);
+  const discovery = await cadWorker([step]);
+  cadSource = step;
+  await fs.promises.rm(path.join(modelProject(), 'return.json'), { force: true });
+  return { ...result, assembly, discovery };
+});
 ipcMain.handle('model-current', async event => {
   assertRenderer(event);
   const project = modelProject();
@@ -434,6 +466,10 @@ app.whenReady().then(() => {
         if (process.env.URDFTOOLS_MODEL_SMOKE) {
           const runModelSmoke = require(path.join(root, 'scripts/m01_desktop_smoke_hook.cjs'));
           await runModelSmoke(window, process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR);
+          if (process.env.URDFTOOLS_AGENT_SMOKE) {
+            const runAgentSmoke = require(path.join(root, 'scripts/a01_desktop_smoke_hook.cjs'));
+            await runAgentSmoke(window, process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR);
+          }
           if (process.env.URDFTOOLS_MODEL_RETURN_SMOKE) {
             const runReturnSmoke = require(path.join(root, 'scripts/m02_desktop_smoke_hook.cjs'));
             await runReturnSmoke(window, process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR);

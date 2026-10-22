@@ -23,6 +23,8 @@ export function ModelingWorkspace() {
   const [built, setBuilt] = useState<ModelApplyResult | null>(null);
   const [modelConfig, setModelConfig] = useState<Configuration | null>(null);
   const [cadReturn, setCadReturn] = useState<CadReturnProposal | null>(null);
+  const [agentInstruction, setAgentInstruction] = useState('');
+  const [agentProposal, setAgentProposal] = useState<Awaited<ReturnType<NonNullable<Window['urdftools']>['agentSuggest']>> | null>(null);
   const [name, setName] = useState('Base');
   const [width, setWidth] = useState(20);
   const [height, setHeight] = useState(10);
@@ -44,7 +46,7 @@ export function ModelingWorkspace() {
   }, []);
   function edit(next: ModelRecipe) {
     setHistory(previous => [...previous.slice(0, cursor + 1), clone(next)]);
-    setCursor(previous => previous + 1); setBuilt(null); setModelConfig(null); setCadReturn(null); setJson(''); setError('');
+    setCursor(previous => previous + 1); setBuilt(null); setModelConfig(null); setCadReturn(null); setAgentProposal(null); setJson(''); setError('');
   }
   function addPart() {
     if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name) || recipe.parts.some(part => part.name === name)) {
@@ -83,6 +85,25 @@ export function ModelingWorkspace() {
       setError(String(cause));
       try { const current = await window.urdftools.modelCurrent(); setRevision(current.revision); } catch { /* retain the visible error */ }
     } finally { setBusy(false); }
+  }
+  async function suggestModel() {
+    if (!window.urdftools || !built || built.revision !== revision) return;
+    setBusy(true); setError(''); setAgentProposal(null);
+    try { setAgentProposal(await window.urdftools.agentSuggest(agentInstruction, revision)); }
+    catch (cause) { setError(String(cause)); }
+    finally { setBusy(false); }
+  }
+  async function acceptAgent() {
+    if (!window.urdftools || !agentProposal) return;
+    setBusy(true); setError('');
+    try {
+      const result = await window.urdftools.agentApply(agentProposal.proposal_id);
+      setHistory(previous => [...previous.slice(0, cursor + 1), clone(agentProposal.recipe)]);
+      setCursor(previous => previous + 1);
+      setRevision(result.revision); setBuilt(result); setModelConfig(result.discovery.configuration);
+      setCadReturn(null); setAgentProposal(null);
+    } catch (cause) { setError(String(cause)); }
+    finally { setBusy(false); }
   }
   async function compareReturn() {
     if (!modelConfig || !window.urdftools) return;
@@ -136,6 +157,19 @@ export function ModelingWorkspace() {
     {busy && <p role="status">正在生成并重新载入 STEP 装配…</p>}
     {error && <p role="alert">{error}</p>}
     {built && <><p role="status">版本 {built.revision}：{built.assembly.parts.join('、')}；当前 STEP SHA-256 {built.assembly.sha256}</p>
+      <h2>Agent 辅助建模</h2>
+      <p>仅发送当前 CAD 配方和下方指令给已登录的 ChatGPT/Codex。建议先在独立副本构建，审阅后才能接受；接受后可撤销或继续编辑参数。</p>
+      <textarea aria-label="Agent 建模指令" rows={3} maxLength={2000} value={agentInstruction} onChange={event => setAgentInstruction(event.target.value)} />
+      <button disabled={busy || !agentInstruction.trim()} onClick={() => void suggestModel()}>生成建模建议</button>
+      {agentProposal && <section aria-label="Agent 建模建议" data-agent-status={agentProposal.status}>
+        <p>{agentProposal.rationale}</p>
+        <p>新增：{agentProposal.diff.added_parts.join('、') || '无'}；移除：{agentProposal.diff.removed_parts.join('、') || '无'}；修改：{agentProposal.diff.changed_parts.join('、') || '无'}</p>
+        {agentProposal.report.parts.map(part => <p key={part.name}>{part.name}：预览质量 {part.mass_kg.toPrecision(6)} kg</p>)}
+        <details><summary>完整配方差异预览</summary><pre>{JSON.stringify(agentProposal.recipe, null, 2)}</pre></details>
+        <button disabled={busy} onClick={() => void acceptAgent()}>接受建议并生成新版本</button>{' '}
+        <button disabled={busy} onClick={() => { const draft = clone(agentProposal.recipe); edit(draft); setJson(JSON.stringify(draft, null, 2)); }}>复制到编辑器微调</button>{' '}
+        <button disabled={busy} onClick={() => setAgentProposal(null)}>拒绝建议</button>
+      </section>}
       <h2>FreeCAD 回流审阅</h2>
       <p>选择本机 FCStd，对照当前 STEP 的零件名称、体积、质心和拓扑。比较只生成提案；接受后所有关节需重新确认，原 CAD 版本保留。</p>
       <button disabled={busy || !modelConfig} onClick={() => void compareReturn()}>比较 FreeCAD 回流</button>

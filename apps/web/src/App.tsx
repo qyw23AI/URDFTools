@@ -18,6 +18,8 @@ declare global {
     chooseCadStep(): Promise<Discovery | null>; cadPreview(config: Configuration): Promise<RobotImport>;
     modelCurrent(): Promise<{revision: number; recipe: ModelRecipe; built?: ModelApplyResult | null; returnWarning?: string | null}>;
     modelApply(recipe: ModelRecipe, expectedRevision: number): Promise<ModelApplyResult>;
+    agentSuggest(instruction: string, expectedRevision: number): Promise<{proposal_id: string; diff: {added_parts: string[]; removed_parts: string[]; changed_parts: string[]}; recipe: ModelRecipe; rationale: string; report: {parts: {name: string; mass_kg: number}[]}; status: 'preview_only'}>;
+    agentApply(proposalId: string): Promise<ModelApplyResult>;
     modelReconcile(config: Configuration): Promise<{proposal: import('./ModelingWorkspace').CadReturnProposal;
       exchange: {source_sha256: string; output_sha256: string; losses: string[]}} | null>;
     modelAcceptReturn(config: Configuration): Promise<Discovery>;

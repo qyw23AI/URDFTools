@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import tempfile
 from urllib.parse import urlsplit
@@ -23,8 +24,9 @@ def _safe_environment():
 
 
 class CodexCliProvider:
-    def __init__(self, executable='codex', model=None, timeout=180):
-        self.executable = executable
+    def __init__(self, executable=None, model=None, timeout=180):
+        installed = Path('/usr/lib/chatgpt/resources/codex')
+        self.executable = executable or shutil.which('codex') or (str(installed) if installed.is_file() else 'codex')
         self.model = model
         self.timeout = timeout
 

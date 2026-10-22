@@ -221,3 +221,6 @@ scheduler.json 或创建提交；配置中既有阈值 diff 原样保留。仅 S
 ## 2026-10-23 — A00 受约束 Agent 工具层
 
 已完成结构化 CAD 建议的白名单校验、隔离预览与人工确认应用；接入当前 ChatGPT 登录的 Codex CLI 和仅回环本地模型端点。用户明确授权仅发送 CAD 配方与建模指令，未发送本地 STEP/FCStd 或密钥，未启用额外付费 API。真实 CLI 对原创测试配方建议 Body 宽度 20→30 mm，CAD 质量 0.0027→0.00405 kg，确认前版本指针字节不变，确认后版本 1→2。正式 A00 门禁 2/2 通过、0 skip；证据见 `docs/acceptance/A00.md` 与 `artifacts/acceptance/A00.json`。本地模型仅经回环测试服务器验证；A01 界面集成和 A02 MCP 仍待开发。
+## 2026-10-23 — A01 Agent 辅助建模
+
+完成 Electron 建模工作台的自然语言建议、参数/质量差异与完整配方预览、拒绝、人工确认应用及复制配方后微调。真实 ChatGPT Codex 对原创双连杆只修改 Arm 宽度；拒绝不改工程，接受后版本 1→2，URDF 独立校验 2 Link/1 Joint，撤销并重建为版本 3。正式 `.venv/bin/python scripts/accept_phase.py A01` 2/2 门禁通过、0 skip；TypeScript/Vite 构建通过。证据见 `docs/acceptance/A01.md`、`artifacts/acceptance/A01.json`、`artifacts/A01/desktop/`。训练性能仍未评估，A02 CLI/MCP 接口尚待开发。

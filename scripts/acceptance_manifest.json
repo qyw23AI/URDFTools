@@ -1,6 +1,10 @@
 {
   "schema_version": 1,
   "phases": {
+    "A01": [
+      {"id": "two-link-real-cli", "kind": "command", "argv": [".tools/model-venv/bin/python", "scripts/a01_cli_smoke.py"], "timeout_seconds": 480},
+      {"id": "agent-desktop", "kind": "command", "argv": ["{python}", "scripts/a01_desktop_smoke.py"], "timeout_seconds": 600}
+    ],
     "A00": [
       {"id": "agent-contracts", "kind": "command", "argv": [".tools/model-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/a00", "-p", "test_*.py", "-v"]},
       {"id": "real-chatgpt-cli", "kind": "command", "argv": [".tools/model-venv/bin/python", "scripts/a00_cli_smoke.py"]}

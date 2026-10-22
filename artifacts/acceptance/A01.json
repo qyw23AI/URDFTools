@@ -1,0 +1,29 @@
+{
+  "phase": "A01",
+  "timestamp": "20261022T190801234886Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "two-link-real-cli",
+      "command": [
+        ".tools/model-venv/bin/python",
+        "scripts/a01_cli_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/A01/runs/20261022T190801234886Z/two-link-real-cli.log",
+      "log_sha256": "01e26e10aebb62ad03e64a3f72f7e6977fd8f111b33bae1c6273de3a1757369a",
+      "status": "passed"
+    },
+    {
+      "id": "agent-desktop",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/a01_desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/A01/runs/20261022T190801234886Z/agent-desktop.log",
+      "log_sha256": "4f2819c2fc1b2dbbb2207ec468cf82f5233d5d0e78df66881de0c54f8f2601a4",
+      "status": "passed"
+    }
+  ]
+}

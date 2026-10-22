@@ -53,7 +53,7 @@ def main():
         else:
             command = [s.replace("{python}", str(python)) for s in stage["argv"]]
         try:
-            code, log = run_stage(command)
+            code, log = run_stage(command, timeout=stage.get('timeout_seconds', 300))
         except (OSError, subprocess.TimeoutExpired) as exc:
             code, log = 2, str(exc)
         log_path = evidence / (stage["id"] + ".log")
