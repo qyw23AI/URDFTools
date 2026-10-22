@@ -7,7 +7,7 @@
     "round_timeout_seconds": 14400,
     "phase_timeout_seconds": 4200,
     "test_timeout_seconds": 1200,
-    "primary_used_pause_percent": 90,
+    "primary_used_pause_percent": 95,
     "secondary_used_pause_percent": 95,
     "retry_seconds": 3000,
     "auth_mode": "chatgpt_only",

@@ -102,3 +102,31 @@ S01 材料交调度器决定正式完成/提交。本轮没有改 state、schedu
 ## 2026-10-22 用户范围修订与恢复
 
 产品采用外部训练结果库与证据分析架构，详见 docs/RESULTS_DATABASE.md、docs/TASKS.md；不实现 RL 训练器。普通/复杂/关键分别 Sol Low/Medium/High，Astra 当前不启用。S01 上次真实 gate 通过，但 Chromium 许可证触发大文件检查而未提交；已逐字节核验官方运行时文件并精确放行。本次保留原始成果，交调度器真实重验与提交，不能将该运维修订当 S01 已完成。小时 timer 和防并发锁保留。
+
+## 2026-10-22 — S02 领域模型与一致契约，验收材料就绪
+
+仅处理 S02。实现 Pydantic 冻结 RobotDocument/快照/来源证据与显式 SI/frame、树/引用校验、
+规范 JSON+资产 hash、文档/快照保存读取、v1 备份迁移、共享 UI/agent 预览/确认/冲突校验和
+undo/redo；生成 JSON Schema 与只读 TypeScript 类型，不新增第三方依赖。
+
+实际 `python3 scripts/accept_phase.py S02` 退出 0：26/26 领域/契约测试、0 skip，
+独立文档保存流程通过，2/2 stage；原有验收器/工具链 12/12 回归也通过。
+双连杆 2 link/1 joint（3.25 kg）、四足树 9 link/8 joint（8.875 kg）往返完整数值与 hash 一致；
+拒绝非法图、NaN/Infinity、单位/frame/引用错误，验证旧 schema 原字节备份及冲突事务无修改。
+真实 tsc 编译实际夹具及负向类型断言通过；快照、迁移备份、编辑 diff/事务与数值摘要保留。
+首次因 S01 非 editable 安装缺新模块导致的导入失败原始日志保留，已修正验收源码路径。
+
+证据：`docs/acceptance/S02.md`、`artifacts/acceptance/S02.json`、`artifacts/S02/runs/`、
+`artifacts/S02/workflows/`、`tests/fixtures/S02/`；字段与接口约束见 `docs/CONTRACTS.md`。
+全部输入为原创 CC0 synthetic_fixture，真实参考成绩覆盖 0；不实现训练器。
+限制包括 JSON 而非 URDF 导入、内存历史非持久多进程事务、文件读取并发竞态、物理合理性未验，
+均已明确记录。未修改 state、scheduler.json 或创建 Git 提交；正式阶段完成由调度器决定。
+未执行或声明后续阶段完成，S03 及其它后续需求完整保留。
+
+2026-10-22 S02 保留 WIP 续接复核：先检查 diff 并读取指定文档。新增真实回归复现并修复
+非布尔确认误提交、超大有限轴数值平方溢出；失败日志 `artifacts/S02/review-first.log` 保留。
+声明命令 `python3 scripts/accept_phase.py S02` 退出 0，28/28 测试、0 skip、2/2 stage，
+文档与快照数值往返、迁移备份、事务工作流及真实 tsc 均通过；原验收器/工具链 12/12 回归通过。
+详见 `docs/acceptance/S02.md`、`artifacts/acceptance/S02.json`。本轮未改 state、HEAD、
+scheduler.json 或创建提交；配置中既有阈值 diff 原样保留。仅 S02 材料就绪，正式完成由调度器决定，
+未执行或宣称后续阶段完成；既有 JSON/内存事务/文件竞态/物理验证限制仍保留。

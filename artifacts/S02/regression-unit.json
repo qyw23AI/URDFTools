@@ -1,0 +1,10 @@
+{
+  "discovered": 12,
+  "executed": 12,
+  "passed": 12,
+  "skipped": 0,
+  "failed": 0,
+  "expected_failures": 0,
+  "unexpected_successes": 0,
+  "status": "passed"
+}

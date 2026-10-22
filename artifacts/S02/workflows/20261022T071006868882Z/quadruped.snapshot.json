@@ -1,0 +1,3616 @@
+{
+  "id": "5073c7f6-996b-4fe4-91a5-de6a6a4d9152",
+  "content_hash": "699cd1c63983928f8edafb36fc26134eed6811c1b9014ad4af0d6195b4237a8e",
+  "parent_id": null,
+  "document": {
+    "schema_version": 2,
+    "id": "00000000-0000-0000-0000-000000000001",
+    "name": "自制四足树",
+    "units": "SI",
+    "handedness": "right",
+    "up_axis": "Z",
+    "origin": "synthetic_fixture",
+    "links": [
+      {
+        "id": "00000000-0000-0000-0000-00000000000a",
+        "name": "body",
+        "visual": [],
+        "collision": [],
+        "inertial": {
+          "mass": {
+            "value": 5.125,
+            "unit": "kg",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "origin": {
+            "relative_to": "00000000-0000-0000-0000-00000000000a",
+            "xyz": [
+              {
+                "value": 0.0125,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.025,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.05,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ],
+            "rpy": [
+              {
+                "value": 0.1,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.2,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.3,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ]
+          },
+          "tensor": [
+            {
+              "value": 0.013,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.001,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.002,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.022,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.003,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.03,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "cad_part_ids": [],
+        "source_assembly_path": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-00000000000b",
+        "name": "FL_upper",
+        "visual": [],
+        "collision": [],
+        "inertial": {
+          "mass": {
+            "value": 0.625,
+            "unit": "kg",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "origin": {
+            "relative_to": "00000000-0000-0000-0000-00000000000b",
+            "xyz": [
+              {
+                "value": 0.0125,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.025,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.05,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ],
+            "rpy": [
+              {
+                "value": 0.1,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.2,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.3,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ]
+          },
+          "tensor": [
+            {
+              "value": 0.013,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.001,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.002,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.022,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.003,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.03,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "cad_part_ids": [],
+        "source_assembly_path": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-00000000000c",
+        "name": "FL_lower",
+        "visual": [],
+        "collision": [],
+        "inertial": {
+          "mass": {
+            "value": 0.3125,
+            "unit": "kg",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "origin": {
+            "relative_to": "00000000-0000-0000-0000-00000000000c",
+            "xyz": [
+              {
+                "value": 0.0125,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.025,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.05,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ],
+            "rpy": [
+              {
+                "value": 0.1,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.2,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.3,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ]
+          },
+          "tensor": [
+            {
+              "value": 0.013,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.001,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.002,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.022,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.003,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.03,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "cad_part_ids": [],
+        "source_assembly_path": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-00000000000d",
+        "name": "FR_upper",
+        "visual": [],
+        "collision": [],
+        "inertial": {
+          "mass": {
+            "value": 0.625,
+            "unit": "kg",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "origin": {
+            "relative_to": "00000000-0000-0000-0000-00000000000d",
+            "xyz": [
+              {
+                "value": 0.0125,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.025,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.05,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ],
+            "rpy": [
+              {
+                "value": 0.1,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.2,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.3,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ]
+          },
+          "tensor": [
+            {
+              "value": 0.013,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.001,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.002,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.022,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.003,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.03,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "cad_part_ids": [],
+        "source_assembly_path": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-00000000000e",
+        "name": "FR_lower",
+        "visual": [],
+        "collision": [],
+        "inertial": {
+          "mass": {
+            "value": 0.3125,
+            "unit": "kg",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "origin": {
+            "relative_to": "00000000-0000-0000-0000-00000000000e",
+            "xyz": [
+              {
+                "value": 0.0125,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.025,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.05,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ],
+            "rpy": [
+              {
+                "value": 0.1,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.2,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.3,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ]
+          },
+          "tensor": [
+            {
+              "value": 0.013,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.001,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.002,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.022,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.003,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.03,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "cad_part_ids": [],
+        "source_assembly_path": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-00000000000f",
+        "name": "RL_upper",
+        "visual": [],
+        "collision": [],
+        "inertial": {
+          "mass": {
+            "value": 0.625,
+            "unit": "kg",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "origin": {
+            "relative_to": "00000000-0000-0000-0000-00000000000f",
+            "xyz": [
+              {
+                "value": 0.0125,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.025,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.05,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ],
+            "rpy": [
+              {
+                "value": 0.1,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.2,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.3,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ]
+          },
+          "tensor": [
+            {
+              "value": 0.013,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.001,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.002,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.022,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.003,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.03,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "cad_part_ids": [],
+        "source_assembly_path": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000000010",
+        "name": "RL_lower",
+        "visual": [],
+        "collision": [],
+        "inertial": {
+          "mass": {
+            "value": 0.3125,
+            "unit": "kg",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "origin": {
+            "relative_to": "00000000-0000-0000-0000-000000000010",
+            "xyz": [
+              {
+                "value": 0.0125,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.025,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.05,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ],
+            "rpy": [
+              {
+                "value": 0.1,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.2,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.3,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ]
+          },
+          "tensor": [
+            {
+              "value": 0.013,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.001,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.002,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.022,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.003,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.03,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "cad_part_ids": [],
+        "source_assembly_path": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000000011",
+        "name": "RR_upper",
+        "visual": [],
+        "collision": [],
+        "inertial": {
+          "mass": {
+            "value": 0.625,
+            "unit": "kg",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "origin": {
+            "relative_to": "00000000-0000-0000-0000-000000000011",
+            "xyz": [
+              {
+                "value": 0.0125,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.025,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.05,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ],
+            "rpy": [
+              {
+                "value": 0.1,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.2,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.3,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ]
+          },
+          "tensor": [
+            {
+              "value": 0.013,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.001,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.002,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.022,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.003,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.03,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "cad_part_ids": [],
+        "source_assembly_path": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000000012",
+        "name": "RR_lower",
+        "visual": [],
+        "collision": [],
+        "inertial": {
+          "mass": {
+            "value": 0.3125,
+            "unit": "kg",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "origin": {
+            "relative_to": "00000000-0000-0000-0000-000000000012",
+            "xyz": [
+              {
+                "value": 0.0125,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.025,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.05,
+                "unit": "m",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ],
+            "rpy": [
+              {
+                "value": 0.1,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": 0.2,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              },
+              {
+                "value": -0.3,
+                "unit": "rad",
+                "provenance": {
+                  "source_kind": "default",
+                  "source_ref": "fixture:original-S02-CC0-1.0",
+                  "version": "1",
+                  "recorded_at": "2026-10-22T00:00:00Z",
+                  "assumptions": [
+                    "synthetic fixture; not real measurements"
+                  ]
+                },
+                "uncertainty": null
+              }
+            ]
+          },
+          "tensor": [
+            {
+              "value": 0.013,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.001,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.002,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.022,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.003,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.03,
+              "unit": "kg*m^2",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "cad_part_ids": [],
+        "source_assembly_path": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      }
+    ],
+    "joints": [
+      {
+        "id": "00000000-0000-0000-0000-000000000064",
+        "name": "FL_hip",
+        "type": "revolute",
+        "parent_id": "00000000-0000-0000-0000-00000000000a",
+        "child_id": "00000000-0000-0000-0000-00000000000b",
+        "origin": {
+          "relative_to": "00000000-0000-0000-0000-00000000000a",
+          "xyz": [
+            {
+              "value": 0.2,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.1,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.0,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ],
+          "rpy": [
+            {
+              "value": 0.1,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.2,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.3,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "axis": [
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 1.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        ],
+        "limits": {
+          "lower": {
+            "value": -1.2,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "upper": {
+            "value": 1.5,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "effort": {
+            "value": null,
+            "unit": "N*m",
+            "provenance": {
+              "source_kind": "unknown",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "velocity": {
+            "value": 3.4,
+            "unit": "rad/s",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        },
+        "dynamics": null,
+        "mimic": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000000065",
+        "name": "FL_knee",
+        "type": "revolute",
+        "parent_id": "00000000-0000-0000-0000-00000000000b",
+        "child_id": "00000000-0000-0000-0000-00000000000c",
+        "origin": {
+          "relative_to": "00000000-0000-0000-0000-00000000000b",
+          "xyz": [
+            {
+              "value": 0.0,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.0,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.25,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ],
+          "rpy": [
+            {
+              "value": 0.1,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.2,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.3,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "axis": [
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 1.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        ],
+        "limits": {
+          "lower": {
+            "value": -1.2,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "upper": {
+            "value": 1.5,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "effort": {
+            "value": null,
+            "unit": "N*m",
+            "provenance": {
+              "source_kind": "unknown",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "velocity": {
+            "value": 3.4,
+            "unit": "rad/s",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        },
+        "dynamics": null,
+        "mimic": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000000066",
+        "name": "FR_hip",
+        "type": "revolute",
+        "parent_id": "00000000-0000-0000-0000-00000000000a",
+        "child_id": "00000000-0000-0000-0000-00000000000d",
+        "origin": {
+          "relative_to": "00000000-0000-0000-0000-00000000000a",
+          "xyz": [
+            {
+              "value": 0.2,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.1,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.0,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ],
+          "rpy": [
+            {
+              "value": 0.1,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.2,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.3,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "axis": [
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 1.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        ],
+        "limits": {
+          "lower": {
+            "value": -1.2,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "upper": {
+            "value": 1.5,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "effort": {
+            "value": null,
+            "unit": "N*m",
+            "provenance": {
+              "source_kind": "unknown",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "velocity": {
+            "value": 3.4,
+            "unit": "rad/s",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        },
+        "dynamics": null,
+        "mimic": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000000067",
+        "name": "FR_knee",
+        "type": "revolute",
+        "parent_id": "00000000-0000-0000-0000-00000000000d",
+        "child_id": "00000000-0000-0000-0000-00000000000e",
+        "origin": {
+          "relative_to": "00000000-0000-0000-0000-00000000000d",
+          "xyz": [
+            {
+              "value": 0.0,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.0,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.25,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ],
+          "rpy": [
+            {
+              "value": 0.1,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.2,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.3,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "axis": [
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 1.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        ],
+        "limits": {
+          "lower": {
+            "value": -1.2,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "upper": {
+            "value": 1.5,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "effort": {
+            "value": null,
+            "unit": "N*m",
+            "provenance": {
+              "source_kind": "unknown",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "velocity": {
+            "value": 3.4,
+            "unit": "rad/s",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        },
+        "dynamics": null,
+        "mimic": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000000068",
+        "name": "RL_hip",
+        "type": "revolute",
+        "parent_id": "00000000-0000-0000-0000-00000000000a",
+        "child_id": "00000000-0000-0000-0000-00000000000f",
+        "origin": {
+          "relative_to": "00000000-0000-0000-0000-00000000000a",
+          "xyz": [
+            {
+              "value": -0.2,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.1,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.0,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ],
+          "rpy": [
+            {
+              "value": 0.1,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.2,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.3,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "axis": [
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 1.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        ],
+        "limits": {
+          "lower": {
+            "value": -1.2,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "upper": {
+            "value": 1.5,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "effort": {
+            "value": null,
+            "unit": "N*m",
+            "provenance": {
+              "source_kind": "unknown",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "velocity": {
+            "value": 3.4,
+            "unit": "rad/s",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        },
+        "dynamics": null,
+        "mimic": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-000000000069",
+        "name": "RL_knee",
+        "type": "revolute",
+        "parent_id": "00000000-0000-0000-0000-00000000000f",
+        "child_id": "00000000-0000-0000-0000-000000000010",
+        "origin": {
+          "relative_to": "00000000-0000-0000-0000-00000000000f",
+          "xyz": [
+            {
+              "value": 0.0,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.0,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.25,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ],
+          "rpy": [
+            {
+              "value": 0.1,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.2,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.3,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "axis": [
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 1.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        ],
+        "limits": {
+          "lower": {
+            "value": -1.2,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "upper": {
+            "value": 1.5,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "effort": {
+            "value": null,
+            "unit": "N*m",
+            "provenance": {
+              "source_kind": "unknown",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "velocity": {
+            "value": 3.4,
+            "unit": "rad/s",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        },
+        "dynamics": null,
+        "mimic": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-00000000006a",
+        "name": "RR_hip",
+        "type": "revolute",
+        "parent_id": "00000000-0000-0000-0000-00000000000a",
+        "child_id": "00000000-0000-0000-0000-000000000011",
+        "origin": {
+          "relative_to": "00000000-0000-0000-0000-00000000000a",
+          "xyz": [
+            {
+              "value": -0.2,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.1,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.0,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ],
+          "rpy": [
+            {
+              "value": 0.1,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.2,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.3,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "axis": [
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 1.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        ],
+        "limits": {
+          "lower": {
+            "value": -1.2,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "upper": {
+            "value": 1.5,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "effort": {
+            "value": null,
+            "unit": "N*m",
+            "provenance": {
+              "source_kind": "unknown",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "velocity": {
+            "value": 3.4,
+            "unit": "rad/s",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        },
+        "dynamics": null,
+        "mimic": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      },
+      {
+        "id": "00000000-0000-0000-0000-00000000006b",
+        "name": "RR_knee",
+        "type": "revolute",
+        "parent_id": "00000000-0000-0000-0000-000000000011",
+        "child_id": "00000000-0000-0000-0000-000000000012",
+        "origin": {
+          "relative_to": "00000000-0000-0000-0000-000000000011",
+          "xyz": [
+            {
+              "value": 0.0,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.0,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.25,
+              "unit": "m",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ],
+          "rpy": [
+            {
+              "value": 0.1,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": -0.2,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            },
+            {
+              "value": 0.3,
+              "unit": "rad",
+              "provenance": {
+                "source_kind": "default",
+                "source_ref": "fixture:original-S02-CC0-1.0",
+                "version": "1",
+                "recorded_at": "2026-10-22T00:00:00Z",
+                "assumptions": [
+                  "synthetic fixture; not real measurements"
+                ]
+              },
+              "uncertainty": null
+            }
+          ]
+        },
+        "axis": [
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 1.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          {
+            "value": 0.0,
+            "unit": "1",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        ],
+        "limits": {
+          "lower": {
+            "value": -1.2,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "upper": {
+            "value": 1.5,
+            "unit": "rad",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "effort": {
+            "value": null,
+            "unit": "N*m",
+            "provenance": {
+              "source_kind": "unknown",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          },
+          "velocity": {
+            "value": 3.4,
+            "unit": "rad/s",
+            "provenance": {
+              "source_kind": "default",
+              "source_ref": "fixture:original-S02-CC0-1.0",
+              "version": "1",
+              "recorded_at": "2026-10-22T00:00:00Z",
+              "assumptions": [
+                "synthetic fixture; not real measurements"
+              ]
+            },
+            "uncertainty": null
+          }
+        },
+        "dynamics": null,
+        "mimic": null,
+        "provenance": {
+          "source_kind": "default",
+          "source_ref": "fixture:original-S02-CC0-1.0",
+          "version": "1",
+          "recorded_at": "2026-10-22T00:00:00Z",
+          "assumptions": [
+            "synthetic fixture; not real measurements"
+          ]
+        }
+      }
+    ],
+    "materials": [],
+    "assets": [],
+    "extensions": [
+      {
+        "namespace": "fixture:custom",
+        "payload": "<fixture keep=\"yes\"/>",
+        "source_asset_id": null,
+        "source_span": null
+      }
+    ],
+    "provenance": {
+      "source_kind": "default",
+      "source_ref": "fixture:original-S02-CC0-1.0",
+      "version": "1",
+      "recorded_at": "2026-10-22T00:00:00Z",
+      "assumptions": [
+        "synthetic fixture; not real measurements"
+      ]
+    }
+  },
+  "created_at": "2026-10-22T07:10:06.881639Z"
+}

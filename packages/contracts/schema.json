@@ -1,0 +1,1231 @@
+{
+  "$defs": {
+    "AssetRef": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "license_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "License Id"
+        },
+        "mime": {
+          "minLength": 1,
+          "title": "Mime",
+          "type": "string"
+        },
+        "relative_path": {
+          "title": "Relative Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size": {
+          "minimum": 0,
+          "title": "Size",
+          "type": "integer"
+        },
+        "source_commit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Commit"
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Url"
+        }
+      },
+      "required": [
+        "id",
+        "sha256",
+        "relative_path",
+        "mime",
+        "size",
+        "source_url",
+        "source_commit",
+        "license_id"
+      ],
+      "title": "AssetRef",
+      "type": "object"
+    },
+    "EditTransaction": {
+      "additionalProperties": false,
+      "properties": {
+        "actor": {
+          "enum": [
+            "ui",
+            "agent"
+          ],
+          "title": "Actor",
+          "type": "string"
+        },
+        "base_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Base Hash",
+          "type": "string"
+        },
+        "base_snapshot": {
+          "format": "uuid",
+          "title": "Base Snapshot",
+          "type": "string"
+        },
+        "confirmed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Confirmed At"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "operations": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "replace_joint": "#/$defs/ReplaceJoint",
+                "replace_link": "#/$defs/ReplaceLink"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ReplaceLink"
+              },
+              {
+                "$ref": "#/$defs/ReplaceJoint"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Operations",
+          "type": "array"
+        },
+        "preview_snapshot": {
+          "$ref": "#/$defs/RobotSnapshot"
+        },
+        "validation": {
+          "const": "valid",
+          "title": "Validation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "base_snapshot",
+        "base_hash",
+        "operations",
+        "preview_snapshot",
+        "validation",
+        "actor",
+        "confirmed_at"
+      ],
+      "title": "EditTransaction",
+      "type": "object"
+    },
+    "Extension": {
+      "additionalProperties": false,
+      "properties": {
+        "namespace": {
+          "minLength": 1,
+          "title": "Namespace",
+          "type": "string"
+        },
+        "payload": {
+          "title": "Payload",
+          "type": "string"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Asset Id"
+        },
+        "source_span": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Span"
+        }
+      },
+      "required": [
+        "namespace",
+        "payload",
+        "source_asset_id",
+        "source_span"
+      ],
+      "title": "Extension",
+      "type": "object"
+    },
+    "Geometry": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Asset Id"
+        },
+        "dimensions": {
+          "items": {
+            "$ref": "#/$defs/ParameterEvidence"
+          },
+          "title": "Dimensions",
+          "type": "array"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "box",
+            "sphere",
+            "cylinder",
+            "mesh"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "material_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Material Id"
+        },
+        "origin": {
+          "$ref": "#/$defs/Transform"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "scale": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Scale"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "origin",
+        "dimensions",
+        "asset_id",
+        "scale",
+        "material_id",
+        "provenance"
+      ],
+      "title": "Geometry",
+      "type": "object"
+    },
+    "Inertial": {
+      "additionalProperties": false,
+      "properties": {
+        "mass": {
+          "$ref": "#/$defs/ParameterEvidence"
+        },
+        "origin": {
+          "$ref": "#/$defs/Transform"
+        },
+        "tensor": {
+          "maxItems": 6,
+          "minItems": 6,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/ParameterEvidence"
+            },
+            {
+              "$ref": "#/$defs/ParameterEvidence"
+            },
+            {
+              "$ref": "#/$defs/ParameterEvidence"
+            },
+            {
+              "$ref": "#/$defs/ParameterEvidence"
+            },
+            {
+              "$ref": "#/$defs/ParameterEvidence"
+            },
+            {
+              "$ref": "#/$defs/ParameterEvidence"
+            }
+          ],
+          "title": "Tensor",
+          "type": "array"
+        }
+      },
+      "required": [
+        "mass",
+        "origin",
+        "tensor"
+      ],
+      "title": "Inertial",
+      "type": "object"
+    },
+    "Joint": {
+      "additionalProperties": false,
+      "properties": {
+        "axis": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "$ref": "#/$defs/ParameterEvidence"
+                },
+                {
+                  "$ref": "#/$defs/ParameterEvidence"
+                },
+                {
+                  "$ref": "#/$defs/ParameterEvidence"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Axis"
+        },
+        "child_id": {
+          "format": "uuid",
+          "title": "Child Id",
+          "type": "string"
+        },
+        "dynamics": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JointDynamics"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "limits": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JointLimits"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mimic": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Mimic"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "origin": {
+          "$ref": "#/$defs/Transform"
+        },
+        "parent_id": {
+          "format": "uuid",
+          "title": "Parent Id",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "type": {
+          "enum": [
+            "fixed",
+            "revolute",
+            "continuous",
+            "prismatic",
+            "floating",
+            "planar"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "parent_id",
+        "child_id",
+        "origin",
+        "axis",
+        "limits",
+        "dynamics",
+        "mimic",
+        "provenance"
+      ],
+      "title": "Joint",
+      "type": "object"
+    },
+    "JointDynamics": {
+      "additionalProperties": false,
+      "properties": {
+        "damping": {
+          "$ref": "#/$defs/ParameterEvidence"
+        },
+        "friction": {
+          "$ref": "#/$defs/ParameterEvidence"
+        }
+      },
+      "required": [
+        "damping",
+        "friction"
+      ],
+      "title": "JointDynamics",
+      "type": "object"
+    },
+    "JointLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "effort": {
+          "$ref": "#/$defs/ParameterEvidence"
+        },
+        "lower": {
+          "$ref": "#/$defs/ParameterEvidence"
+        },
+        "upper": {
+          "$ref": "#/$defs/ParameterEvidence"
+        },
+        "velocity": {
+          "$ref": "#/$defs/ParameterEvidence"
+        }
+      },
+      "required": [
+        "lower",
+        "upper",
+        "effort",
+        "velocity"
+      ],
+      "title": "JointLimits",
+      "type": "object"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "cad_part_ids": {
+          "default": [],
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Cad Part Ids",
+          "type": "array"
+        },
+        "collision": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Geometry"
+          },
+          "title": "Collision",
+          "type": "array"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "inertial": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Inertial"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "source_assembly_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Assembly Path"
+        },
+        "visual": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Geometry"
+          },
+          "title": "Visual",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "inertial",
+        "provenance"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "Material": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "rgba": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rgba"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "rgba",
+        "provenance"
+      ],
+      "title": "Material",
+      "type": "object"
+    },
+    "Mimic": {
+      "additionalProperties": false,
+      "properties": {
+        "joint_id": {
+          "format": "uuid",
+          "title": "Joint Id",
+          "type": "string"
+        },
+        "multiplier": {
+          "$ref": "#/$defs/ParameterEvidence"
+        },
+        "offset": {
+          "$ref": "#/$defs/ParameterEvidence"
+        }
+      },
+      "required": [
+        "joint_id",
+        "multiplier",
+        "offset"
+      ],
+      "title": "Mimic",
+      "type": "object"
+    },
+    "OperationResult": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_refs": {
+          "items": {
+            "$ref": "#/$defs/AssetRef"
+          },
+          "title": "Artifact Refs",
+          "type": "array"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ServiceError"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "findings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Findings",
+          "type": "array"
+        },
+        "job_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Job Id"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RobotSnapshot"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "queued",
+            "blocked_input",
+            "blocked_hardware"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "operation_id",
+        "status",
+        "result",
+        "findings",
+        "artifact_refs",
+        "job_id",
+        "error"
+      ],
+      "title": "OperationResult",
+      "type": "object"
+    },
+    "ParameterEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "uncertainty": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Uncertainty"
+        },
+        "unit": {
+          "enum": [
+            "m",
+            "rad",
+            "kg",
+            "kg*m^2",
+            "m/s",
+            "rad/s",
+            "N",
+            "N*m",
+            "1",
+            "s",
+            "N*s/m",
+            "N*m*s/rad"
+          ],
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "value",
+        "unit",
+        "provenance"
+      ],
+      "title": "ParameterEvidence",
+      "type": "object"
+    },
+    "ProjectManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "active_snapshot": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Active Snapshot"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "robot_snapshot_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Robot Snapshot Ids",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": 2,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "settings": {
+          "$ref": "#/$defs/ProjectSettings"
+        },
+        "source_assets": {
+          "items": {
+            "$ref": "#/$defs/AssetRef"
+          },
+          "title": "Source Assets",
+          "type": "array"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "title",
+        "robot_snapshot_ids",
+        "active_snapshot",
+        "source_assets",
+        "settings"
+      ],
+      "title": "ProjectManifest",
+      "type": "object"
+    },
+    "ProjectSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "display_angle_unit": {
+          "enum": [
+            "rad",
+            "deg"
+          ],
+          "title": "Display Angle Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "display_angle_unit"
+      ],
+      "title": "ProjectSettings",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "assumptions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "source_kind": {
+          "enum": [
+            "measured",
+            "cad",
+            "vendor",
+            "inferred",
+            "default",
+            "unknown"
+          ],
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "source_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Ref"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Version"
+        }
+      },
+      "required": [
+        "source_kind",
+        "source_ref",
+        "version",
+        "recorded_at"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ReplaceJoint": {
+      "additionalProperties": false,
+      "properties": {
+        "joint": {
+          "$ref": "#/$defs/Joint"
+        },
+        "kind": {
+          "const": "replace_joint",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "joint"
+      ],
+      "title": "ReplaceJoint",
+      "type": "object"
+    },
+    "ReplaceLink": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "replace_link",
+          "title": "Kind",
+          "type": "string"
+        },
+        "link": {
+          "$ref": "#/$defs/Link"
+        }
+      },
+      "required": [
+        "kind",
+        "link"
+      ],
+      "title": "ReplaceLink",
+      "type": "object"
+    },
+    "RobotDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "assets": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AssetRef"
+          },
+          "title": "Assets",
+          "type": "array"
+        },
+        "extensions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Extension"
+          },
+          "title": "Extensions",
+          "type": "array"
+        },
+        "handedness": {
+          "const": "right",
+          "title": "Handedness",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "joints": {
+          "items": {
+            "$ref": "#/$defs/Joint"
+          },
+          "title": "Joints",
+          "type": "array"
+        },
+        "links": {
+          "items": {
+            "$ref": "#/$defs/Link"
+          },
+          "title": "Links",
+          "type": "array"
+        },
+        "materials": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Material"
+          },
+          "title": "Materials",
+          "type": "array"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "origin": {
+          "enum": [
+            "user_upload",
+            "public_import",
+            "synthetic_fixture"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "schema_version": {
+          "const": 2,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "units": {
+          "const": "SI",
+          "title": "Units",
+          "type": "string"
+        },
+        "up_axis": {
+          "const": "Z",
+          "title": "Up Axis",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "name",
+        "units",
+        "handedness",
+        "up_axis",
+        "origin",
+        "links",
+        "joints",
+        "provenance"
+      ],
+      "title": "RobotDocument",
+      "type": "object"
+    },
+    "RobotSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "content_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Content Hash",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "document": {
+          "$ref": "#/$defs/RobotDocument"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Id"
+        }
+      },
+      "required": [
+        "id",
+        "content_hash",
+        "parent_id",
+        "document",
+        "created_at"
+      ],
+      "title": "RobotSnapshot",
+      "type": "object"
+    },
+    "ServiceError": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "minLength": 1,
+          "title": "Code",
+          "type": "string"
+        },
+        "details": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Details",
+          "type": "array"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "remediation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Remediation"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "details",
+        "remediation"
+      ],
+      "title": "ServiceError",
+      "type": "object"
+    },
+    "Transform": {
+      "additionalProperties": false,
+      "description": "Right handed; URDF fixed-axis roll/pitch/yaw in radians.",
+      "properties": {
+        "relative_to": {
+          "format": "uuid",
+          "title": "Relative To",
+          "type": "string"
+        },
+        "rpy": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/ParameterEvidence"
+            },
+            {
+              "$ref": "#/$defs/ParameterEvidence"
+            },
+            {
+              "$ref": "#/$defs/ParameterEvidence"
+            }
+          ],
+          "title": "Rpy",
+          "type": "array"
+        },
+        "xyz": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/ParameterEvidence"
+            },
+            {
+              "$ref": "#/$defs/ParameterEvidence"
+            },
+            {
+              "$ref": "#/$defs/ParameterEvidence"
+            }
+          ],
+          "title": "Xyz",
+          "type": "array"
+        }
+      },
+      "required": [
+        "relative_to",
+        "xyz",
+        "rpy"
+      ],
+      "title": "Transform",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/RobotDocument"
+    },
+    {
+      "$ref": "#/$defs/RobotSnapshot"
+    },
+    {
+      "$ref": "#/$defs/EditTransaction"
+    },
+    {
+      "$ref": "#/$defs/OperationResult"
+    },
+    {
+      "$ref": "#/$defs/ProjectManifest"
+    }
+  ]
+}

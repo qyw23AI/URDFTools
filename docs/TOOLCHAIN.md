@@ -48,4 +48,4 @@ python3 scripts/accept_phase.py S01
 
 桌面 gate 每次用固定工具链构建源码，校验已安装 Electron 文件，在临时 HOME、无用户 DISPLAY/WAYLAND_DISPLAY/XAUTHORITY 的环境运行 Chromium `--ozone-platform=headless --disable-gpu`。真实 React 挂载、查看→评估点击、preload 隔离、sandbox 和 PNG 截图均有断言；不使用 `--no-sandbox`。这是本地软件渲染验收，不能推断用户 GNOME 会话、GPU/WebGL 或最终安装已验收。单独入口为 `python3 scripts/desktop_smoke.py`。
 
-验收器从 `scripts/acceptance_manifest.json` 注册阶段，仅 S01 有实现；未知/未来阶段返回 2。每个 stage 有界执行，超时清理整个进程组，保存独立 UTC 时间戳日志及 counts。空测试、全 skip、失败和 expected failure 均不通过。集成验收在全新含空格目录安装，验证 CLI、真实 HTTP 鉴权/Origin、Vite preview 与生产 bundle、SSR、离线失败和真实桌面渲染。机器报告在 `artifacts/acceptance/S01.json`，历史失败保留在 `artifacts/S01/runs/`。
+验收器从 `scripts/acceptance_manifest.json` 注册阶段，S01、S02 已注册实际验收；未知/未来阶段返回 2。每个 stage 有界执行，超时清理整个进程组，保存独立 UTC 时间戳日志及 counts。空测试、全 skip、失败和 expected failure 均不通过。集成验收在全新含空格目录安装，验证 CLI、真实 HTTP 鉴权/Origin、Vite preview 与生产 bundle、SSR、离线失败和真实桌面渲染。机器报告在 `artifacts/acceptance/S01.json`，历史失败保留在 `artifacts/S01/runs/`。

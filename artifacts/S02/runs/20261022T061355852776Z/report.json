@@ -1,0 +1,32 @@
+{
+  "phase": "S02",
+  "timestamp": "20261022T061355852776Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "domain-contracts",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/run_test_suite.py",
+        "--directory",
+        "tests/s02",
+        "--report",
+        "/home/qyw/URDFTools/artifacts/S02/runs/20261022T061355852776Z/domain-contracts.json"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/S02/runs/20261022T061355852776Z/domain-contracts.log",
+      "log_sha256": "cfb2b8a72f38bd45dcccbf28b881127fd796027d87e2fbc98ce77c91fe979e9a",
+      "counts": {
+        "discovered": 25,
+        "executed": 25,
+        "passed": 25,
+        "skipped": 0,
+        "failed": 0,
+        "expected_failures": 0,
+        "unexpected_successes": 0,
+        "status": "passed"
+      },
+      "status": "passed"
+    }
+  ]
+}

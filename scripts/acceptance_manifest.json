@@ -2,9 +2,39 @@
   "schema_version": 1,
   "phases": {
     "S01": [
-      {"id":"python", "kind":"unittest", "directory":"tests/unit"},
-      {"id":"clean-install", "kind":"unittest", "directory":"tests/integration"},
-      {"id":"desktop", "kind":"command", "argv":["{python}","scripts/desktop_smoke.py"]}
+      {
+        "id": "python",
+        "kind": "unittest",
+        "directory": "tests/unit"
+      },
+      {
+        "id": "clean-install",
+        "kind": "unittest",
+        "directory": "tests/integration"
+      },
+      {
+        "id": "desktop",
+        "kind": "command",
+        "argv": [
+          "{python}",
+          "scripts/desktop_smoke.py"
+        ]
+      }
+    ],
+    "S02": [
+      {
+        "id": "domain-contracts",
+        "kind": "unittest",
+        "directory": "tests/s02"
+      },
+      {
+        "id": "document-workflow",
+        "kind": "command",
+        "argv": [
+          "{python}",
+          "scripts/s02_workflow.py"
+        ]
+      }
     ]
   }
 }
