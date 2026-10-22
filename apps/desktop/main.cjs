@@ -83,6 +83,83 @@ ipcMain.handle('select-import', (event, operation_id, model) => {
   if (!window || event.sender !== window.webContents || typeof operation_id !== 'string' || typeof model !== 'string') throw new Error('无效选择');
   return importRequest({ action: 'select', operation_id, model });
 });
+let cadSource = null;
+function cadWorker(args) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(path.join(root, '.tools/cad-venv/bin/python'),
+      [path.join(root, 'scripts/cad_joint_wizard.py'), ...args],
+      { cwd: root, env: { PATH: process.env.PATH }, stdio: ['ignore', 'pipe', 'pipe'] });
+    let output = ''; let errors = '';
+    const deadline = setTimeout(() => child.kill('SIGKILL'), 120000);
+    child.stdout.on('data', data => {
+      output += data;
+      if (output.length > 16 * 1024 * 1024) child.kill('SIGKILL');
+    });
+    child.stderr.on('data', data => { errors = (errors + data).slice(-8192); });
+    child.on('error', reject);
+    child.on('close', code => {
+      clearTimeout(deadline);
+      if (code !== 0) return reject(new Error(errors || 'CAD worker failed'));
+      try { resolve(JSON.parse(output)); } catch (error) { reject(error); }
+    });
+  });
+}
+function assertRenderer(event) {
+  if (!window || event.sender !== window.webContents) throw new Error('无效窗口');
+}
+ipcMain.handle('choose-cad-step', async event => {
+  assertRenderer(event);
+  const fixture = smoke ? process.env.URDFTOOLS_CAD_WIZARD_SMOKE : null;
+  let source;
+  if (fixture) source = fixture;
+  else {
+    const choice = await dialog.showOpenDialog(window, { properties: ['openFile'],
+      filters: [{ name: 'STEP / STP', extensions: ['step', 'stp'] }] });
+    if (choice.canceled) return null;
+    source = choice.filePaths[0];
+  }
+  const result = await cadWorker([source]);
+  cadSource = source;
+  return result;
+});
+ipcMain.handle('cad-preview', async (event, config) => {
+  assertRenderer(event);
+  if (!cadSource || !config || typeof config !== 'object') throw new Error('请先选择 STEP 文件');
+  const encoded = JSON.stringify(config);
+  if (encoded.length > 1024 * 1024) throw new Error('转换配置过大');
+  const directory = await fs.promises.mkdtemp(path.join(app.getPath('userData'), 'cad-preview-'));
+  try {
+    const configPath = path.join(directory, 'config.json');
+    const previewPath = path.join(directory, 'preview.urdf');
+    await fs.promises.writeFile(configPath, encoded, { mode: 0o600 });
+    await cadWorker([cadSource, '--config', configPath, '--preview', previewPath]);
+    return await importRequest({ action: 'import', source: previewPath });
+  } finally {
+    await fs.promises.rm(directory, { recursive: true, force: true });
+  }
+});
+ipcMain.handle('save-cad-config', async (event, config) => {
+  assertRenderer(event);
+  if (!cadSource || !config || typeof config !== 'object') throw new Error('没有可保存的配置');
+  const encoded = JSON.stringify(config, null, 2) + '\n';
+  if (encoded.length > 1024 * 1024) throw new Error('转换配置过大');
+  const choice = await dialog.showSaveDialog(window, { defaultPath: 'cad-joints.json',
+    filters: [{ name: 'JSON 配置', extensions: ['json'] }] });
+  if (choice.canceled) return false;
+  await fs.promises.writeFile(choice.filePath, encoded, { mode: 0o600 });
+  return true;
+});
+ipcMain.handle('load-cad-config', async event => {
+  assertRenderer(event);
+  if (!cadSource) throw new Error('请先选择 STEP 文件');
+  const choice = await dialog.showOpenDialog(window, { properties: ['openFile'],
+    filters: [{ name: 'JSON 配置', extensions: ['json'] }] });
+  if (choice.canceled) return null;
+  const file = choice.filePaths[0];
+  if ((await fs.promises.stat(file)).size > 1024 * 1024) throw new Error('转换配置过大');
+  const result = await cadWorker([cadSource, '--config', file]);
+  return result.configuration;
+});
 function stopService() {
   stopping = true;
   if (importWorker) importWorker.kill('SIGTERM');
@@ -343,6 +420,64 @@ app.whenReady().then(() => {
         if (process.env.URDFTOOLS_VIEWER_S06_SMOKE) {
           const runS06ViewerSmoke = require(path.join(root, 'scripts/s06_desktop_smoke_hook.cjs'));
           await runS06ViewerSmoke(window, path, fs, process.env.URDFTOOLS_VIEWER_S06_SMOKE);
+        }
+        if (process.env.URDFTOOLS_CAD_WIZARD_SMOKE) {
+          const waitForCad = async expression => {
+            const until = Date.now() + 60000;
+            while (Date.now() < until) {
+              if (await window.webContents.executeJavaScript(expression)) return;
+              await new Promise(resolve => setTimeout(resolve, 60));
+            }
+            throw new Error('CAD wizard UI timeout: ' + expression + ' | ' +
+              await window.webContents.executeJavaScript("document.querySelector('main').textContent.slice(-800)"));
+          };
+          await window.webContents.executeJavaScript(`document.querySelectorAll('nav button')[1].click()`);
+          await waitForCad(`document.querySelector('button') && [...document.querySelectorAll('button')].some(b => b.textContent === '选择 STEP / STP')`);
+          await window.webContents.executeJavaScript(`([...document.querySelectorAll('button')].find(b => b.textContent === '选择 STEP / STP')).click()`);
+          await waitForCad(`document.querySelector('[aria-label="OffsetPart_joint type"]') !== null`);
+          const discovered = await window.webContents.executeJavaScript(`document.querySelector('.cad-wizard').textContent`);
+          if (!discovered.includes('BasePart') || !discovered.includes('OffsetPart') ||
+              !discovered.includes('未确认关节：1')) throw new Error('CAD parts/candidate missing');
+          await window.webContents.executeJavaScript(`(() => {
+            const el=document.querySelector('[aria-label="OffsetPart_joint type"]');
+            const setter=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set;
+            setter.call(el,'revolute'); el.dispatchEvent(new Event('change',{bubbles:true}));
+          })()`);
+          await waitForCad(`document.querySelector('[aria-label="OffsetPart_joint limits"]') !== null`);
+          await window.webContents.executeJavaScript(`document.querySelector('[aria-label="OffsetPart_joint confirmed"]').click()`);
+          await waitForCad(`Number(document.querySelector('[aria-label="三维机器人查看器"]')?.dataset.treeLinkCount) === 2`);
+          const event = await window.webContents.executeJavaScript(`(() => {
+            const v=document.querySelector('[aria-label="三维机器人查看器"]');
+            const slider=document.querySelector('input[aria-label="OffsetPart_joint"]');
+            return {linkCount:Number(v.dataset.treeLinkCount),jointCount:Number(v.dataset.treeJointCount),
+              meshCount:Number(v.dataset.meshCount),jointMin:Number(slider?.min),jointMax:Number(slider?.max),
+              unconfirmed:document.querySelector('.cad-wizard').textContent.includes('未确认关节：0')};
+          })()`);
+          if (event.jointCount !== 1 || event.meshCount < 2 || event.jointMin !== -1 ||
+              event.jointMax !== 1 || !event.unconfirmed) throw new Error('CAD preview mismatch: '+JSON.stringify(event));
+          const initialQuaternion = await window.webContents.executeJavaScript(`document.querySelector('[data-joint-quaternion]')?.dataset.jointQuaternion`);
+          await window.webContents.executeJavaScript(`document.querySelector('input[aria-label="OffsetPart_joint"]').focus()`);
+          window.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'End' });
+          window.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'End' });
+          await waitForCad(`document.querySelector('[data-joint-quaternion]')?.dataset.jointQuaternion !== '${initialQuaternion}'`);
+          const zQuaternion = await window.webContents.executeJavaScript(`document.querySelector('[data-joint-quaternion]')?.dataset.jointQuaternion`);
+          const axisInput = '[aria-label="OffsetPart_joint axis"]';
+          await window.webContents.executeJavaScript(`(() => { const el=document.querySelector('${axisInput}'); el.focus(); el.value='1 0 0'; el.dispatchEvent(new FocusEvent('focusout',{bubbles:true})); el.blur(); })()`);
+          await waitForCad(`document.querySelector('.cad-wizard').textContent.includes('未确认关节：1')`);
+          await window.webContents.executeJavaScript(`document.querySelector('[aria-label="OffsetPart_joint confirmed"]').click()`);
+          await waitForCad(`Number(document.querySelector('[aria-label="三维机器人查看器"]')?.dataset.treeLinkCount) === 2`);
+          await window.webContents.executeJavaScript(`document.querySelector('input[aria-label="OffsetPart_joint"]').focus()`);
+          window.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'End' });
+          window.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'End' });
+          await waitForCad(`document.querySelector('[data-joint-quaternion]')?.dataset.jointQuaternion && document.querySelector('[data-joint-quaternion]')?.dataset.jointQuaternion !== '${zQuaternion}'`);
+          const xQuaternion = await window.webContents.executeJavaScript(`document.querySelector('[data-joint-quaternion]')?.dataset.jointQuaternion`);
+          const z = zQuaternion.split(',').map(Number), x = xQuaternion.split(',').map(Number);
+          if (Math.abs(z[2]) < 0.4 || Math.abs(z[0]) > 0.01 || Math.abs(x[0]) < 0.4 || Math.abs(x[2]) > 0.01) {
+            throw new Error('Corrected CAD joint axis did not change rotation: '+JSON.stringify({zQuaternion,xQuaternion}));
+          }
+          const png = (await window.webContents.capturePage()).toPNG();
+          fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'cad-wizard.png'), png);
+          console.log(JSON.stringify({ event: 'desktop_cad_wizard_smoke', ...event, zQuaternion, xQuaternion, screenshotBytes: png.length }));
         }
         await window.webContents.executeJavaScript(`document.querySelectorAll('nav button')[3].click()`);
         await new Promise(resolve => setTimeout(resolve, 100));

@@ -1,0 +1,36 @@
+{
+  "phase": "C02",
+  "timestamp": "20261022T131340676540Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "wizard-contracts",
+      "command": [
+        ".tools/cad-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/c02",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C02/runs/20261022T131340676540Z/wizard-contracts.log",
+      "log_sha256": "c514758748b47ea75c9599d81dc70d18e99173ef53b85cdd62527d163966f0dc",
+      "status": "passed"
+    },
+    {
+      "id": "wizard-desktop",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/c02_desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C02/runs/20261022T131340676540Z/wizard-desktop.log",
+      "log_sha256": "9bdabb4556be44eb720436c69a962e01778d9ac0c70985d4f46d7458d9efcdf3",
+      "status": "passed"
+    }
+  ]
+}

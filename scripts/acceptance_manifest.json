@@ -68,26 +68,142 @@
       }
     ],
     "S04": [
-      { "id": "viewer-model", "kind": "unittest", "directory": "tests/s04" },
-      { "id": "viewer-desktop", "kind": "command", "argv": ["{python}", "scripts/s04_desktop_smoke.py"] }
+      {
+        "id": "viewer-model",
+        "kind": "unittest",
+        "directory": "tests/s04"
+      },
+      {
+        "id": "viewer-desktop",
+        "kind": "command",
+        "argv": [
+          "{python}",
+          "scripts/s04_desktop_smoke.py"
+        ]
+      }
     ],
     "S05": [
-      { "id": "viewer-analysis-fixture", "kind": "unittest", "directory": "tests/s05" },
-      { "id": "viewer-analysis-desktop", "kind": "command", "argv": ["{python}", "scripts/s05_desktop_smoke.py"] }
+      {
+        "id": "viewer-analysis-fixture",
+        "kind": "unittest",
+        "directory": "tests/s05"
+      },
+      {
+        "id": "viewer-analysis-desktop",
+        "kind": "command",
+        "argv": [
+          "{python}",
+          "scripts/s05_desktop_smoke.py"
+        ]
+      }
     ],
     "S06": [
-      { "id": "real-reference-models", "kind": "unittest", "directory": "tests/s06" },
-      { "id": "real-model-viewer-e2e", "kind": "command", "argv": ["{python}", "scripts/s06_real_models_smoke.py"] }
+      {
+        "id": "real-reference-models",
+        "kind": "unittest",
+        "directory": "tests/s06"
+      },
+      {
+        "id": "real-model-viewer-e2e",
+        "kind": "command",
+        "argv": [
+          "{python}",
+          "scripts/s06_real_models_smoke.py"
+        ]
+      }
     ],
     "C00": [
-      { "id": "cad-worker-lock", "kind": "command", "argv": ["{python}", "scripts/setup_cad_worker.py", "--offline"] },
-      { "id": "step-reader-contracts", "kind": "command", "argv": [".tools/cad-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/c00", "-p", "test_*.py", "-v"] },
-      { "id": "step-cli-smoke", "kind": "command", "argv": [".tools/cad-venv/bin/python", "scripts/c00_cli_smoke.py"] }
+      {
+        "id": "cad-worker-lock",
+        "kind": "command",
+        "argv": [
+          "{python}",
+          "scripts/setup_cad_worker.py",
+          "--offline"
+        ]
+      },
+      {
+        "id": "step-reader-contracts",
+        "kind": "command",
+        "argv": [
+          ".tools/cad-venv/bin/python",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests/c00",
+          "-p",
+          "test_*.py",
+          "-v"
+        ]
+      },
+      {
+        "id": "step-cli-smoke",
+        "kind": "command",
+        "argv": [
+          ".tools/cad-venv/bin/python",
+          "scripts/c00_cli_smoke.py"
+        ]
+      }
     ],
     "C01": [
-      { "id": "cad-worker-lock", "kind": "command", "argv": ["{python}", "scripts/setup_cad_worker.py", "--offline"] },
-      { "id": "mass-property-contracts", "kind": "command", "argv": [".tools/cad-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/c01", "-p", "test_*.py", "-v"] },
-      { "id": "mass-property-cli", "kind": "command", "argv": [".tools/cad-venv/bin/python", "scripts/c01_cli_smoke.py"] }
+      {
+        "id": "cad-worker-lock",
+        "kind": "command",
+        "argv": [
+          "{python}",
+          "scripts/setup_cad_worker.py",
+          "--offline"
+        ]
+      },
+      {
+        "id": "mass-property-contracts",
+        "kind": "command",
+        "argv": [
+          ".tools/cad-venv/bin/python",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests/c01",
+          "-p",
+          "test_*.py",
+          "-v"
+        ]
+      },
+      {
+        "id": "mass-property-cli",
+        "kind": "command",
+        "argv": [
+          ".tools/cad-venv/bin/python",
+          "scripts/c01_cli_smoke.py"
+        ]
+      }
+    ],
+    "C02": [
+      {
+        "id": "wizard-contracts",
+        "kind": "command",
+        "argv": [
+          ".tools/cad-venv/bin/python",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests/c02",
+          "-p",
+          "test_*.py",
+          "-v"
+        ]
+      },
+      {
+        "id": "wizard-desktop",
+        "kind": "command",
+        "argv": [
+          "{python}",
+          "scripts/c02_desktop_smoke.py"
+        ]
+      }
     ]
   }
 }

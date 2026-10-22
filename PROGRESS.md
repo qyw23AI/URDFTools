@@ -1,5 +1,12 @@
 # URDFTools 项目进度
 
+## 2026-10-22 — C02 关节分组与转换向导完成技术验收
+
+实现真实 STEP 读取与单位/装配一致性核对、圆柱面轴线候选、可编辑 Link 分组及单根父子树、关节类型/轴/原点/限位、人工确认和 SHA-256 绑定的配置复用。Electron“转换”工作区接入独立 CAD worker 与自动三维预览。预览明确仅为视觉包围盒，不含物理属性和最终导出。
+
+实际运行 `.venv/bin/python scripts/accept_phase.py C02`：**2/2 gate 通过、0 failed、0 skipped**；5 个真实 STEP/配置测试和 Electron 端到端均通过。桌面改变关节轴后实际四元数由 Z 旋转变成 X 旋转。S03 4/4、S04 2/2 回归通过，生产构建通过。证据 `docs/acceptance/C02.md`、`artifacts/acceptance/C02.json`、`artifacts/C02/desktop/`；操作说明 `docs/CAD_WIZARD_GUIDE.md`。下一阶段 C03 为精确网格/惯量/URDF-ROS 包导出与交叉验证。
+
+
 ## 2026-10-22 — 切换为每小时直接开发；独立复核 S03–S06、C00–C01
 
 用户取消本地 Python/systemd 调度器。`urdftools-dev.timer` 已禁用，Codex 应用已有每小时心跳已改为在当前对话直接开发。检查 WebCodex runtime 时该项目活跃任务为 0，因此接手现有 WIP。旧 `.scheduler/state.json` 停留 S03 属历史状态，不作为当前进度。
