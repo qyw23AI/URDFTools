@@ -1,0 +1,500 @@
+test_429_and_global_backoff (test_scheduler.SchedulerTest) ... FAIL
+test_all_skipped_rejected (test_scheduler.SchedulerTest) ... FAIL
+test_changed_wip_not_overwritten (test_scheduler.SchedulerTest) ... FAIL
+test_chatgpt_only_and_no_inherited_keys (test_scheduler.SchedulerTest) ... FAIL
+test_checkpoint_resume_preserves_exact_wip (test_scheduler.SchedulerTest) ... FAIL
+test_commit_done_state_not_saved_recovery (test_scheduler.SchedulerTest) ... FAIL
+test_commit_failure_recovers_without_new_exec (test_scheduler.SchedulerTest) ... FAIL
+test_completed_with_blocker_fails (test_scheduler.SchedulerTest) ... FAIL
+test_concurrent_lock (test_scheduler.SchedulerTest) ... ok
+test_dependency_order (test_scheduler.SchedulerTest) ... FAIL
+test_existing_user_changes_protected (test_scheduler.SchedulerTest) ... ok
+test_explicit_sol_fallback (test_scheduler.SchedulerTest) ... FAIL
+test_failed_commit_changed_files_not_committed (test_scheduler.SchedulerTest) ... FAIL
+test_false_completed_without_commit_rejected (test_scheduler.SchedulerTest) ... ok
+test_four_model_routes (test_scheduler.SchedulerTest) ... ok
+test_gate_counts_numerical_invariants (test_scheduler.SchedulerTest) ... ok
+test_git_success_evidence_and_repeat (test_scheduler.SchedulerTest) ... FAIL
+test_graph_mutation_rejected (test_scheduler.SchedulerTest) ... FAIL
+test_graph_validation (test_scheduler.SchedulerTest) ... ok
+test_hard_crash_recovers_live_orphan_group (test_scheduler.SchedulerTest) ... FAIL
+/usr/lib/python3.10/unittest/case.py:613: ResourceWarning: unclosed file <_io.BufferedReader name=3>
+  outcome.errors.clear()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.10/unittest/case.py:613: ResourceWarning: unclosed file <_io.BufferedReader name=5>
+  outcome.errors.clear()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+test_hardware_wait_does_not_block_independent (test_scheduler.SchedulerTest) ... FAIL
+test_hardware_wip_checkpoint_and_operator_resume (test_scheduler.SchedulerTest) ... FAIL
+test_invalid_result (test_scheduler.SchedulerTest) ... FAIL
+test_invalid_stream (test_scheduler.SchedulerTest) ... FAIL
+test_isolated_codex_home_excludes_provider_and_mcp (test_scheduler.SchedulerTest) ... ERROR
+test_missing_turn_completed (test_scheduler.SchedulerTest) ... FAIL
+test_model_unavailable_no_downgrade (test_scheduler.SchedulerTest) ... FAIL
+test_multiple_gates_keep_separate_logs (test_scheduler.SchedulerTest) ... FAIL
+test_no_tasks_no_external_calls (test_scheduler.SchedulerTest) ... ok
+test_partial_exit_zero (test_scheduler.SchedulerTest) ... FAIL
+test_primary_quota_boundary (test_scheduler.SchedulerTest) ... FAIL
+test_project_provider_config_refused (test_scheduler.SchedulerTest) ... ok
+test_quota_threshold_and_model_buckets (test_scheduler.SchedulerTest) ... FAIL
+test_real_test_failure (test_scheduler.SchedulerTest) ... FAIL
+test_repository_plan_preserved (test_scheduler.SchedulerTest) ... ok
+test_s00_acceptance_gate_rejects_missing_or_blocked_live (test_scheduler.SchedulerTest) ... ok
+test_self_modification_stops_round (test_scheduler.SchedulerTest) ... FAIL
+test_signal_kills_descendants_and_releases_lock (test_scheduler.SchedulerTest) ... FAIL
+/usr/lib/python3.10/unittest/case.py:613: ResourceWarning: unclosed file <_io.BufferedReader name=3>
+  outcome.errors.clear()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.10/unittest/case.py:613: ResourceWarning: unclosed file <_io.BufferedReader name=5>
+  outcome.errors.clear()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+test_staged_user_changes_protected (test_scheduler.SchedulerTest) ... ok
+test_tampered_completion_evidence_rejected (test_scheduler.SchedulerTest) ... FAIL
+test_text_429_does_not_match (test_scheduler.SchedulerTest) ... FAIL
+test_three_phase_round_ceiling (test_scheduler.SchedulerTest) ... FAIL
+test_timeout_kills_descendants (test_scheduler.SchedulerTest) ... FAIL
+test_unknown_quota_one_bounded_exec (test_scheduler.SchedulerTest) ... FAIL
+test_unknown_quota_stops_multi_phase_round (test_scheduler.SchedulerTest) ... FAIL
+test_unrecognized_zero_exit_is_not_gate (test_scheduler.SchedulerTest) ... FAIL
+test_waiting_experiment_poll_avoids_model (test_scheduler.SchedulerTest) ... FAIL
+test_zero_tests_rejected (test_scheduler.SchedulerTest) ... FAIL
+
+======================================================================
+ERROR: test_isolated_codex_home_excludes_provider_and_mcp (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 447, in test_isolated_codex_home_excludes_provider_and_mcp
+    with scheduler.codex_home() as env:
+  File "/usr/lib/python3.10/contextlib.py", line 135, in __enter__
+    return next(self.gen)
+  File "/home/qyw/URDFTools/scheduler.py", line 111, in codex_home
+    with tempfile.TemporaryDirectory(prefix='urdftools-chatgpt-', dir=isolated_parent) as directory:
+  File "/usr/lib/python3.10/tempfile.py", line 974, in __init__
+    self.name = mkdtemp(suffix, prefix, dir)
+  File "/usr/lib/python3.10/tempfile.py", line 523, in mkdtemp
+    _os.mkdir(file, 0o700)
+OSError: [Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-ueecmr5n'
+
+======================================================================
+FAIL: test_429_and_global_backoff (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 124, in test_429_and_global_backoff
+    self.result('quota_wait', error={'code': 'rate_limit_exceeded', 'status': 429})
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'quota_wait'
+- internal_error
++ quota_wait
+ : {"phase": "one", "run_id": "20261022T030021Z-one-433f1f0c", "finished": "2026-10-22T03:00:21+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-nzfbn5ny'", "log": ".scheduler/runs/20261022T030021Z-one-433f1f0c", "started": "2026-10-22T03:00:21+00:00"}
+
+
+======================================================================
+FAIL: test_all_skipped_rejected (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 290, in test_all_skipped_rejected
+    self.result('test_failed')
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'test_failed'
+- internal_error
++ test_failed
+ : {"phase": "one", "run_id": "20261022T030021Z-one-f9f05d2e", "finished": "2026-10-22T03:00:21+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-5ktfalqd'", "log": ".scheduler/runs/20261022T030021Z-one-f9f05d2e", "started": "2026-10-22T03:00:21+00:00"}
+
+
+======================================================================
+FAIL: test_changed_wip_not_overwritten (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 456, in test_changed_wip_not_overwritten
+    self.result('partial', result='partial')
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'partial'
+- internal_error
++ partial
+ : {"phase": "one", "run_id": "20261022T030021Z-one-62193a37", "finished": "2026-10-22T03:00:21+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-9pyi9i39'", "log": ".scheduler/runs/20261022T030021Z-one-62193a37", "started": "2026-10-22T03:00:21+00:00"}
+
+
+======================================================================
+FAIL: test_chatgpt_only_and_no_inherited_keys (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 174, in test_chatgpt_only_and_no_inherited_keys
+    self.assertEqual(self.state()['attempts'][-1]['result'], 'auth_required')
+AssertionError: 'internal_error' != 'auth_required'
+- internal_error
++ auth_required
+
+
+======================================================================
+FAIL: test_checkpoint_resume_preserves_exact_wip (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 254, in test_checkpoint_resume_preserves_exact_wip
+    self.result('blocked_hardware', result='blocked', blocker_type='hardware')
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'blocked_hardware'
+- internal_error
++ blocked_hardware
+ : {"phase": "one", "run_id": "20261022T030021Z-one-0707776f", "finished": "2026-10-22T03:00:21+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-z285fbac'", "log": ".scheduler/runs/20261022T030021Z-one-0707776f", "started": "2026-10-22T03:00:21+00:00"}
+
+
+======================================================================
+FAIL: test_commit_done_state_not_saved_recovery (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 404, in test_commit_done_state_not_saved_recovery
+    self.assertEqual(result.returncode, 91, result.stderr)
+AssertionError: 0 != 91 : b''
+
+======================================================================
+FAIL: test_commit_failure_recovers_without_new_exec (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 390, in test_commit_failure_recovers_without_new_exec
+    self.result('commit_failed')
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'commit_failed'
+- internal_error
++ commit_failed
+ : {"phase": "one", "run_id": "20261022T030021Z-one-a9010c0b", "finished": "2026-10-22T03:00:21+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-6h05cma1'", "log": ".scheduler/runs/20261022T030021Z-one-a9010c0b", "started": "2026-10-22T03:00:21+00:00"}
+
+
+======================================================================
+FAIL: test_completed_with_blocker_fails (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 202, in test_completed_with_blocker_fails
+    self.result('partial', blockers=['not actually done'])
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'partial'
+- internal_error
++ partial
+ : {"phase": "one", "run_id": "20261022T030021Z-one-4dfaf0d2", "finished": "2026-10-22T03:00:21+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-6ppo_ysh'", "log": ".scheduler/runs/20261022T030021Z-one-4dfaf0d2", "started": "2026-10-22T03:00:21+00:00"}
+
+
+======================================================================
+FAIL: test_dependency_order (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 221, in test_dependency_order
+    self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+AssertionError: 1 != 0 : {"phase": "one", "run_id": "20261022T030021Z-one-04771294", "finished": "2026-10-22T03:00:21+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-ca0wtza5'", "log": ".scheduler/runs/20261022T030021Z-one-04771294", "started": "2026-10-22T03:00:21+00:00"}
+
+
+======================================================================
+FAIL: test_explicit_sol_fallback (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 186, in test_explicit_sol_fallback
+    self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+AssertionError: 1 != 0 : {"phase": "one", "run_id": "20261022T030021Z-one-06c462ad", "finished": "2026-10-22T03:00:21+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-s70ccs1z'", "log": ".scheduler/runs/20261022T030021Z-one-06c462ad", "started": "2026-10-22T03:00:21+00:00"}
+
+
+======================================================================
+FAIL: test_failed_commit_changed_files_not_committed (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 431, in test_failed_commit_changed_files_not_committed
+    self.result('commit_failed')
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'commit_failed'
+- internal_error
++ commit_failed
+ : {"phase": "one", "run_id": "20261022T030021Z-one-a03b876b", "finished": "2026-10-22T03:00:21+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-xwimm5gw'", "log": ".scheduler/runs/20261022T030021Z-one-a03b876b", "started": "2026-10-22T03:00:21+00:00"}
+
+
+======================================================================
+FAIL: test_git_success_evidence_and_repeat (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 102, in test_git_success_evidence_and_repeat
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 1 != 0 : {"phase": "one", "run_id": "20261022T030022Z-one-0de5cd3d", "finished": "2026-10-22T03:00:22+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-wgdav4fh'", "log": ".scheduler/runs/20261022T030022Z-one-0de5cd3d", "started": "2026-10-22T03:00:22+00:00"}
+
+
+======================================================================
+FAIL: test_graph_mutation_rejected (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 311, in test_graph_mutation_rejected
+    self.result('blocked_input', graph_change=True)
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'blocked_input'
+- internal_error
++ blocked_input
+ : {"phase": "one", "run_id": "20261022T030022Z-one-6bd44d63", "finished": "2026-10-22T03:00:22+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-3_5_9oxs'", "log": ".scheduler/runs/20261022T030022Z-one-6bd44d63", "started": "2026-10-22T03:00:22+00:00"}
+
+
+======================================================================
+FAIL: test_hard_crash_recovers_live_orphan_group (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 377, in test_hard_crash_recovers_live_orphan_group
+    self.assertTrue((self.root / 'child.pid').exists())
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_hardware_wait_does_not_block_independent (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 232, in test_hardware_wait_does_not_block_independent
+    self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+AssertionError: 1 != 0 : {"phase": "independent", "run_id": "20261022T030027Z-independent-bf1146ae", "finished": "2026-10-22T03:00:27+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-cjh566if'", "log": ".scheduler/runs/20261022T030027Z-independent-bf1146ae", "started": "2026-10-22T03:00:27+00:00"}
+
+
+======================================================================
+FAIL: test_hardware_wip_checkpoint_and_operator_resume (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 240, in test_hardware_wip_checkpoint_and_operator_resume
+    self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+AssertionError: 1 != 0 : {"phase": "one", "run_id": "20261022T030027Z-one-787dfd35", "finished": "2026-10-22T03:00:27+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-kg5g6_8t'", "log": ".scheduler/runs/20261022T030027Z-one-787dfd35", "started": "2026-10-22T03:00:27+00:00"}
+
+
+======================================================================
+FAIL: test_invalid_result (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 193, in test_invalid_result
+    self.result('partial', invalid_result=True)
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'partial'
+- internal_error
++ partial
+ : {"phase": "one", "run_id": "20261022T030027Z-one-ac8f2bb2", "finished": "2026-10-22T03:00:27+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-utgy3cgm'", "log": ".scheduler/runs/20261022T030027Z-one-ac8f2bb2", "started": "2026-10-22T03:00:27+00:00"}
+
+
+======================================================================
+FAIL: test_invalid_stream (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 196, in test_invalid_stream
+    self.result('partial', invalid_stream=True)
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'partial'
+- internal_error
++ partial
+ : {"phase": "one", "run_id": "20261022T030027Z-one-5d5f72ed", "finished": "2026-10-22T03:00:27+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-e0z4ogne'", "log": ".scheduler/runs/20261022T030027Z-one-5d5f72ed", "started": "2026-10-22T03:00:27+00:00"}
+
+
+======================================================================
+FAIL: test_missing_turn_completed (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 199, in test_missing_turn_completed
+    self.result('partial', no_turn=True)
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'partial'
+- internal_error
++ partial
+ : {"phase": "one", "run_id": "20261022T030027Z-one-9421aad8", "finished": "2026-10-22T03:00:27+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-xexsvcnd'", "log": ".scheduler/runs/20261022T030027Z-one-9421aad8", "started": "2026-10-22T03:00:27+00:00"}
+
+
+======================================================================
+FAIL: test_model_unavailable_no_downgrade (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 180, in test_model_unavailable_no_downgrade
+    self.result('wait_model', models=['gpt-6-sol'])
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'wait_model'
+- internal_error
++ wait_model
+ : {"phase": "one", "run_id": "20261022T030027Z-one-9c9e3c5c", "finished": "2026-10-22T03:00:27+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-gvzajsft'", "log": ".scheduler/runs/20261022T030027Z-one-9c9e3c5c", "started": "2026-10-22T03:00:27+00:00"}
+
+
+======================================================================
+FAIL: test_multiple_gates_keep_separate_logs (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 306, in test_multiple_gates_keep_separate_logs
+    self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+AssertionError: 1 != 0 : {"phase": "one", "run_id": "20261022T030027Z-one-8012ba0e", "finished": "2026-10-22T03:00:27+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-p1mu2qri'", "log": ".scheduler/runs/20261022T030027Z-one-8012ba0e", "started": "2026-10-22T03:00:27+00:00"}
+
+
+======================================================================
+FAIL: test_partial_exit_zero (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 120, in test_partial_exit_zero
+    self.result('partial', result='partial')
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'partial'
+- internal_error
++ partial
+ : {"phase": "one", "run_id": "20261022T030027Z-one-e35564b5", "finished": "2026-10-22T03:00:27+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-1j9xnpqo'", "log": ".scheduler/runs/20261022T030027Z-one-e35564b5", "started": "2026-10-22T03:00:27+00:00"}
+
+
+======================================================================
+FAIL: test_primary_quota_boundary (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 165, in test_primary_quota_boundary
+    self.result('quota_wait', primary=90)
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'quota_wait'
+- internal_error
++ quota_wait
+ : {"phase": "one", "run_id": "20261022T030027Z-one-86eb61a0", "finished": "2026-10-22T03:00:27+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-gp6ekmvf'", "log": ".scheduler/runs/20261022T030027Z-one-86eb61a0", "started": "2026-10-22T03:00:27+00:00"}
+
+
+======================================================================
+FAIL: test_quota_threshold_and_model_buckets (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 161, in test_quota_threshold_and_model_buckets
+    self.result('quota_wait', buckets={'astra': {'secondary': {'usedPercent': 96}}})
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'quota_wait'
+- internal_error
++ quota_wait
+ : {"phase": "one", "run_id": "20261022T030028Z-one-66a14925", "finished": "2026-10-22T03:00:28+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-tlk1_v9o'", "log": ".scheduler/runs/20261022T030028Z-one-66a14925", "started": "2026-10-22T03:00:28+00:00"}
+
+
+======================================================================
+FAIL: test_real_test_failure (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 295, in test_real_test_failure
+    self.result('test_failed')
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'test_failed'
+- internal_error
++ test_failed
+ : {"phase": "one", "run_id": "20261022T030028Z-one-e000e30b", "finished": "2026-10-22T03:00:28+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-nzmeq4gi'", "log": ".scheduler/runs/20261022T030028Z-one-e000e30b", "started": "2026-10-22T03:00:28+00:00"}
+
+
+======================================================================
+FAIL: test_self_modification_stops_round (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 469, in test_self_modification_stops_round
+    self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+AssertionError: 1 != 0 : {"phase": "one", "run_id": "20261022T030028Z-one-6faef24f", "finished": "2026-10-22T03:00:28+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-s15l_qzr'", "log": ".scheduler/runs/20261022T030028Z-one-6faef24f", "started": "2026-10-22T03:00:28+00:00"}
+
+
+======================================================================
+FAIL: test_signal_kills_descendants_and_releases_lock (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 362, in test_signal_kills_descendants_and_releases_lock
+    self.assertTrue((self.root / 'child.pid').exists())
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_tampered_completion_evidence_rejected (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 419, in test_tampered_completion_evidence_rejected
+    self.assertEqual(self.invoke('run').returncode, 0)
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_text_429_does_not_match (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 130, in test_text_429_does_not_match
+    self.assertEqual(self.invoke('run').returncode, 0)
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_three_phase_round_ceiling (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 156, in test_three_phase_round_ceiling
+    self.assertEqual(self.invoke('run').returncode, 0)
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_timeout_kills_descendants (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 350, in test_timeout_kills_descendants
+    self.result('timeout', sleep=True, ignore_term=True)
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'timeout'
+- internal_error
++ timeout
+ : {"phase": "one", "run_id": "20261022T030033Z-one-508fe734", "finished": "2026-10-22T03:00:33+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-29hp506l'", "log": ".scheduler/runs/20261022T030033Z-one-508fe734", "started": "2026-10-22T03:00:33+00:00"}
+
+
+======================================================================
+FAIL: test_unknown_quota_one_bounded_exec (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 135, in test_unknown_quota_one_bounded_exec
+    self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+AssertionError: 1 != 0 : {"phase": "one", "run_id": "20261022T030033Z-one-f35c02a0", "finished": "2026-10-22T03:00:33+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-f0nd111r'", "log": ".scheduler/runs/20261022T030033Z-one-f35c02a0", "started": "2026-10-22T03:00:33+00:00"}
+
+
+======================================================================
+FAIL: test_unknown_quota_stops_multi_phase_round (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 143, in test_unknown_quota_stops_multi_phase_round
+    self.assertEqual(self.invoke('run').returncode, 0)
+AssertionError: 1 != 0
+
+======================================================================
+FAIL: test_unrecognized_zero_exit_is_not_gate (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 300, in test_unrecognized_zero_exit_is_not_gate
+    self.result('test_failed')
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'test_failed'
+- internal_error
++ test_failed
+ : {"phase": "one", "run_id": "20261022T030033Z-one-ad69e9a8", "finished": "2026-10-22T03:00:33+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-zgiccrmw'", "log": ".scheduler/runs/20261022T030033Z-one-ad69e9a8", "started": "2026-10-22T03:00:33+00:00"}
+
+
+======================================================================
+FAIL: test_waiting_experiment_poll_avoids_model (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 268, in test_waiting_experiment_poll_avoids_model
+    self.result('waiting_experiment', result='waiting_experiment', job_id='job-42')
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'waiting_experiment'
+- internal_error
++ waiting_experiment
+ : {"phase": "one", "run_id": "20261022T030033Z-one-7e01a312", "finished": "2026-10-22T03:00:33+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-mzanzk5u'", "log": ".scheduler/runs/20261022T030033Z-one-7e01a312", "started": "2026-10-22T03:00:33+00:00"}
+
+
+======================================================================
+FAIL: test_zero_tests_rejected (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 281, in test_zero_tests_rejected
+    self.result('test_failed')
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'internal_error' != 'test_failed'
+- internal_error
++ test_failed
+ : {"phase": "one", "run_id": "20261022T030033Z-one-79bfe651", "finished": "2026-10-22T03:00:33+00:00", "result": "internal_error", "reason": "[Errno 30] Read-only file system: '/home/qyw/.codex/tmp/urdftools-chatgpt-08guy_8q'", "log": ".scheduler/runs/20261022T030033Z-one-79bfe651", "started": "2026-10-22T03:00:33+00:00"}
+
+
+----------------------------------------------------------------------
+Ran 48 tests in 12.769s
+
+FAILED (failures=36, errors=1)

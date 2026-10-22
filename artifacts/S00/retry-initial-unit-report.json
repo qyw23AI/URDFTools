@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-10-22T03:00:33+00:00",
+  "command": [
+    "/usr/bin/python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests",
+    "-p",
+    "test_scheduler*.py",
+    "-v"
+  ],
+  "exit_code": 1,
+  "status": "failed",
+  "tests_run": 48,
+  "failures": 37,
+  "errors": null,
+  "skipped": 0,
+  "source_sha256": "6baed9227a8e79dc9a7c32af67aef63cc9100ce73883926c8cef809aad089d23",
+  "tests_sha256": "5c64051f89c04e5fcd504620bd839450509cc48b6d957a0f1ad5e89350758d6c",
+  "evidence_sha256": "e346f8d14e0be4cdefdc166e15e3d42899c53b5952d0ca694ad88d442599992d"
+}

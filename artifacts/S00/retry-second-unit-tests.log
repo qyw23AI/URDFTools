@@ -1,0 +1,93 @@
+test_429_and_global_backoff (test_scheduler.SchedulerTest) ... ok
+test_all_skipped_rejected (test_scheduler.SchedulerTest) ... ok
+test_changed_wip_not_overwritten (test_scheduler.SchedulerTest) ... ok
+test_chatgpt_only_and_no_inherited_keys (test_scheduler.SchedulerTest) ... ok
+test_checkpoint_resume_preserves_exact_wip (test_scheduler.SchedulerTest) ... ok
+test_commit_done_state_not_saved_recovery (test_scheduler.SchedulerTest) ... ok
+test_commit_failure_recovers_without_new_exec (test_scheduler.SchedulerTest) ... FAIL
+test_completed_with_blocker_fails (test_scheduler.SchedulerTest) ... ok
+test_concurrent_lock (test_scheduler.SchedulerTest) ... ok
+test_dependency_order (test_scheduler.SchedulerTest) ... ok
+test_existing_user_changes_protected (test_scheduler.SchedulerTest) ... ok
+test_explicit_sol_fallback (test_scheduler.SchedulerTest) ... ok
+test_failed_commit_changed_files_not_committed (test_scheduler.SchedulerTest) ... FAIL
+test_false_completed_without_commit_rejected (test_scheduler.SchedulerTest) ... ok
+test_four_model_routes (test_scheduler.SchedulerTest) ... ok
+test_gate_counts_numerical_invariants (test_scheduler.SchedulerTest) ... ok
+test_git_success_evidence_and_repeat (test_scheduler.SchedulerTest) ... ok
+test_graph_mutation_rejected (test_scheduler.SchedulerTest) ... ok
+test_graph_validation (test_scheduler.SchedulerTest) ... ok
+test_hard_crash_recovers_live_orphan_group (test_scheduler.SchedulerTest) ... ok
+test_hardware_wait_does_not_block_independent (test_scheduler.SchedulerTest) ... ok
+test_hardware_wip_checkpoint_and_operator_resume (test_scheduler.SchedulerTest) ... ok
+test_invalid_result (test_scheduler.SchedulerTest) ... ok
+test_invalid_stream (test_scheduler.SchedulerTest) ... ok
+test_isolated_codex_home_excludes_provider_and_mcp (test_scheduler.SchedulerTest) ... ERROR
+test_missing_turn_completed (test_scheduler.SchedulerTest) ... ok
+test_model_unavailable_no_downgrade (test_scheduler.SchedulerTest) ... ok
+test_multiple_gates_keep_separate_logs (test_scheduler.SchedulerTest) ... ok
+test_no_tasks_no_external_calls (test_scheduler.SchedulerTest) ... ok
+test_partial_exit_zero (test_scheduler.SchedulerTest) ... ok
+test_primary_quota_boundary (test_scheduler.SchedulerTest) ... ok
+test_project_provider_config_refused (test_scheduler.SchedulerTest) ... ok
+test_quota_threshold_and_model_buckets (test_scheduler.SchedulerTest) ... ok
+test_real_test_failure (test_scheduler.SchedulerTest) ... ok
+test_repository_plan_preserved (test_scheduler.SchedulerTest) ... ok
+test_s00_acceptance_gate_rejects_missing_or_blocked_live (test_scheduler.SchedulerTest) ... ok
+test_self_modification_stops_round (test_scheduler.SchedulerTest) ... ok
+test_signal_kills_descendants_and_releases_lock (test_scheduler.SchedulerTest) ... ok
+test_staged_user_changes_protected (test_scheduler.SchedulerTest) ... ok
+test_tampered_completion_evidence_rejected (test_scheduler.SchedulerTest) ... ok
+test_text_429_does_not_match (test_scheduler.SchedulerTest) ... ok
+test_three_phase_round_ceiling (test_scheduler.SchedulerTest) ... ok
+test_timeout_kills_descendants (test_scheduler.SchedulerTest) ... ok
+test_unknown_quota_one_bounded_exec (test_scheduler.SchedulerTest) ... ok
+test_unknown_quota_stops_multi_phase_round (test_scheduler.SchedulerTest) ... ok
+test_unrecognized_zero_exit_is_not_gate (test_scheduler.SchedulerTest) ... ok
+test_waiting_experiment_poll_avoids_model (test_scheduler.SchedulerTest) ... ok
+test_zero_tests_rejected (test_scheduler.SchedulerTest) ... ok
+
+======================================================================
+ERROR: test_isolated_codex_home_excludes_provider_and_mcp (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 447, in test_isolated_codex_home_excludes_provider_and_mcp
+    with scheduler.codex_home() as env:
+  File "/usr/lib/python3.10/contextlib.py", line 281, in helper
+    return _GeneratorContextManager(func, args, kwds)
+  File "/usr/lib/python3.10/contextlib.py", line 103, in __init__
+    self.gen = func(*args, **kwds)
+TypeError: codex_home() missing 1 required positional argument: 'root'
+
+======================================================================
+FAIL: test_commit_failure_recovers_without_new_exec (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 390, in test_commit_failure_recovers_without_new_exec
+    self.result('commit_failed')
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'blocked_input' != 'commit_failed'
+- blocked_input
++ commit_failed
+ : {"phase": "one", "run_id": "20261022T030147Z-one-0ed19bcc", "finished": "2026-10-22T03:01:47+00:00", "result": "blocked_input", "reason": "Git commit failed; see git-commit.stdout/stderr", "log": ".scheduler/runs/20261022T030147Z-one-0ed19bcc", "started": "2026-10-22T03:01:47+00:00"}
+
+
+======================================================================
+FAIL: test_failed_commit_changed_files_not_committed (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 431, in test_failed_commit_changed_files_not_committed
+    self.result('commit_failed')
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 84, in result
+    self.assertEqual(state['attempts'][-1]['result'], expected, result.stdout + result.stderr)
+AssertionError: 'blocked_input' != 'commit_failed'
+- blocked_input
++ commit_failed
+ : {"phase": "one", "run_id": "20261022T030148Z-one-62ea77e0", "finished": "2026-10-22T03:01:48+00:00", "result": "blocked_input", "reason": "Git commit failed; see git-commit.stdout/stderr", "log": ".scheduler/runs/20261022T030148Z-one-62ea77e0", "started": "2026-10-22T03:01:48+00:00"}
+
+
+----------------------------------------------------------------------
+Ran 48 tests in 8.873s
+
+FAILED (failures=2, errors=1)

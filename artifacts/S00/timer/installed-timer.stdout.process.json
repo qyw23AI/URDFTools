@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "systemctl",
+    "--user",
+    "show",
+    "urdftools-dev.timer",
+    "--property=ActiveState,TimersCalendar,Persistent"
+  ],
+  "exit_code": 1,
+  "status": null,
+  "duration_seconds": 0.005
+}

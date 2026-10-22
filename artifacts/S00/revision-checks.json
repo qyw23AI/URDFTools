@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-10-22T03:11:07+00:00",
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "scheduler.py",
+        "validate"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"valid\": true, \"phases\": 50, \"scheduler_gate\": {\"executed\": 50, \"passed\": 50, \"failed\": 0, \"skipped\": 0}}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "install-timer.sh"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check_s00_acceptance.py"
+      ],
+      "exit_code": 1,
+      "stdout": "{\"checks\": [{\"report\": \"artifacts/S00/unit-report.json\", \"passed\": true, \"reported_status\": \"passed\"}, {\"report\": \"artifacts/S00/live-smoke/report.json\", \"passed\": false, \"reported_status\": \"blocked\"}, {\"report\": \"artifacts/S00/timer/report.json\", \"passed\": false, \"reported_status\": \"blocked\"}], \"scheduler_gate\": {\"executed\": 3, \"passed\": 1, \"failed\": 2, \"skipped\": 0}}\n",
+      "stderr": ""
+    }
+  ],
+  "auth_paths_in_final_archive": false,
+  "invariants": {
+    "timestamp": "2026-10-22T03:11:07+00:00",
+    "project_state_unchanged": true,
+    "project_head_unchanged": true,
+    "project_head": "cc596899c847300ed8ee3a3dde24561c6f791cf0",
+    "state_sha256": "e43e00d7012b691a5f053f8b2f699a2ba60ddb4735fddfe162846b0bd5d5aa08",
+    "plan_sha256": "c0c80f7d8bfbbcd0473d9d21c54a0fea99e92a50ffe21b4044ace558c96df371",
+    "phases": 50,
+    "original_phase_requirements_preserved": true,
+    "project_commits_created": false,
+    "note": "Pre-existing plan and S00 gate preserved without scheduler.json edits; unrelated artifacts/ ignore edit left untouched."
+  }
+}
