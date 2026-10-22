@@ -53,3 +53,15 @@
 ## Codex 执行依据
 
 [非交互模式](https://learn.chatgpt.com/docs/non-interactive-mode) 支持显式模型参数、结构化结果和脚本运行；[app-server](https://learn.chatgpt.com/docs/app-server) 文档列出 `model/list`、`account/read`、`account/rateLimits/read`。前一版只检测 CLI 错误，本次将额度预检和支持模型查询列入 S00，并要求用本机版本实测，失败时保留 unavailable 而不伪造百分比。[配置参考](https://learn.chatgpt.com/docs/config-file/config-reference) 包含强制 ChatGPT 登录方式；不得自动兑换额度重置或调用付费 API。
+
+## 2026-10-22：外部训练结果库研究与采用决策
+
+以下是设计研究，不表示已经安装或集成；采用代码时仍需固定版本、逐项许可核验与 notices。
+
+- [MLflow Tracking](https://mlflow.org/docs/latest/tracking)：参数、指标与 artifacts 的组织可借鉴。默认以本地 SQLite/文件库实现，先做本地导出适配，不强制服务器或云账户。
+- [rliable](https://github.com/google-research/rliable)：参考分层 bootstrap、IQM、改善概率，适合多种子结果比较；缺匹配协议不能靠统计修复。
+- [Rerun 视频说明](https://github.com/rerun-io/rerun/blob/main/docs/content/concepts/logging-and-ingestion/video.md)：视频资源与 VideoFrameReference 的时间关联适合指标/事件联动；可选导出，桌面基础播放器独立可用。
+- [LeRobotDataset v3](https://huggingface.co/docs/lerobot/lerobot-dataset-v3)：借鉴 Parquet、视频和元数据分离与时间索引。它是机器人数据组织方案，不能直接当作 RL 性能标准或因果诊断。
+- [RL Baselines3 Zoo](https://github.com/DLR-RM/rl-baselines3-zoo)：参考外部日志/评价输出适配，不引入训练执行。训练平台版本和日志字段需建立小型真实格式夹具。
+
+优先实现通用 manifest+CSV/JSON，再 Parquet/TensorBoard 与平台导出适配。上述通用项目不提供“由视频自动确定 URDF 机械缺陷”的现成可信判据；该部分采用确定性物理检查、同协议比较、证据约束 skills 和外部受控复验闭环。

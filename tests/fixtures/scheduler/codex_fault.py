@@ -29,7 +29,7 @@ if sys.argv[1] == 'app-server':
             result = {'account': {'type': fault.get('auth', 'chatgpt'), 'planType': 'test'}}
         elif method == 'model/list':
             result = {'data': [dict(id=m, model=m, supportedReasoningEfforts=[{'reasoningEffort': e}
-                      for e in ['medium', 'high', 'xhigh']]) for m in fault.get('models',
+                      for e in ['low', 'medium', 'high', 'xhigh']]) for m in fault.get('models',
                       ['gpt-6.1-sol', 'gpt-6-sol', 'gpt-6-astra'])], 'nextCursor': None}
         elif method == 'account/rateLimits/read':
             if fault.get('quota_unknown'):

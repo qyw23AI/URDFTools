@@ -1,11 +1,11 @@
-# URDFTools 技术架构 v1
+# URDFTools 技术架构 v2
 
 状态：设计基线已建立，允许调度开发。2026-10-22。
 需求见 `REQUIREMENTS.md`，证据来源见 `RESEARCH.md`，计算与实验协议见 `EVALUATION.md`，模型分工见 `TASKS.md`。
 
 ## 1. 产品结构与边界
 
-URDFTools 是本地优先的机器人设计工作台。用户流程是导入/绘制 → 检查运动与物理参数 → 配置任务/电机/接触 → 静态和动态评估 → 有界 RL 实验 → 对照报告 → 人工确认机械改进 → 重新导出。四个一级工作区为「查看」「转换」「建模」「评估」，右侧 agent 面板能调用与界面同一套服务。实验中心、参照库、skills 管理和开发进度通过辅助入口访问。
+URDFTools 是本地优先的机器人设计工作台。用户流程是导入/绘制 → 检查运动与物理参数 → 配置任务/电机/接触 → 静态和动态评估 → 外部训练结果导入与同条件比较 → 对照报告 → 人工确认机械改进 → 重新导出。四个一级工作区为「查看」「转换」「建模」「评估」，右侧 agent 面板能调用与界面同一套服务。实验中心、参照库、skills 管理和开发进度通过辅助入口访问。
 
 产品输出是有证据支撑的设计判断。URDF 通常只描述刚体树及部分参数，训练结果还取决于控制器、接触、任务、算法和算力；报告必须显式保存这些条件。检查器、模拟器和统计代码计算数据，LLM 解释数据、提出待验证假设和受约束修改。
 
@@ -20,7 +20,7 @@ URDFTools 是本地优先的机器人设计工作台。用户流程是导入/绘
 | 重量级人工 CAD | FreeCAD/RobotCAD 可选本地桥 | 本应用提供常用草图/参数化零件与机器人装配；完整机械 CAD 的高级编辑复用 FreeCAD，并保存可往返 STEP/FCStd。 |
 | 机器人数据 | 自有 RobotDocument，yourdfpy 独立导入/交叉验证；trimesh 辅助网格处理 | 独立于显示库和模拟器；保留扩展元素、来源及转换损失报告。 |
 | 动力学 | MuJoCo + Pinocchio；CoACD 作为可选碰撞分解 | 用 MuJoCo 执行动力学，Pinocchio 交叉验证 FK、惯量、重力及雅可比；不将碰撞代理当作质量分布。 |
-| RL | Gymnasium + Stable-Baselines3 PPO 的 CPU 基线；mjlab/RSL-RL 的 GPU 适配 | CPU 可做真实管道验证与有界训练。GPU 配置与结果分别标记，禁止不同求解器/预算直接混比。MuJoCo Playground 用作环境与配置参考。 |
+| 结果适配 | JSON/CSV/Parquet/TensorBoard；MLflow/SB3/RSL-RL 日志适配 | 不执行训练，不加载策略权重；保存算法/引擎/预算/种子/地形/控制协议差异。 |
 | 结果 | SQLite 索引 + 本地内容寻址文件；JSON/CSV/Parquet/MP4/HTML | 不把视频、模型权重、用户 CAD 放到源码 Git；每项保存哈希和来源。默认不上传。 |
 | Agent | Codex CLI/provider adapter + 本地模型 adapter；受约束 JSON tool calls；可用 MCP stdio facade | 与 UI 共享工具，不由模型绕过校验修改生产资产。第三方 API 接口可做未启用的扩展点。 |
 | 自动开发 | 现有 Python 调度器，systemd 用户 timer 每小时；先执行 S00 加固 | 每任务单独 `codex exec -m ... -c model_reasoning_effort=...`；真实模型由命令和 CLI 会话元数据记录。 |
@@ -38,9 +38,9 @@ flowchart TD
   API --> CAD[CAD 独立 worker / OCP / build123d]
   API --> RULE[静态检查与动力学规则]
   API --> SIM[MuJoCo / Pinocchio]
-  API --> JOB[持久化实验作业队列]
-  JOB --> RL[CPU PPO / GPU 适配]
-  RL --> EVID[指标 / 视频 / 检查点 / 哈希]
+  API --> JOB[持久化导入与分析队列]
+  JOB --> RL[外部结果格式适配与验证]
+  RL --> EVID[指标 / 视频 / 来源 / 哈希]
   RULE --> EVID
   EVID --> REPORT[统计对照与机械反馈]
   SKILL[类型和动力学 skills] --> RULE
@@ -49,7 +49,7 @@ flowchart TD
   DEV[每小时开发调度器] --> GIT[源码 Git / 验收文档]
 ```
 
-开发调度器与产品实验队列是两个生命周期。前者消耗 Codex 额度并修改源码；后者运行已实现的确定性训练程序、保存模型，不持续调用 LLM。开发阶段可创建实验作业并等待/查询，不能把 每小时开发定时器直接当作训练进程。
+开发调度器与产品分析队列是两个生命周期。前者消耗 Codex 额度并修改源码；后者导入数据、计算指标和处理媒体。产品不启动 RL 训练。训练结果数据库的具体约束见 RESULTS_DATABASE.md。
 
 建议目录：
 
@@ -58,7 +58,7 @@ apps/desktop/                 Electron 主进程和 preload
 apps/web/                     四个工作区与 viewer
 packages/contracts/           JSON schemas / TS 类型
 python/urdftools/              core, importers, cad, validation, dynamics,
-                              simulation, training, references, skills, agent, api, cli
+                              simulation, results, references, skills, agent, api, cli
 skills/                       人类可读 SKILL.md + 可执行规则声明
 references/catalog/           模型和实验元数据；大资产在缓存
 examples/                     小型自制机器人、CAD 与反例
@@ -100,26 +100,26 @@ agent 流程：读取目标/选中部件 → 提出操作序列 → 在副本执
 
 ## 7. 评估与实验
 
-详见 `EVALUATION.md`。五层输出：文件/资源有效性、物理一致性、任务能力估计、可复现仿真与训练、证据支持的机械反馈。硬错误、风险提示、资料缺失、训练证据分别展示；未知数据不能获得满分，也不能仅因缺失资料判定机械设计差。
+详见 `EVALUATION.md`。五层输出：文件/资源有效性、物理一致性、任务能力估计、外部训练结果及条件可追溯性、证据支持的机械反馈。硬错误、风险提示、资料缺失、训练证据分别展示；未知数据不能获得满分，也不能仅因缺失资料判定机械设计差。
 
-训练适配器统一 reset/step、语义关节映射、观测、动作单位和限幅、奖励分量、终止原因、时间步/控制 decimation。任意新机器人必须配置足端/接触部件、默认姿态、动作维度、电机数据；形态识别建议可人工覆盖。仅名字相近不构成可靠映射。
+结果适配器统一实验元数据、语义关节映射、观测/动作单位、奖励分量、终止原因和时间轴；记录外部平台时间步/控制 decimation。任意新机器人必须配置足端/接触部件、默认姿态、动作维度、电机数据；形态识别建议可人工覆盖。仅名字相近不构成可靠映射。
 
 对照库分三层：源模型事实、任务环境配置、真实实验结果。A1/Go2 与 G1/H1 各自匹配任务、体型和执行器假设。每份数据有许可证、提交/哈希、转换映射、任务版本、控制/训练配置、种子、硬件/软件、日志与视频。不得下载一段公开视频冒充本机对照实验。
 
 ## 8. 服务与作业接口
 
-统一服务返回 `{operation_id, status, result, findings, artifact_refs}`；长任务返回 job id，UI 经 SSE 接收事件并可取消。核心服务：import_assets、validate_model、preview_pose、edit_document、convert_cad、build_geometry、compile_simulation、run_probe、create_experiment、resume_experiment、compare_runs、render_report、propose_patch、apply_patch。均在 `CONTRACTS.md` 中约定数据字段。
+统一服务返回 `{operation_id, status, result, findings, artifact_refs}`；长任务返回 job id，UI 经 SSE 接收事件并可取消。核心服务：import_assets、validate_model、preview_pose、edit_document、convert_cad、build_geometry、compile_simulation、run_probe、import_experiment_bundle、resume_import、validate_comparability、suggest_external_experiment、compare_runs、render_report、propose_patch、apply_patch。均在 `CONTRACTS.md` 中约定数据字段。
 
-SQLite 作业状态：queued/running/checkpointed/succeeded/failed/cancelled/blocked_hardware/blocked_input。崩溃后发现 stale lease 转 checkpointed 或 failed，不重复覆盖已有输出。恢复训练必须校验配置、模型和优化器兼容性；模型变更强制创建新 run，不能续用旧结果标签。
+SQLite 作业状态：queued/running/checkpointed/succeeded/failed/cancelled/blocked_hardware/blocked_input。崩溃后发现 stale lease 转 checkpointed 或 failed，不重复覆盖已有输出。恢复导入必须核验源文件 hash 和事务游标；变更源文件创建新版本，不能覆盖旧结果标签。
 
 ## 9. 权限、运行时与发布
 
 Electron renderer 关闭 Node integration，启用 contextIsolation 和 sandbox，preload 只暴露有限类型化接口。API 使用回环绑定、每次启动凭据、origin 校验；服务不得暴露任意 shell/任意路径访问。模型/CAD/资料默认本地处理；agent 外发内容在连接配置中明确展示。新增付费 provider 必须用户显式启用。
 
-引导安装项目独立 Python 3.12/Node 工具环境，固定 lockfile，CAD/GPU 分 extras。CPU 核心发行包应离线打开示例、查看和评估，CAD 附加包与 GPU 插件单独校验；不存在可用 CAD 时必须显示未安装而不是把按钮无声禁用。安装到用户目录，无需覆盖系统 Python；不要自动修驱动、执行远程 pipe-to-shell 或更改全局账户配置。
+引导安装项目独立 Python 3.12/Node 工具环境，固定 lockfile，CAD/可选分析分 extras。CPU 核心发行包应离线打开示例、查看和评估，CAD 附加包与分析适配器单独校验；不存在可用 CAD 时必须显示未安装而不是把按钮无声禁用。安装到用户目录，无需覆盖系统 Python；不要自动修驱动、执行远程 pipe-to-shell 或更改全局账户配置。
 
 ## 10. 验收与完成判据
 
 每阶段含实现、自动验收、用户流程证据、已知限制和后续入口，写 `docs/acceptance/<id>.md`；测试命令与机器可读 `artifacts/acceptance/<id>.json` 由调度器执行/记录。禁止零测试发现、全 skip、占位返回、只检查文件存在就通过功能验收。
 
-最终分开标识：`software_ready`（所有必需软件阶段通过）和 `benchmark_campaign_complete`（预定真实对照训练/视频齐全）。本机算力不够时可交付已验收软件，但整体状态不得显示全部完成。发行需要真实 GUI 启动、离线示例、CAD 转换、agent 审核编辑、静/动态评估、训练恢复、对照报告、打包安装与 GNOME 收藏夹均有证据。
+最终分别显示 `software_ready`（必需软件阶段通过）和 `reference_data_coverage`（真实结果数量、类别、算法、协议、缺项）。无用户真实数据不阻止软件流程验收，但禁止声称已形成实证标准库。发行需真实 GUI、离线示例、CAD、agent、静/动态评估、导入恢复、视频对照、报告和收藏夹证据。

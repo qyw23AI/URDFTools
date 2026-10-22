@@ -97,6 +97,22 @@ class SchedulerTest(unittest.TestCase):
         self.assertEqual(state['completed'], [])
         return state
 
+    def test_large_license_exception_is_exact(self):
+        name = 'third_party/notices/electron-runtime/LICENSES.chromium.html'
+        path = self.root / name
+        path.parent.mkdir(parents=True)
+        path.write_bytes(b'x' * (5 * 1024 * 1024 + 1))
+        instance = scheduler.Scheduler(self.root)
+        with self.assertRaises(scheduler.Failure):
+            instance.manifest()
+        approved = 'c16ee3cc1aa0d1669a839428ef26869d7a3844a43df505377b85077e1db14396'
+        with patch.object(scheduler, 'file_hash', return_value=approved):
+            self.assertEqual(instance.manifest()[name], approved)
+            other = path.with_name('unreviewed.html')
+            path.rename(other)
+            with self.assertRaises(scheduler.Failure):
+                instance.manifest()
+
     def test_four_model_routes(self):
         for level, (model, effort) in scheduler.LEVELS.items():
             self.config['phases'][0]['level'] = level
@@ -230,7 +246,7 @@ class SchedulerTest(unittest.TestCase):
         self.assertNotIn('exec', self.calls())
 
     def test_model_unavailable_no_downgrade(self):
-        self.config['phases'][0]['level'] = 'critical'
+        self.config['phases'][0]['level'] = 'critical_xhigh'
         self.save_config(commit=True)
         self.result('wait_model', models=['gpt-6-sol'])
         self.assertNotIn('exec', self.calls())

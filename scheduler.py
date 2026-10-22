@@ -23,10 +23,10 @@ import uuid
 
 ROOT = Path(__file__).resolve().parent
 LEVELS = {
-    'ordinary': ('gpt-6.1-sol', 'medium'),
-    'complex': ('gpt-6.1-sol', 'high'),
-    'critical': ('gpt-6-astra', 'high'),
-    'critical_xhigh': ('gpt-6-astra', 'xhigh'),
+    'ordinary': ('gpt-6.1-sol', 'low'),
+    'complex': ('gpt-6.1-sol', 'medium'),
+    'critical': ('gpt-6.1-sol', 'high'),
+    'critical_xhigh': ('gpt-6-astra', 'high'),
 }
 POLICY = dict(max_phases_per_round=3, round_timeout_seconds=14400,
               phase_timeout_seconds=4200, test_timeout_seconds=1200,
@@ -653,7 +653,9 @@ class Scheduler:
                     part.startswith('.') for part in Path(name).parts)) or (
                 path.suffix.lower() in {'.pem', '.key', '.step', '.stp', '.fcstd', '.mp4', '.zip', '.pt', '.pth'}):
                 raise Failure('blocked_input', 'manual review required for non-source path: ' + name)
-            if path.is_file() and path.stat().st_size > 5 * 1024 * 1024:
+            if path.is_file() and path.stat().st_size > 5 * 1024 * 1024 and not (
+                    name == 'third_party/notices/electron-runtime/LICENSES.chromium.html' and
+                    file_hash(path) == 'c16ee3cc1aa0d1669a839428ef26869d7a3844a43df505377b85077e1db14396'):
                 raise Failure('blocked_input', 'large file requires manual review: ' + name)
             result[name] = file_hash(path)
         return result

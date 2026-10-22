@@ -627,10 +627,10 @@
     },
     {
       "id": "B00",
-      "title": "可恢复实验作业系统",
+      "title": "可恢复的结果导入与分析作业",
       "level": "complex",
       "depends_on": [
-        "E03",
+        "S02",
         "S01"
       ],
       "prompt_file": "tasks/B00.md",
@@ -648,7 +648,7 @@
     },
     {
       "id": "B01",
-      "title": "CPU PPO 训练闭环",
+      "title": "标准训练结果数据库与导入",
       "level": "complex",
       "depends_on": [
         "B00"
@@ -668,7 +668,7 @@
     },
     {
       "id": "B02",
-      "title": "四足统一运动任务",
+      "title": "四足结果协议与参照入库",
       "level": "complex",
       "depends_on": [
         "B01",
@@ -689,7 +689,7 @@
     },
     {
       "id": "B03",
-      "title": "人形统一运动任务",
+      "title": "人形结果协议与参照入库",
       "level": "complex",
       "depends_on": [
         "B01",
@@ -710,7 +710,7 @@
     },
     {
       "id": "B04",
-      "title": "粗糙地形与鲁棒性条件",
+      "title": "地形与扰动结果协议",
       "level": "ordinary",
       "depends_on": [
         "B02",
@@ -751,11 +751,10 @@
     },
     {
       "id": "B06",
-      "title": "GPU 加速适配接口",
+      "title": "外部日志适配与结果交换",
       "level": "ordinary",
       "depends_on": [
-        "B00",
-        "B02"
+        "B01"
       ],
       "prompt_file": "tasks/B06.md",
       "tests": [
@@ -772,7 +771,7 @@
     },
     {
       "id": "B07",
-      "title": "实验媒体与对照视图",
+      "title": "视频时序与交互对照",
       "level": "ordinary",
       "depends_on": [
         "B05",
@@ -793,7 +792,7 @@
     },
     {
       "id": "B08",
-      "title": "两类机器人端到端真实烟测",
+      "title": "两类机器人结果导入端到端验收",
       "level": "ordinary",
       "depends_on": [
         "B02",
@@ -838,7 +837,7 @@
     },
     {
       "id": "D01",
-      "title": "消融与敏感度实验",
+      "title": "消融建议与外部复验闭环",
       "level": "complex",
       "depends_on": [
         "D00",
@@ -988,7 +987,7 @@
     },
     {
       "id": "X00",
-      "title": "Go2 多种子参考实验",
+      "title": "Go2 标准结果库工作流",
       "level": "ordinary",
       "depends_on": [
         "Q03",
@@ -1009,7 +1008,7 @@
     },
     {
       "id": "X01",
-      "title": "G1 多种子参考实验",
+      "title": "G1 标准结果库工作流",
       "level": "ordinary",
       "depends_on": [
         "Q03",
@@ -1030,7 +1029,7 @@
     },
     {
       "id": "X02",
-      "title": "A1/H1 扩展与变体比较",
+      "title": "A1/H1 扩展与变体分析",
       "level": "ordinary",
       "depends_on": [
         "X00",

@@ -2,16 +2,16 @@
 
 S00 实施记录（2026-10-22）：当前源码 59 项本地测试通过（含真实四小时 calendar 数值断言），补齐 Git 重试证据固定哈希、嵌套 HTTP 429/401 和错误枚举兼容。宿主真实 CLI 数值任务、Git 事务与重复运行、已部署四小时 timer 的短触发均通过；续接复核已校验当前源码/测试/部署哈希及原始证据，综合 gate 3/3。详见 `acceptance/S00.md` 最新复核，正式阶段完成及提交仍由外层调度器决定。以下保留设计与完整后续约束，首段中的 bootstrap 描述为实施前基线。
 
-现有实现是 bootstrap，仅可执行线性单阶段。首个 S00 由 Sol High 通过现有调度器实现下列加固；当前架构模型不直接编写产品功能或调度器实现。已有 systemd timer 正常工作，沿用一个定时来源，避免同时创建 Codex 自动化和 systemd 重复启动。默认阶段已下调为 Sol Medium 20、Sol High 28、Astra High 2、Astra xHigh 0；xHigh 保留为未来有证据的显式复核档。
+当前已部署 S00；2026-10-22 用户授权进一步降档及结果库架构修订。当前队列普通 Sol Low 20、复杂 Sol Medium 28、关键 Sol High 2；Astra 自动使用数为零。保留小时 timer 与独占锁。
 
 ## 模型选择
 
 | level | 首选模型 | effort | 任务 |
 |---|---|---|---|
-| ordinary | gpt-6.1-sol | medium | 文档、目录/参照注册、报告、打包安装、已定义实验操作 |
-| complex | gpt-6.1-sol | high | 桌面/服务/CAD/训练集成、调度器和复杂测试 |
-| critical | gpt-6-astra | high | 坐标惯量、动力学、机器人任务、诊断和统计核心 |
-| critical_xhigh | gpt-6-astra | xhigh | 当前队列不启用；未来有证据才显式分配 |
+| ordinary | gpt-6.1-sol | low | 文档、目录/参照注册、报告、打包安装、已定义实验操作 |
+| complex | gpt-6.1-sol | medium | 桌面/服务/CAD/结果导入集成、调度器和复杂测试 |
+| critical | gpt-6.1-sol | high | 坐标惯量、动力学、机器人任务、诊断和统计核心 |
+| critical_xhigh | gpt-6-astra | high | 当前队列不启用；未来有证据才显式分配 |
 
 每任务创建独立 CLI 进程，保存请求 model/effort、完整命令（凭据脱敏）、thread id、可用的会话元数据、usage 和最终结果。模型输出自称身份不作证据。优先通过 `codex app-server` 的已支持 `model/list` 查询可用模型及 effort；按本机协议初始化。gpt-6.1-sol 不可用时，只有查询证实的同类 gpt-6-sol 可作显式记录的替代；Astra 不可用则该关键任务 wait_model，不静默降档。
 
@@ -28,7 +28,7 @@ S00 实施记录（2026-10-22）：当前源码 59 项本地测试通过（含�
 7. 只有结构化 completed、无 blocker、gate 全通过、必要 artifact 存在且内容合法，才提交该阶段并标完成。Git 提交失败有独立状态，可重试提交而不重做阶段。保留 run evidence 和完成 commit 的关联。
 8. partial/failure/quota/timeout 保存完整日志、阶段摘要与 WIP 恢复信息。模型不可修改 `.scheduler/state.json`。需要 WIP Git 时只纳入本轮获授权的代码与文档，不包含密钥/用户 CAD/视频；不 reset/clean/stash 用户改动。已知外部变更先识别后隔离，不盲目 git add -A。
 9. 每轮默认最多 3 个阶段，总墙钟上限 4 小时，单任务 70 分钟，测试最多 20 分钟；剩余预算不够不启动新任务。每次成功后重新读取状态/配置。首轮 bootstrap 原进程只运行 S00，下一轮使用新版。
-10. signal/timeout 必须终止整个子进程组、写 interrupted 状态并释放锁；重启恢复不得重复标完成。训练作业使用独立 checkpoints，不能伴随终止留下无限孤儿进程。
+10. signal/timeout 必须终止整个子进程组、写 interrupted 状态并释放锁；重启恢复不得重复标完成。导入分析作业使用独立恢复游标，不能伴随终止留下无限孤儿进程。
 
 ## 状态与事务
 
@@ -38,7 +38,7 @@ gate 通过后、首次 Git 提交前，在 journal 中固定 `evidence_sha256`�
 
 失败分类 `quota_wait/auth_required/wait_model/blocked_hardware/blocked_input/partial/test_failed/timeout/interrupted/commit_failed/internal_error`。错误分类基于结构化错误，不让正文中的“429 示例”触发停机。认证/额度异常不进行密集重试；每轮最多一次外部失败尝试。网络短暂错误最多一次带退避重试且不得重复应用修改。
 
-产品实验运行中返回 waiting_experiment，保存 job id，后续先检查 job 状态；无需持续启动语言模型来轮询纯计算。重试预算用 step/time 上限，不能把预算耗尽当作训练成功。
+产品长时间导入/分析运行中可返回 waiting_experiment（兼容旧状态名），保存 job id，后续先检查 job 状态；无需持续启动语言模型来轮询纯计算。重试采用时间和文件量上限，预算耗尽不得当导入完成。
 
 ## 必须的调度器测试
 
@@ -54,3 +54,5 @@ gate 通过后、首次 Git 提交前，在 journal 中固定 `evidence_sha256`�
 
 
 运维补充（2026-10-22）：调度器返回 75 表示额度/认证/模型暂不可用的安全等待，用户级 service 通过 `SuccessExitStatus=75` 将其显示为正常停轮；详细原因和最早重试时间仍以 `.scheduler/state.json`、终端进度和 run evidence 为准。其它失败退出码继续由 systemd 标为 failed。
+
+2026-10-22 修复：S01 gate 已通过但 Chromium LICENSES 文件 15,102,119 字节触发 5 MiB 门槛。只对精确路径及审核 SHA256 放行；更换任何字节仍需复核。其余大资产、凭据和非源码限制保留。
