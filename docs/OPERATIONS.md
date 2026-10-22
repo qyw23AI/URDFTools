@@ -15,7 +15,7 @@ systemctl --user start --no-block urdftools-dev.service
 journalctl --user -u urdftools-dev.service -n 50
 ```
 
-`run --dry-run` 根据依赖和等待状态选任务，不启动模型、不改 state。`validate` 检查完整图与测试配置；其计数是配置节点数，不代表产品功能通过。`doctor` 使用临时隔离配置进行只读模型/身份/额度查询，不启动登录或推理。当前沙箱中真实 account/read 路由发现失败，因此不能凭 model/list 目录宣称推理成功。
+`run --dry-run` 根据依赖和等待状态选任务，不启动模型、不改 state。`validate` 检查完整图与测试配置；其计数是配置节点数，不代表产品功能通过。`doctor` 使用临时隔离配置进行只读模型/身份/额度查询，不启动登录或推理。模型目录只证明 CLI 列出了候选模型，不证明当前额度足以执行。
 
 运行 `run` 前工作树和 index 应干净；已知用户改动会阻止运行，不 reset/clean/stash。认证/额度失败有共享退避，不因 timer 重触发密集调用。修复输入/认证/硬件后，操作者可执行 `python3 scheduler.py retry S00` 显式解除该任务的等待，然后再 `run`；此命令不跳过 gate、不标完成，也不清除失败证据。不要在仍活动的开发任务中调用 retry。
 
@@ -28,13 +28,13 @@ bash install-timer.sh
 python3 scripts/check_s00_acceptance.py
 ```
 
-本地测试使用故障 peer，但进程、数值断言和 Git 事务实际运行；逐例输入和日志压缩在 `artifacts/S00/fault-evidence.tar.gz`。真实烟测只针对独立临时 Git 仓库；预检失败不会绕过身份检查调用 exec。安装脚本保留原六小时 timer，重载后另用一个短临时 timer 实际触发无模型的 probe；不会将手动启动 service 算作自动触发。当前部署及触发均受权限阻塞，S00 附加 gate 因此返回非零，详见 `docs/acceptance/S00.md`。
+本地测试使用故障 peer，但进程、数值断言和 Git 事务实际运行；逐例输入和日志压缩在 `artifacts/S00/fault-evidence.tar.gz`。真实烟测只针对独立临时 Git 仓库。当前用户级 timer 每小时整点检查，systemd 不重启活动中的 service，调度器独占锁再次阻止并发；已用短临时 timer 验证实际触发。当前源码的最新烟测因真实 Codex 主窗口达到 90% 停机阈值而未执行模型，详见 `docs/acceptance/S00.md`。
 
-隔离登录目录位于所选工作区 `.scheduler/codex-homes`，仅链接现有 auth.json，不写全局配置；故障测试只用自制身份且归档排除登录目录。真实烟测仓库位于项目 `.scheduler/live-repositories`，避开当前 CLI 的 /tmp helper 限制；成功/失败都保留独立仓库供复核。timer 证据必须同时包含部署 unit 哈希一致、已启用的六小时持久 calendar 和实际短 timer 触发；通过 calendar 数值测试或仅触发无关 probe 均不能替代完整运行验收。
+隔离登录目录位于所选工作区 `.scheduler/codex-homes`，仅链接现有 auth.json，不写全局配置；故障测试只用自制身份且归档排除登录目录。真实烟测仓库位于项目 `.scheduler/live-repositories`；成功/失败都保留独立仓库供复核。timer 证据包含部署 unit 哈希一致、已启用的每小时持久 calendar 和实际短 timer 触发。
 
 每阶段的验收记录在 `docs/acceptance/<id>.md`，总进度在 `PROGRESS.md`，机器状态在 `.scheduler/state.json`。源码本地 Git 提交是断点；日志在 `.scheduler/runs/`。用户可手动停止 service 保留 checkpoint；暂停定时器使用 `systemctl --user stop urdftools-dev.timer`（停止 timer 不会自动杀死正在运行的 service）。
 
-认证：使用现有 `codex login` 的 ChatGPT 会话。会话过期需用户自行重新登录；不得把 token 写进项目。CLI app-server 额度读取由 S00 实测，无法读取时明确显示 unavailable，按实际限额事件退出。不要自动兑换重置次数。
+认证：使用现有 `codex login` 的 ChatGPT 会话。会话过期需用户自行重新登录；不得把 token 写进项目。额度读取 RPC 返回 429 时记为额度未知，在 ChatGPT 身份与目标模型已确认后，当轮仅允许一次有界模型调用；模型调用明确报额度耗尽或读到使用率阈值时停止。不要自动兑换重置次数。
 
 额度字段说明：`auth=chatgpt` 只表示登录方式；`account/rateLimits/read` 返回的 `rateLimits.limitId=codex` 才是此调度器用于停轮的 Codex 限额桶（`primary` 为 5 小时窗口、`secondary` 为周窗口）。它不查询普通 ChatGPT Chat 的消息上限；Chat 与 Work/Codex 使用规则按产品和计划区分，具体以账号 Usage 页面为准。OpenAI 文档：[Codex usage with a ChatGPT plan](https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan)、[GPT-6 usage limits and product distinctions](https://help.openai.com/en/articles/20001354-gpt-6-and-other-models-in-chatgpt).
 
@@ -49,4 +49,4 @@ CLI 子进程可能没有交互 shell 的 PATH；引导脚本显式处理路径�
 
 硬件：GPU 驱动当前不可用，仅记录检测结果；不自动重装驱动。纯 CPU 功能继续实现，GPU 实验保留 waiting_hardware。训练队列默认节流、可断点续训，不把未跑的全量基准报告为完成。
 
-当前开发目录在 writable root 内，用户 systemd 目录不在写入范围，用户总线也被当前沙箱拒绝；本次没有部署修订或验证自动触发。已有定时部署授权无需重复请求，但必须在具备这些权限的执行环境完成，禁止通过 symlink、全局不受限 sandbox 或修改总线地址绕过限制。
+当前 S01 的未完成工作保存在 `.scheduler/checkpoints/20261022T040140Z-S01-50b70e56`，按哈希核对了 356 个文件；`retry S01` 已请求下轮恢复。自动检查下一次为 13:00 CST。不要手工删除检查点或对工作树执行 `git clean`。
