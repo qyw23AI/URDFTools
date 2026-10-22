@@ -1,0 +1,48 @@
+{
+  "phase": "C01",
+  "timestamp": "20261022T125543803822Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "cad-worker-lock",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/setup_cad_worker.py",
+        "--offline"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C01/runs/20261022T125543803822Z/cad-worker-lock.log",
+      "log_sha256": "a69aa589f48a2407967b720fcd2eafb3c12ef16240dce7392ba013c9149ebdc0",
+      "status": "passed"
+    },
+    {
+      "id": "mass-property-contracts",
+      "command": [
+        ".tools/cad-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/c01",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C01/runs/20261022T125543803822Z/mass-property-contracts.log",
+      "log_sha256": "9e20680fb961f9163951a64feb349bddc738eb2511a427561672d0320ef91995",
+      "status": "passed"
+    },
+    {
+      "id": "mass-property-cli",
+      "command": [
+        ".tools/cad-venv/bin/python",
+        "scripts/c01_cli_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C01/runs/20261022T125543803822Z/mass-property-cli.log",
+      "log_sha256": "8ed9ce6b1109b026bfd5751be3e4c74fa54078580175dcb0d6948d94f42d049b",
+      "status": "passed"
+    }
+  ]
+}

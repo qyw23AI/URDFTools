@@ -1,5 +1,61 @@
 # URDFTools 项目进度
 
+## 2026-10-22 — 切换为每小时直接开发；独立复核 S03–S06、C00–C01
+
+用户取消本地 Python/systemd 调度器。`urdftools-dev.timer` 已禁用，Codex 应用已有每小时心跳已改为在当前对话直接开发。检查 WebCodex runtime 时该项目活跃任务为 0，因此接手现有 WIP。旧 `.scheduler/state.json` 停留 S03 属历史状态，不作为当前进度。
+
+本轮独立运行 `.venv/bin/python scripts/accept_phase.py S03 S04 S05 S06 C00 C01`（逐阶段单独调用），结果分别为 4/4、2/2、2/2、2/2、3/3、3/3，均 0 failed / 0 skipped；S06 真实 Go2/G1 Electron 模型导入与关节操作成功。S02 回归 2/2；固定 Node/npm 路径的 TypeScript 与 Vite 生产构建退出 0；`git diff --check` 退出 0。首次生产构建命令误写为不存在的 `.tools/node/bin/npm`，因路径错误退出 127；随后按 `docs/TOOLCHAIN.md` 使用 `.tools/node/bin/node .tools/npm/bin/npm-cli.js` 重跑通过。
+
+这些 gate 确认目前已实现的导入、查看、STEP 元数据及质量属性功能；不代表 CAD→URDF 转换向导、建模 Agent 或 RL 结果评估已完成。下一阶段按依赖为 C02。第三方 step2urdf adapter LICENSE 的版权占位和完整发行审查仍留给 Q01。
+
+
+## 2026-10-22 — C01 CAD 质量/质心/惯量与坐标变换技术 gate 通过（等待调度器复核）
+
+实际运行 .venv/bin/python scripts/accept_phase.py C01：**3/3 gate 通过、0 skip**；质量属性数值测试 8/8，CLI 场景 4/4。实现位于 python/urdftools/cad/mass_properties.py，通过 OCP 的闭合有效 B-rep solid 计算体积、质心与惯量，并按显式密度换算 kg 与 kg·m²；使用 \(I_w=RI_lR^T\) 变换惯量张量，并用平行轴定理合成装配总惯量。命令行入口为 scripts/cad_step_mass.py。
+
+独立公式验证结果：20×10×5 mm 长方体、两个偏置半径 10 mm 球体、旋转 45° 的长方体（含非对角 \(I_{xy}=-1.25\times10^{-8}\,kg\,m^2\)）均通过。无材料密度时，质量/物理惯量与装配总值保持 null；近似几何不参与质量计算，OBJ/visual/collision mesh 不作为真实质量来源。详见 docs/acceptance/C01.md 和 artifacts/acceptance/C01.json。
+
+C01 仍是后端 API/CLI，不包含材料数据库、交互式密度分配 UI、CAD→URDF 导出或查看器集成。step2urdf 上游 MIT 许可版权占位符仍需 Q01 复核。按 tasks/C01.md，阶段完成状态待调度器复核；本轮没有修改 .scheduler/state.json 或创建 Git commit。
+
+
+## 2026-10-22 — C00 STEP 内核与转换原型技术 gate 通过（等待调度器复核）
+
+实际运行 `.venv/bin/python scripts/accept_phase.py C00`：**3/3 gate 通过、0 skip**；STEP 读取契约测试 4/4，CLI 对两个真实 STEP fixture 的检查 2/2。CAD worker 使用独立的 CPython 3.12.14 环境，OCP 8.0.1.1.0 / proxy 8.0.1.1.0 / NumPy 2.3.4 / PyYAML 6.0.3 均由 `cad-requirements.lock` hash 锁定；`pip check` 无依赖冲突，主应用 `.venv` 未安装 OCP。
+
+双零件 mm 装配读取到 1 根装配、2 个零件、两种颜色及第二零件 (0.05, 0.02, 0.01) m 的变换；单零件 m 文件识别为 metre，尺寸归一化约 0.02×0.01×0.005 m，缺失颜色保留为未知。公开 API `urdftools.cad.inspect_step` 与 `scripts/cad_step_inspect.py` 输出源文件 SHA-256、单位、装配树、4×4 变换矩阵、颜色和内核/适配器 provenance。详见 `docs/acceptance/C00.md` 和 `artifacts/acceptance/C00.json`。
+
+C00 仍只是 STEP 读取与元数据原型，**没有**生成 URDF、推断关节、转换 UI、质量/惯量物理验证或 RL 训练结果分析。step2urdf 上游 MIT LICENSE 的版权行包含 `YOUR NAME HERE` 占位文本，Q01 发行许可审查必须处理。按 `tasks/C00.md`，阶段完成状态仍待调度器复核；本轮没有修改 `.scheduler/state.json` 或创建 Git commit。
+
+
+## 2026-10-22 — C00 CAD 内核预检历史记录（正式技术 gate 前）
+
+独立环境 `.tools/cad-venv` 固定 cadquery-ocp-novtk 8.0.1.1.0 / cadquery-ocp-proxy 8.0.1.1.0 / numpy 2.3.4。首次尝试带 VTK 的 wheel 时实际报 libvtkWrappingPythonCore3.12.so 缺失，随后改用无需 VTK 的固定内核，已经成功导入 OCP 和 XCAF STEP APIs。通过真实 STEP 写入-读取：单根装配/2 组件，包含 30 mm 位移；源长度单位 MM 和 M 都可识别，内部几何 20 mm 转成 SI 应为 0.02 m。
+原创 `scripts/generate_c00_fixtures.py` 输出 `tests/fixtures/C00/two_part_mm.step` / `single_part_m.step` 和 hash 清单；原型 `urdftools.cad.step2urdf_adapter.load_step` 直接读取 2 个有颜色、姿态不同的零件，以及 1 个缺失颜色的米单位零件，实测包围盒、名称和 COM 数值正确。详情见 `docs/CAD_KERNEL_PREFLIGHT.md`。当时尚未通过 C00 正式技术验收；后续 gate 结果见上方。转换 UI 和 CAD→URDF 生成仍未实现。没有启动调度器或训练器，没有修改系统 Python/驱动。
+
+## 2026-10-22 — S06：Unitree Go2/G1 真实三维查看端到端验收
+
+WebCodex 主动构建，不依赖定时调度器。首次运行真实 Unitree Go2 文件夹导入时发现旧的 4 MiB URDF/XML 限制误用于 10.7 MB 的合法 Collada DAE 网格。修复为 mesh 使用原有单文件 64 MiB 限额，URDF/package XML 仍保持 4 MiB；不改写用户或上游的源 URDF。随后 S06 `tests/s06/` **3/3** 文件来源/sha256/Go2 文件夹/G1 ZIP 导入测试通过。
+
+正式命令 `.venv/bin/python scripts/accept_phase.py S06` **2/2 gate 通过、0 skipped**。真实 Electron 39.2.7、React/Three.js 和 headless SwiftShader 自动使用原生拖放验证：Go2 **42 Link/41 Joint**、12 可动关节、44 Mesh、27 Collision/27 个红色线框 Mesh；G1 **40 Link/39 Joint**、29 可动关节、73 Mesh、37 Collision/37 个红色线框 Mesh。两者成功加载资产、实测关节姿态改变、Visual/Collision 切换、来源物理字段指纹不变、视角重置、PNG 下载。上游与许可固定版本在 `tests/fixtures/S06/reference_models.json`，机器验收 `artifacts/acceptance/S06.json`、`artifacts/S06/desktop/`，完整指南 `docs/VIEWER_GUIDE.md`、`docs/acceptance/S06.md`。
+
+S06 是只读显示验收，**不是四足机器人 URDF 在强化学习中适用性的结论**；网格包围盒不是 CAD 精确尺寸。CAD→URDF、Agent、物理仿真、外部 RL 训练结果分析和 GNOME 正式安装仍未完成。未运行 RL 训练器、调度器或修改其 state，保留所有 WIP，未 Git commit。
+
+## 2026-10-22 17:16 CST — S05 查看器分析工具验收通过
+
+在保留工作区所有未提交成果的前提下完成 S05：结构树/Link-Joint 定位、视觉与 Collision 独立显示、显式质心标记、Link 隔离/恢复、视角重置、PNG 导出、质量/质心/惯量字段读取和整机/Link 视觉包围盒测量。缺失的 URDF 物理字段保持“未知”，不会将 loader 默认零值当作真实参数。
+
+实际运行 `python scripts/accept_phase.py S05`：**2/2 gate 通过、0 skip**。Python 夹具 2/2；Electron 39.2.7 + headless SwiftShader E2E 验证 2 Link / 1 Joint、1.25 kg 已知质量 + 1 Link 未知质量、碰撞/视觉切换不改变物理指纹、关节 ±1.2 rad 限位、包围盒数值、COM 标记、隔离恢复、视角重置和 PNG 导出。截图 `artifacts/S05/desktop/viewer-analysis.png`，机器报告 `artifacts/acceptance/S05.json` / `artifacts/S05/desktop/report.json`。
+
+随后回归实际运行 S02 **2/2**、S04 **2/2**、S03 **4/4**，均 0 skip；S02 领域测试 28/28、S03 导入测试现为 18/18（新增真实大型 DAE 上限回归测试）。当前生产构建、Electron 主进程语法检查、`git diff --check` 通过。早先 S05 的失败验收记录保留在阶段运行日志中，修复后的最新 gate 已通过。测试只使用原创合成 URDF，不等同于真实四足机器人验收；包围盒不是 CAD 精确尺寸，物理/动力学有效性、CAD/Agent/训练结果分析和正式安装包仍未实现。未运行强化学习训练；未启动或修改 scheduler/timer/state，未创建 Git commit。
+
+
+## 2026-10-22 下午 — 网页 ChatGPT + WebCodex 直接构建 S03/S04
+
+用户变更分工：WebCodex 为主要开发通道，任务调度器只用于阶段性成果复核和改进；此次没有启动/修改 scheduler、timer 或 `.scheduler/state.json`。
+接管时 S03 已有保留的未提交代码。初次 `python3 scripts/accept_phase.py S03` 结果 3/4：17/17 导入测试、CLI 真实工作流、React SSR 通过；Electron 原生拖放因固定坐标未落入响应区而失败。修复为根据 DOM 实际坐标投递文件夹并输出诊断后，S03 阶段 gate **4/4 通过、0 skip**，包含 Electron 沙箱/IPC/导入选择/缺 Mesh 定位。后续集成 S04 后 S03 再回归 4/4 通过。
+S04 已接入固定版本 three@0.180.0、urdf-loader@0.13.1、@types/three@0.180.0，离线方案采用受控 Electron 自定义 `urdftools://asset` 协议与 SHA256 已导入资产核验，不接受任意磁盘路径。React/Three.js Z-up 场景、旋转缩放/平移、OBJ/STL/DAE/基本几何加载、动态关节滑块/限位已经接线；单关节真实浏览器验收会旋转机器人关节。新自制 CC0 夹具 `tests/fixtures/S04/simple_robot`（2 link、1 revolute、OBJ mesh）在真实离线 Electron/WebGL 渲染下，两个 mesh 显示、package URI 加载、shoulder 转到 1.20 rad（上下限 ±1.20 rad）并生成 PNG。S04 声明 gate **2/2 通过、2/2 测试、0 skip**，证据 `artifacts/S04/desktop/viewer.png` 与 `artifacts/acceptance/S04.json`。未测试真实用户四足/humanoid/复杂大型模型，不能宣告 S05/S06 或 CAD/Agent/评估已完成。
+已保留第三方依赖来源和许可线索，发行清理仍待 Q01。未运行任何 RL 训练，真实参考数据库覆盖为 0。
+
 2026-10-22 14:06 CST — S01 保留 WIP 再验：先检查 diff 并读取指定配置/文档，重跑 `python3 scripts/accept_phase.py S01` 退出 0；12 单元、8 全新目录集成全部通过、0 skip，desktop 真实无头渲染/点击/隔离断言通过，3/3 stage。证据 `artifacts/S01/runs/20261022T060641296645Z/`、`artifacts/acceptance/S01.json`；已查看本轮截图。既有来源/发行许可限制保留，未实现未来阶段。未修改调度状态、创建 Git 提交或改动 HEAD；正式完成由调度器决定。
 
 > 当前状态（2026-10-22，S01 网络恢复续做）：S00 既有完成记录保留；S01 实现和验收材料就绪，真实声明测试退出 0：12/12 单元、8/8 全新目录集成、desktop 渲染通过，整体 3/3 stage、0 skip。正式阶段完成和 Git 保存由调度器决定；未执行或声明后续阶段完成。

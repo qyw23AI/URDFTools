@@ -1,0 +1,43 @@
+{
+  "phase": "S05",
+  "timestamp": "20261022T125518444453Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "viewer-analysis-fixture",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/run_test_suite.py",
+        "--directory",
+        "tests/s05",
+        "--report",
+        "/home/qyw/URDFTools/artifacts/S05/runs/20261022T125518444453Z/viewer-analysis-fixture.json"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/S05/runs/20261022T125518444453Z/viewer-analysis-fixture.log",
+      "log_sha256": "18983c28037c492977b740b91e97c4d8a1defa0921874afb6fe940cea4d6a6b9",
+      "counts": {
+        "discovered": 2,
+        "executed": 2,
+        "passed": 2,
+        "skipped": 0,
+        "failed": 0,
+        "expected_failures": 0,
+        "unexpected_successes": 0,
+        "status": "passed"
+      },
+      "status": "passed"
+    },
+    {
+      "id": "viewer-analysis-desktop",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/s05_desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/S05/runs/20261022T125518444453Z/viewer-analysis-desktop.log",
+      "log_sha256": "cf09a7adf359c7536812d9c69ae123a311a52da6728d0480738dd3f52ee4dd7c",
+      "status": "passed"
+    }
+  ]
+}

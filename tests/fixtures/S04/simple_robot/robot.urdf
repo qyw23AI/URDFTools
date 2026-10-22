@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot name="JointViewerFixture">
+  <material name="yellow"><color rgba="0.9 0.8 0.2 1"/></material>
+  <link name="body">
+    <visual><geometry><box size="0.3 0.2 0.08"/></geometry></visual>
+    <collision><geometry><box size="0.3 0.2 0.08"/></geometry></collision>
+  </link>
+  <link name="arm">
+    <visual>
+      <origin xyz="0.25 0 0" rpy="0 0 0"/>
+      <geometry><mesh filename="package://viewer_robot/meshes/arm.obj"/></geometry>
+      <material name="yellow"/>
+    </visual>
+  </link>
+  <joint name="shoulder" type="revolute">
+    <parent link="body"/><child link="arm"/>
+    <origin xyz="0.15 0 0.06" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.20" upper="1.20" effort="15" velocity="2"/>
+  </joint>
+</robot>

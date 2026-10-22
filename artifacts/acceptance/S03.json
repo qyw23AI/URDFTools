@@ -1,0 +1,65 @@
+{
+  "phase": "S03",
+  "timestamp": "20261022T125510448476Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "import-service",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/run_test_suite.py",
+        "--directory",
+        "tests/s03",
+        "--report",
+        "/home/qyw/URDFTools/artifacts/S03/runs/20261022T125510448476Z/import-service.json"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/S03/runs/20261022T125510448476Z/import-service.log",
+      "log_sha256": "9b62c47e5b1a2956c8ba77a23b5871b200026e58abf4e124753b29199b540174",
+      "counts": {
+        "discovered": 18,
+        "executed": 18,
+        "passed": 18,
+        "skipped": 0,
+        "failed": 0,
+        "expected_failures": 0,
+        "unexpected_successes": 0,
+        "status": "passed"
+      },
+      "status": "passed"
+    },
+    {
+      "id": "import-workflow",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/s03_workflow.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/S03/runs/20261022T125510448476Z/import-workflow.log",
+      "log_sha256": "7a4bb2cb684cb979b20ee077fdf2692d15576cde3092f8323e388faf6bee1e29",
+      "status": "passed"
+    },
+    {
+      "id": "frontend-render",
+      "command": [
+        ".tools/node/bin/node",
+        "tests/web/shell.test.mjs"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/S03/runs/20261022T125510448476Z/frontend-render.log",
+      "log_sha256": "07bc3fe9474d137586af7a39fcabd231341f60a9ba302d1bb3ab734deb9d5f95",
+      "status": "passed"
+    },
+    {
+      "id": "desktop-import",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/s03_desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/S03/runs/20261022T125510448476Z/desktop-import.log",
+      "log_sha256": "fa6270e11e12abdd3d30a4071692a3b3e55b7b8e2dda2fe22107ba37602c70f6",
+      "status": "passed"
+    }
+  ]
+}

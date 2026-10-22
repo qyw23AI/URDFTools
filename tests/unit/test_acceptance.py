@@ -49,7 +49,7 @@ class AcceptanceTests(unittest.TestCase):
         self.assertEqual(report["passed"], 1)
 
     def test_future_phase_not_implemented(self):
-        p = subprocess.run([sys.executable, "scripts/accept_phase.py", "S03"], cwd=ROOT, capture_output=True, text=True)
+        p = subprocess.run([sys.executable, "scripts/accept_phase.py", "S04"], cwd=ROOT, capture_output=True, text=True)
         self.assertEqual(p.returncode, 2)
         self.assertIn("No implemented acceptance", p.stderr)
 

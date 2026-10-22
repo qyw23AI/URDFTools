@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "fixture_origin": "self-authored test geometry; not a vendor robot model",
+  "generator": "scripts/generate_c00_fixtures.py",
+  "kernel_distribution": "cadquery-ocp-novtk",
+  "kernel_version": "8.0.1.1.0",
+  "models": {
+    "two_part_mm.step": {
+      "source_unit": "mm",
+      "root_name": "TwoPartAssembly",
+      "part_count": 2,
+      "parts": [
+        {
+          "name": "BasePart",
+          "dimensions_mm": [
+            20,
+            10,
+            5
+          ],
+          "translation_mm": [
+            0,
+            0,
+            0
+          ],
+          "color_rgb": [
+            0.8,
+            0.2,
+            0.1
+          ]
+        },
+        {
+          "name": "OffsetPart",
+          "dimensions_mm": [
+            10,
+            6,
+            4
+          ],
+          "translation_mm": [
+            50,
+            20,
+            10
+          ],
+          "color_rgb": [
+            0.1,
+            0.4,
+            0.9
+          ]
+        }
+      ]
+    },
+    "single_part_m.step": {
+      "source_unit": "m",
+      "root_name": "MeterPart",
+      "part_count": 1,
+      "parts": [
+        {
+          "name": "MeterPart",
+          "dimensions_m": [
+            0.02,
+            0.01,
+            0.005
+          ],
+          "translation_m": [
+            0,
+            0,
+            0
+          ],
+          "color_rgb": null
+        }
+      ]
+    }
+  },
+  "files": {
+    "two_part_mm.step": {
+      "size_bytes": 33245,
+      "sha256": "4fceea35dbae14610b87d90ffcf57ffda0ad262c801cd927b5b469ca362cdf25"
+    },
+    "single_part_m.step": {
+      "size_bytes": 15474,
+      "sha256": "626e3f4e4f69bf17e426f0ede0f66ce7533cca7faa03dbfb20441066c87612e9"
+    }
+  }
+}

@@ -1,0 +1,1 @@
+<robot name="damaged"><link name="base"><visual><geometry><mesh filename="bad.obj"/></geometry></visual></link></robot>

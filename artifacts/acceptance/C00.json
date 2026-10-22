@@ -1,0 +1,48 @@
+{
+  "phase": "C00",
+  "timestamp": "20261022T125540395082Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "cad-worker-lock",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/setup_cad_worker.py",
+        "--offline"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C00/runs/20261022T125540395082Z/cad-worker-lock.log",
+      "log_sha256": "a69aa589f48a2407967b720fcd2eafb3c12ef16240dce7392ba013c9149ebdc0",
+      "status": "passed"
+    },
+    {
+      "id": "step-reader-contracts",
+      "command": [
+        ".tools/cad-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/c00",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C00/runs/20261022T125540395082Z/step-reader-contracts.log",
+      "log_sha256": "03006e63b5a4048d30255063e378b8f18222f7416593e256e4946392ddc3ddb9",
+      "status": "passed"
+    },
+    {
+      "id": "step-cli-smoke",
+      "command": [
+        ".tools/cad-venv/bin/python",
+        "scripts/c00_cli_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C00/runs/20261022T125540395082Z/step-cli-smoke.log",
+      "log_sha256": "8ed81b940b8dcb27b0cef7294b51127c1beab42a8fdd9a091e2e5772bfbd1f0e",
+      "status": "passed"
+    }
+  ]
+}

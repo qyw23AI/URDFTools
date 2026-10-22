@@ -1,0 +1,43 @@
+{
+  "phase": "S06",
+  "timestamp": "20261022T125521447489Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "real-reference-models",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/run_test_suite.py",
+        "--directory",
+        "tests/s06",
+        "--report",
+        "/home/qyw/URDFTools/artifacts/S06/runs/20261022T125521447489Z/real-reference-models.json"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/S06/runs/20261022T125521447489Z/real-reference-models.log",
+      "log_sha256": "803af1265a972f58e95c5598e8bbe54f7ba8696e88b81439565cebf0a32f297e",
+      "counts": {
+        "discovered": 3,
+        "executed": 3,
+        "passed": 3,
+        "skipped": 0,
+        "failed": 0,
+        "expected_failures": 0,
+        "unexpected_successes": 0,
+        "status": "passed"
+      },
+      "status": "passed"
+    },
+    {
+      "id": "real-model-viewer-e2e",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/s06_real_models_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/S06/runs/20261022T125521447489Z/real-model-viewer-e2e.log",
+      "log_sha256": "a87ef1cc464f5950c2eb3a62ae68588717fd0b2ec471346c9a75990c758f245a",
+      "status": "passed"
+    }
+  ]
+}

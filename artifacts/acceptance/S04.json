@@ -1,0 +1,43 @@
+{
+  "phase": "S04",
+  "timestamp": "20261022T125515340445Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "viewer-model",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/run_test_suite.py",
+        "--directory",
+        "tests/s04",
+        "--report",
+        "/home/qyw/URDFTools/artifacts/S04/runs/20261022T125515340445Z/viewer-model.json"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/S04/runs/20261022T125515340445Z/viewer-model.log",
+      "log_sha256": "1dcc35fd5cec5d6cd4833267a2d077ee57dcf25d2cc4655d6d930448b4c4cfbd",
+      "counts": {
+        "discovered": 2,
+        "executed": 2,
+        "passed": 2,
+        "skipped": 0,
+        "failed": 0,
+        "expected_failures": 0,
+        "unexpected_successes": 0,
+        "status": "passed"
+      },
+      "status": "passed"
+    },
+    {
+      "id": "viewer-desktop",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/s04_desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/S04/runs/20261022T125515340445Z/viewer-desktop.log",
+      "log_sha256": "d3db6d3faa14d67d787ceadd3b8e3e0955e0a8c351742a11e4e84e03f0d278f6",
+      "status": "passed"
+    }
+  ]
+}

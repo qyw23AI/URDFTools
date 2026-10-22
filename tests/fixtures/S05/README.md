@@ -1,0 +1,1 @@
+Original CC0-1.0 synthetic fixture for S05: 2 links, 1 revolute joint, one explicit inertial block and one intentionally missing inertial block, different visual/collision boxes, and a package:// OBJ mesh. All values are test-only, not a real robot reference.

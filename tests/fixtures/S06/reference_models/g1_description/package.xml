@@ -1,0 +1,2 @@
+<?xml version="1.0"?>
+<package format="2"><name>g1_description</name><version>0.1.0</version><description>Local test wrapper for the unchanged Unitree G1 URDF fixture</description><maintainer email="noreply@example.invalid">URDFTools test fixture</maintainer><license>BSD-3-Clause</license></package>

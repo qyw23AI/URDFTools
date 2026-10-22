@@ -1,0 +1,1 @@
+<robot name="缺失网格"><link name="base"><visual><geometry><mesh filename="../meshes/不存在.stl"/></geometry></visual></link></robot>

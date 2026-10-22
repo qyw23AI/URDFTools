@@ -1,0 +1,1 @@
+<robot name="中文样机"><link name="base"><visual><geometry><mesh filename="package://demo_robot/meshes/三角.obj"/></geometry></visual><collision><geometry><mesh filename="../meshes/三角.obj"/></geometry></collision></link></robot>

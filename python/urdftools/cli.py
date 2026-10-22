@@ -1,4 +1,4 @@
-"""S01 CLI shell; no future import/CAD/training commands are advertised."""
+"""Local CLI: runtime diagnostics, authenticated service and bounded imports."""
 import argparse
 import json
 import os
@@ -14,10 +14,27 @@ def main():
     doctor.add_argument("--json", action="store_true")
     serve = commands.add_parser("serve")
     serve.add_argument("--port", type=int, default=0)
+    importer = commands.add_parser('import')
+    importer.add_argument('source')
+    importer.add_argument('--storage', required=True)
+    importer.add_argument('--model', help='Explicit model path from import discovery')
+    importer.add_argument('--json', action='store_true')
     args = parser.parse_args()
     if args.command == "doctor":
         print(json.dumps(runtime_status(), ensure_ascii=False))
         return 0
+    if args.command == 'import':
+        from urdftools.importers import ImportService
+        service = ImportService(args.storage)
+        report = service.ingest(args.source)
+        if args.model:
+            try:
+                report = service.select(report['operation_id'], args.model)
+            except ValueError as exc:
+                print(json.dumps({'code': 'invalid_model_selection', 'message': str(exc)}))
+                return 2
+        print(json.dumps(report, ensure_ascii=False))
+        return 1 if report['status'] == 'failed' else 0
     token = os.environ.get("URDFTOOLS_SESSION_TOKEN", "")
     if len(token) < 32:
         print(json.dumps({"code": "missing_session_token", "remediation":

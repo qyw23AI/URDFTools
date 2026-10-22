@@ -1,17 +1,91 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, protocol } = require('electron');
 const { spawn } = require('node:child_process');
-const { randomBytes } = require('node:crypto');
+const { randomBytes, createHash } = require('node:crypto');
 const path = require('node:path');
 const readline = require('node:readline');
 const fs = require('node:fs');
+protocol.registerSchemesAsPrivileged([{ scheme: 'urdftools', privileges: {
+  standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true
+} }]);
 const root = path.resolve(__dirname, '../..');
+const mimeTypes = { '.urdf': 'application/xml', '.obj': 'text/plain; charset=utf-8',
+  '.stl': 'model/stl', '.dae': 'model/vnd.collada+xml', '.png': 'image/png',
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.bmp': 'image/bmp' };
+function setupAssetProtocol() {
+  protocol.handle('urdftools', async request => {
+    try {
+      const url = new URL(request.url);
+      if (url.hostname !== 'asset' || request.method !== 'GET') throw new Error('invalid route');
+      const parts = decodeURIComponent(url.pathname).split('/').slice(1);
+      const [operation, container, ...relativeParts] = parts;
+      if (!/^[0-9a-f-]{36}$/.test(operation) || container !== 'bundle' || relativeParts.length === 0) throw new Error('invalid path');
+      const relative = relativeParts.join('/');
+      const base = path.join(app.getPath('userData'), 'imports', operation);
+      const record = JSON.parse(await fs.promises.readFile(path.join(base, 'report.json'), 'utf-8'));
+      if (record.operation_id !== operation) throw new Error('operation mismatch');
+      const asset = record.assets.find(a => a.path === relative);
+      if (!asset) throw new Error('unlisted asset');
+      const fullPath = path.resolve(base, 'bundle', relative);
+      if (!fullPath.startsWith(path.resolve(base, 'bundle') + path.sep)) throw new Error('path escape');
+      const content = await fs.promises.readFile(fullPath);
+      if (content.byteLength !== asset.size ||
+          createHash('sha256').update(content).digest('hex') !== asset.sha256) throw new Error('asset changed');
+      return new Response(content, { status: 200, headers: {
+        'Content-Type': mimeTypes[path.extname(relative).toLowerCase()] || 'application/octet-stream',
+        'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'
+      } });
+    } catch {
+      return new Response('Resource not available', { status: 404, headers: { 'Access-Control-Allow-Origin': '*' } });
+    }
+  });
+}
 const smoke = process.argv.includes('--smoke');
 if (smoke) console.log(JSON.stringify({ event: 'desktop_start', electron: process.versions.electron }));
 let service;
 let window;
 let stopping = false;
+let importBusy = false;
+let importWorker;
+function importRequest(request) {
+  if (importBusy) return Promise.reject(new Error('已有导入正在进行'));
+  importBusy = true;
+  return new Promise((resolve, reject) => {
+    const worker = spawn(path.join(root, '.venv/bin/python'),
+      ['-m', 'urdftools.importers', path.join(app.getPath('userData'), 'imports')],
+      { cwd: root, env: { PATH: process.env.PATH, PYTHONPATH: path.join(root, 'python') }, stdio: ['pipe', 'pipe', 'pipe'] });
+    importWorker = worker;
+    let output = ''; let errors = '';
+    worker.stdin.on('error', () => {});
+    const deadline = setTimeout(() => worker.kill('SIGKILL'), 120000);
+    worker.stdout.on('data', data => { output += data; if (output.length > 32 * 1024 * 1024) worker.kill('SIGKILL'); });
+    worker.stderr.on('data', data => { errors = (errors + data).slice(-4096); });
+    worker.on('error', reject);
+    worker.on('close', code => {
+      clearTimeout(deadline);
+      importWorker = null;
+      if (code !== 0) return reject(new Error(errors || '导入进程失败或超时'));
+      try { resolve(JSON.parse(output)); } catch (error) { reject(error); }
+    });
+    worker.stdin.end(JSON.stringify(request));
+  }).finally(() => { importBusy = false; });
+}
+ipcMain.handle('import-source', async (event, source) => {
+  if (!window || event.sender !== window.webContents || typeof source !== 'string' || !path.isAbsolute(source)) throw new Error('无效的本地输入');
+  return importRequest({ action: 'import', source });
+});
+ipcMain.handle('choose-import', async (event, kind) => {
+  if (!window || event.sender !== window.webContents) throw new Error('无效窗口');
+  const choice = await dialog.showOpenDialog(window, { properties: [kind === 'folder' ? 'openDirectory' : 'openFile'],
+    filters: kind === 'folder' ? [] : [{ name: 'URDF / ZIP', extensions: ['urdf', 'zip'] }] });
+  return choice.canceled ? null : importRequest({ action: 'import', source: choice.filePaths[0] });
+});
+ipcMain.handle('select-import', (event, operation_id, model) => {
+  if (!window || event.sender !== window.webContents || typeof operation_id !== 'string' || typeof model !== 'string') throw new Error('无效选择');
+  return importRequest({ action: 'select', operation_id, model });
+});
 function stopService() {
   stopping = true;
+  if (importWorker) importWorker.kill('SIGTERM');
   if (service && service.exitCode === null) {
     service.kill('SIGTERM');
     setTimeout(() => { if (service.exitCode === null) service.kill('SIGKILL'); }, 2000).unref();
@@ -19,6 +93,7 @@ function stopService() {
 }
 function fail(error) { console.error(error.message || error); stopService(); app.exit(1); }
 app.whenReady().then(() => {
+  setupAssetProtocol();
   if (smoke) console.log(JSON.stringify({ event: 'electron_ready' }));
   const token = randomBytes(32).toString('hex');
   service = spawn(path.join(root, '.venv/bin/python'), ['-m', 'urdftools', 'serve'], {
@@ -55,6 +130,220 @@ app.whenReady().then(() => {
         if (title !== '查看') throw new Error('Renderer did not mount');
         const isolated = await window.webContents.executeJavaScript(`typeof require === 'undefined' && window.urdftools.version === '0.1.0'`);
         if (!isolated) throw new Error('Renderer isolation/preload failed');
+        if (process.env.URDFTOOLS_IMPORT_SMOKE) {
+          const fixture = process.env.URDFTOOLS_IMPORT_SMOKE;
+          const waitFor = async expression => {
+            const until = Date.now() + 15000;
+            while (Date.now() < until) {
+              if (await window.webContents.executeJavaScript(expression)) return;
+              await new Promise(resolve => setTimeout(resolve, 30));
+            }
+            throw new Error('Import UI timeout: ' + expression);
+          };
+          window.webContents.debugger.attach('1.3');
+          const target = await window.webContents.executeJavaScript(`(() => { const rect = document.querySelector('[aria-label="本地导入"]').getBoundingClientRect(); return { x: Math.round(rect.left + rect.width / 2), y: Math.round(rect.top + Math.min(100, rect.height / 2)), rect: rect.toJSON() }; })()`);
+          const dragData = { items: [], files: [fixture], dragOperationsMask: 1 };
+          window.webContents.on('console-message', ({ level, message }) => console.log(JSON.stringify({ event: 'renderer_console', level, message })));
+          for (const type of ['dragEnter', 'dragOver', 'drop']) {
+            await window.webContents.debugger.sendCommand('Input.dispatchDragEvent', { type, x: target.x, y: target.y, data: dragData });
+          }
+          console.log(JSON.stringify({ event: 'drag_diagnostics', target, dom: await window.webContents.executeJavaScript(`({ errors: [...document.querySelectorAll('[role="alert"]')].map(x=>x.textContent), status: document.querySelector('[data-import-status]')?.getAttribute('data-import-status'), text: document.querySelector('main')?.textContent.slice(0, 200) })`) }));
+          await waitFor(`document.querySelector('[data-import-status="selection_required"]') !== null`);
+          await window.webContents.executeJavaScript(`document.querySelectorAll('article button')[0].click()`);
+          await waitFor(`document.querySelector('[data-import-status="ready"]') !== null`);
+          const first = await window.webContents.executeJavaScript(`document.querySelector('article button[aria-pressed=true]').textContent`);
+          if (!first.includes('中文样机')) throw new Error('Wrong model selected');
+          await window.webContents.executeJavaScript(`document.querySelectorAll('article button')[1].click()`);
+          await waitFor(`document.querySelector('[data-import-status="failed"]') !== null`);
+          const findings = await window.webContents.executeJavaScript(`document.querySelector('main').textContent`);
+          if (!findings.includes('missing_resource') || !findings.includes('02缺失.urdf#element[')) throw new Error('Missing located error');
+          window.webContents.debugger.detach();
+          fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'import.png'), (await window.webContents.capturePage()).toPNG());
+          console.log(JSON.stringify({ event: 'desktop_import_smoke', nativeDrag: true, multiModel: true, selectedReady: first, missingLocated: true }));
+        }
+        if (process.env.URDFTOOLS_VIEWER_SMOKE) {
+          const fixture = process.env.URDFTOOLS_VIEWER_SMOKE;
+          const waitFor = async expression => {
+            const until = Date.now() + (process.env.URDFTOOLS_VIEWER_S06_SMOKE ? 90000 : 20000);
+            while (Date.now() < until) {
+              if (await window.webContents.executeJavaScript(expression)) return;
+              await new Promise(resolve => setTimeout(resolve, 60));
+            }
+            throw new Error('Viewer UI timeout: ' + expression + ' | ' +
+              await window.webContents.executeJavaScript("document.querySelector('main').textContent.slice(-600)"));
+          };
+          const rect = await window.webContents.executeJavaScript(`(() => { const r = document.querySelector('[aria-label="本地导入"]').getBoundingClientRect(); return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+45)}; })()`);
+          window.webContents.debugger.attach('1.3');
+          const data = { items: [], files: [fixture], dragOperationsMask: 1 };
+          for (const type of ['dragEnter', 'dragOver', 'drop']) {
+            await window.webContents.debugger.sendCommand('Input.dispatchDragEvent', { type, x: rect.x, y: rect.y, data });
+          }
+          await waitFor(`document.querySelector('[data-import-status="ready"]') !== null`);
+          if (process.env.URDFTOOLS_VIEWER_S06_SMOKE) {
+            console.log(JSON.stringify({ event: 'desktop_viewer_import_ready', model: process.env.URDFTOOLS_VIEWER_S06_SMOKE, fixture }));
+            window.webContents.debugger.detach();
+          } else {
+          await waitFor(`Number(document.querySelector('[data-mesh-count]')?.dataset.meshCount) >= 2`);
+          await waitFor(`document.querySelector('input[aria-label="shoulder"]') !== null`);
+          const before = await window.webContents.executeJavaScript(`document.querySelector('[data-joint-quaternion]')?.dataset.jointQuaternion`);
+          await window.webContents.executeJavaScript(`document.querySelector('input[aria-label="shoulder"]').focus()`);
+          window.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'End' });
+          window.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'End' });
+          await waitFor(`Number(document.querySelector('input[aria-label="shoulder"]')?.value) > 1.19`);
+          const after = await window.webContents.executeJavaScript(`document.querySelector('[data-joint-quaternion]')?.dataset.jointQuaternion`);
+          if (!after || after === before) throw new Error('Joint did not rotate');
+          const range = await window.webContents.executeJavaScript(`(() => {const s = document.querySelector('input[aria-label="shoulder"]'); return {value:Number(s.value),min:Number(s.min),max:Number(s.max)};})()`);
+          if (range.min !== -1.2 || range.max !== 1.2) throw new Error('Incorrect joint limits');
+          const png = (await window.webContents.capturePage()).toPNG();
+          fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'viewer.png'), png);
+          window.webContents.debugger.detach();
+          console.log(JSON.stringify({ event: 'desktop_viewer_smoke', meshCount: 2, joint: 'shoulder',
+            value: range.value, limits: [range.min, range.max], quaternion: after, screenshotBytes: png.length }));
+          }
+        }
+        if (process.env.URDFTOOLS_VIEWER_S05_SMOKE) {
+          window.webContents.on('console-message', ({ level, message }) => console.log(JSON.stringify({ event: 's05_renderer_console', level, message })));
+          console.log(JSON.stringify({ event: 's05_step', step: 'start' }));
+          const waitFor = async expression => {
+            const until = Date.now() + 20000;
+            while (Date.now() < until) {
+              if (await window.webContents.executeJavaScript(expression)) return;
+              await new Promise(resolve => setTimeout(resolve, 50));
+            }
+            throw new Error('S05 analysis UI timeout: ' + expression + ' | ' +
+              await window.webContents.executeJavaScript("document.querySelector('main').textContent.slice(-1200)"));
+          };
+          await waitFor(`Number(document.querySelector('[data-tree-link-count]')?.dataset.treeLinkCount) === 2`);
+          await waitFor(`Number(document.querySelector('[data-collision-count]')?.dataset.collisionCount) === 1`);
+          await waitFor(`Number(document.querySelector('[data-mass-known-count]')?.dataset.massKnownCount) === 1`);
+          await waitFor(`document.querySelector('[data-overall-bounds]')?.dataset.overallBounds !== ''`);
+          console.log(JSON.stringify({ event: 's05_step', step: 'initial-ui-ready' }));
+          const before = await window.webContents.executeJavaScript(`(() => {
+            const v = document.querySelector('[aria-label="三维机器人查看器"]');
+            return {
+              meshCount:Number(v.dataset.meshCount), linkCount:Number(v.dataset.treeLinkCount),
+              jointCount:Number(v.dataset.treeJointCount), visualCount:Number(v.dataset.visualCount),
+              collisionCount:Number(v.dataset.collisionCount), collisionStyledMeshCount:Number(v.dataset.collisionStyledMeshCount),
+              massKnownCount:Number(v.dataset.massKnownCount),
+              massUnknownCount:Number(v.dataset.massUnknownCount), totalKnownMass:Number(v.dataset.totalKnownMass),
+              massComplete:v.dataset.massComplete === 'true', physicsFingerprint:v.dataset.physicsFingerprint,
+              bounds:v.dataset.overallBounds.split(',').map(Number)
+            };
+          })()`);
+          console.log(JSON.stringify({ event: 's05_step', step: 'initial-metrics', before }));
+          if (before.linkCount !== 2 || before.jointCount !== 1 || before.visualCount !== 2 ||
+              before.collisionCount !== 1 || before.massKnownCount !== 1 || before.massUnknownCount !== 1 ||
+              before.massComplete || Math.abs(before.totalKnownMass - 1.25) > 0.001 ||
+              before.bounds.length !== 3 || before.bounds.some(n => !(n > 0))) {
+            throw new Error('Incorrect structure/physics/measurement values: ' + JSON.stringify(before));
+          }
+          console.log(JSON.stringify({ event: 's05_step', step: 'metrics-valid' }));
+          await window.webContents.executeJavaScript(`document.querySelector('[data-structure-node="joint:shoulder"]').click()`);
+          await waitFor(`document.querySelector('[data-selected-node]')?.dataset.selectedNode === 'joint:shoulder'`);
+          const jointPosition = await window.webContents.executeJavaScript(`document.querySelector('[data-selected-position]')?.dataset.selectedPosition`);
+          if (!jointPosition || jointPosition.split(',').length !== 3) throw new Error('Joint world position missing');
+          console.log(JSON.stringify({ event: 's05_step', step: 'joint-selected', jointPosition }));
+          await window.webContents.executeJavaScript(`document.querySelector('[data-structure-node="link:body"]').click()`);
+          await waitFor(`document.querySelector('[data-selected-node]')?.dataset.selectedNode === 'link:body'`);
+          const selectedDimensions = await window.webContents.executeJavaScript(`document.querySelector('[data-selected-dimensions]')?.dataset.selectedDimensions`);
+          if (!selectedDimensions || selectedDimensions.split(',').length !== 3 ||
+              selectedDimensions.split(',').some(n => !(Number(n) > 0))) {
+            throw new Error('Selected link bounding box invalid: ' + selectedDimensions);
+          }
+          console.log(JSON.stringify({ event: 's05_step', step: 'link-selected', selectedDimensions }));
+          const slider = await window.webContents.executeJavaScript(`(() => { const s=document.querySelector('input[aria-label="shoulder"]'); return {value:Number(s.value),min:Number(s.min),max:Number(s.max)}; })()`);
+          if (slider.min !== -1.2 || slider.max !== 1.2 || Math.abs(slider.value - 1.2) > 0.011) {
+            throw new Error('Joint slider value/limits invalid: ' + JSON.stringify(slider));
+          }
+          console.log(JSON.stringify({ event: 's05_step', step: 'joint-range', slider }));
+          const fingerprint = before.physicsFingerprint;
+          await window.webContents.executeJavaScript(`document.querySelector('input[aria-label="显示碰撞体"]').click()`);
+          await waitFor(`Number(document.querySelector('[data-visible-collision-count]')?.dataset.visibleCollisionCount) === 1`);
+          await waitFor(`Number(document.querySelector('[data-mesh-count]')?.dataset.meshCount) >= 3`);
+          const afterCollision = await window.webContents.executeJavaScript(`document.querySelector('[data-physics-fingerprint]')?.dataset.physicsFingerprint`);
+          if (afterCollision !== fingerprint) throw new Error('Collision toggle changed URDF physics values');
+          console.log(JSON.stringify({ event: 's05_step', step: 'collision-visible' }));
+          await window.webContents.executeJavaScript(`document.querySelector('input[aria-label="显示视觉模型"]').click()`);
+          await waitFor(`Number(document.querySelector('[data-visible-visual-count]')?.dataset.visibleVisualCount) === 0`);
+          await waitFor(`Number(document.querySelector('[data-visible-collision-count]')?.dataset.visibleCollisionCount) === 1`);
+          const afterHiddenVisual = await window.webContents.executeJavaScript(`document.querySelector('[data-physics-fingerprint]')?.dataset.physicsFingerprint`);
+          if (afterHiddenVisual !== fingerprint) throw new Error('Visual toggle changed URDF physics values');
+          console.log(JSON.stringify({ event: 's05_step', step: 'visual-hidden' }));
+          await window.webContents.executeJavaScript(`document.querySelector('input[aria-label="显示视觉模型"]').click()`);
+          await waitFor(`Number(document.querySelector('[data-visible-visual-count]')?.dataset.visibleVisualCount) === 2`);
+          await waitFor(`document.querySelector('[data-visual-visible]')?.dataset.visualVisible === 'true' && document.querySelector('input[aria-label="显示视觉模型"]')?.checked === true`);
+          console.log(JSON.stringify({ event: 's05_step', step: 'visual-restored' }));
+          await waitFor(`Number(document.querySelector('[data-com-marker-count]')?.dataset.comMarkerCount) === 1`);
+          await window.webContents.executeJavaScript(`document.querySelector('button[aria-label="隔离选中 Link"]').click()`);
+          await waitFor(`document.querySelector('[data-isolated-link]')?.dataset.isolatedLink === 'body'`);
+          await waitFor(`Number(document.querySelector('[data-visible-visual-count]')?.dataset.visibleVisualCount) === 1`);
+          await waitFor(`Number(document.querySelector('[data-visible-collision-count]')?.dataset.visibleCollisionCount) === 1`);
+          const afterIsolation = await window.webContents.executeJavaScript(`document.querySelector('[data-physics-fingerprint]')?.dataset.physicsFingerprint`);
+          if (afterIsolation !== fingerprint) throw new Error('Isolation changed URDF physics values');
+          await window.webContents.executeJavaScript(`document.querySelector('button[aria-label="隔离选中 Link"]').click()`);
+          await waitFor(`document.querySelector('[data-isolated-link]')?.dataset.isolatedLink === ''`);
+          await waitFor(`Number(document.querySelector('[data-visible-visual-count]')?.dataset.visibleVisualCount) === 2`);
+          await window.webContents.executeJavaScript(`document.querySelector('input[aria-label="显示已知质心"]').click()`);
+          await waitFor(`Number(document.querySelector('[data-visible-com-marker-count]')?.dataset.visibleComMarkerCount) === 0`);
+          const afterComHidden = await window.webContents.executeJavaScript(`document.querySelector('[data-physics-fingerprint]')?.dataset.physicsFingerprint`);
+          if (afterComHidden !== fingerprint) throw new Error('COM marker toggle changed URDF physics values');
+          await window.webContents.executeJavaScript(`document.querySelector('input[aria-label="显示已知质心"]').click()`);
+          await waitFor(`Number(document.querySelector('[data-visible-com-marker-count]')?.dataset.visibleComMarkerCount) === 1`);
+          await window.webContents.executeJavaScript(`document.querySelector('button[aria-label="重置视角"]').click()`);
+          await waitFor(`Number(document.querySelector('[data-view-reset-count]')?.dataset.viewResetCount) === 1`);
+          const exportPath = path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'viewer-export.png');
+          const exportPromise = new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('Screenshot download timed out')), 12000);
+            window.webContents.session.once('will-download', (event, item) => {
+              item.setSavePath(exportPath);
+              item.once('done', (_downloadEvent, state) => {
+                clearTimeout(timeout);
+                if (state !== 'completed') return reject(new Error('Screenshot download failed: ' + state));
+                try { resolve({ state, bytes: fs.statSync(exportPath).size }); }
+                catch (error) { reject(error); }
+              });
+            });
+          });
+          await window.webContents.executeJavaScript(`document.querySelector('button[aria-label="导出三维截图"]').click()`);
+          const exportResult = await exportPromise;
+          if (exportResult.bytes < 1000) throw new Error('Exported screenshot is unexpectedly small');
+          await waitFor(`document.querySelector('[data-screenshot-ready]')?.dataset.screenshotReady === 'true'`);
+          console.log(JSON.stringify({ event: 's05_step', step: 'isolation-com-view-screenshot', exportResult }));
+          const final = await window.webContents.executeJavaScript(`(() => {
+            const v=document.querySelector('[aria-label="三维机器人查看器"]');
+            return {
+              meshCount:Number(v.dataset.meshCount), linkCount:Number(v.dataset.treeLinkCount),
+              jointCount:Number(v.dataset.treeJointCount), visualCount:Number(v.dataset.visualCount),
+              visibleVisualCount:Number(v.dataset.visibleVisualCount), collisionCount:Number(v.dataset.collisionCount),
+              collisionStyledMeshCount:Number(v.dataset.collisionStyledMeshCount),
+              visibleCollisionCount:Number(v.dataset.visibleCollisionCount), massKnownCount:Number(v.dataset.massKnownCount),
+              massUnknownCount:Number(v.dataset.massUnknownCount), totalKnownMass:Number(v.dataset.totalKnownMass),
+              massComplete:v.dataset.massComplete === 'true', physicsFingerprint:v.dataset.physicsFingerprint,
+              visualVisible:v.dataset.visualVisible === 'true', collisionVisible:v.dataset.collisionVisible === 'true',
+              visualChecked:document.querySelector('input[aria-label="显示视觉模型"]').checked,
+              collisionChecked:document.querySelector('input[aria-label="显示碰撞体"]').checked,
+              comMarkerCount:Number(v.dataset.comMarkerCount), visibleComMarkerCount:Number(v.dataset.visibleComMarkerCount),
+              comVisible:v.dataset.comVisible === 'true', isolatedLink:v.dataset.isolatedLink,
+              viewResetCount:Number(v.dataset.viewResetCount), screenshotReady:v.dataset.screenshotReady === 'true',
+              bounds:v.dataset.overallBounds.split(',').map(Number), selectedDimensions:v.dataset.selectedDimensions.split(',').map(Number),
+              joint:'shoulder', jointValue:Number(document.querySelector('input[aria-label="shoulder"]').value)
+            };
+          })()`);
+          final.physicsUnchanged = final.physicsFingerprint === fingerprint;
+          delete final.physicsFingerprint;
+          final.isolationRestored = final.isolatedLink === '' && final.visibleVisualCount === 2;
+          final.comMarkerVerified = final.comMarkerCount === 1 && final.visibleComMarkerCount === 1 && final.comVisible;
+          final.screenshotExportBytes = exportResult.bytes;
+          const png = (await window.webContents.capturePage()).toPNG();
+          fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'viewer-analysis.png'), png);
+          console.log(JSON.stringify({ event: 's05_step', step: 'screenshot', bytes: png.length }));
+          console.log(JSON.stringify({ event: 'desktop_viewer_s05_smoke', ...final,
+            jointPosition:jointPosition, screenshotBytes:png.length }));
+        }
+        if (process.env.URDFTOOLS_VIEWER_S06_SMOKE) {
+          const runS06ViewerSmoke = require(path.join(root, 'scripts/s06_desktop_smoke_hook.cjs'));
+          await runS06ViewerSmoke(window, path, fs, process.env.URDFTOOLS_VIEWER_S06_SMOKE);
+        }
         await window.webContents.executeJavaScript(`document.querySelectorAll('nav button')[3].click()`);
         await new Promise(resolve => setTimeout(resolve, 100));
         const selected = await window.webContents.executeJavaScript(`document.querySelector('h1').textContent`);

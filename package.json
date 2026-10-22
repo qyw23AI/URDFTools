@@ -3,13 +3,27 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": {"node": "24.19.0", "npm": "10.9.9"},
+  "engines": {
+    "node": "24.19.0",
+    "npm": "10.9.9"
+  },
   "scripts": {
     "build": "tsc --noEmit && vite build apps/web --outDir ../../dist/web",
     "dev": "vite apps/web --host 127.0.0.1",
     "preview": "vite preview apps/web --outDir ../../dist/web --host 127.0.0.1",
     "test": "node tests/web/shell.test.mjs"
   },
-  "dependencies": {"react": "19.2.3", "react-dom": "19.2.3"},
-  "devDependencies": {"@types/react": "19.2.7", "@types/react-dom": "19.2.3", "typescript": "5.9.3", "vite": "8.2.2"}
+  "dependencies": {
+    "@types/three": "0.180.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "three": "0.180.0",
+    "urdf-loader": "0.13.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.3",
+    "vite": "8.2.2"
+  }
 }

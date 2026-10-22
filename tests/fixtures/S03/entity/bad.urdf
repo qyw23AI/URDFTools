@@ -1,0 +1,1 @@
+<!DOCTYPE robot [<!ENTITY secret SYSTEM "file:///etc/passwd">]><robot name="&secret;"/>

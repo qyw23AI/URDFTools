@@ -1,0 +1,2 @@
+<?xml version="1.0"?>
+<package format="2"><name>g1_description</name><version>1.0.0</version><description>Import-test package wrapper; upstream URDF and meshes remain unchanged.</description><maintainer email="unitree@unitree.com">Unitree Robotics</maintainer><license>BSD-3-Clause</license></package>

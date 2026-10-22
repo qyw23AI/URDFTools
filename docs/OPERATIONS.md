@@ -1,5 +1,11 @@
 # 项目运行与交接
 
+## 当前直接开发方式（2026-10-22）
+
+本地 `urdftools-dev.timer` 已禁用；旧 `scheduler.py run` 不再作为开发入口。Codex 应用中的“URDFTools 每小时直接开发”心跳在当前对话续做：先确认没有 WebCodex 任务正在编辑、检查额度，再复核未验收代码并继续下一阶段。每轮运行实际 gate，更新 `PROGRESS.md` 与阶段验收文档，尽可能做本地 Git 提交。提交暂时失败时保留工作区和证据，下一轮继续。`.scheduler/state.json` 是旧系统历史状态，不代表当前产品进度。
+
+以下内容是旧调度器的历史操作记录，不再用于启动自动开发。
+
 源码根目录 `/home/qyw/URDFTools`；架构于 2026-10-22 生成。当前实现从 S00 开始，由调度器启动独立 Codex CLI，按 `scheduler.json` 的 level 实际指定模型。
 
 现有可用命令：

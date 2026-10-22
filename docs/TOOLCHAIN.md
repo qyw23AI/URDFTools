@@ -46,6 +46,38 @@ python3 scripts/accept_phase.py S01
 
 服务仅绑定 127.0.0.1、动态端口，所有 HTTP 请求需 Bearer token，含 Origin 请求拒绝；启动行不输出 token。当前 renderer 不直接访问服务，Electron 主进程执行健康检查并管理服务生命周期。关闭 Node integration，启用 contextIsolation 和 sandbox，拒绝新窗口与导航。
 
+## C00 独立 CAD worker
+
+STEP 导入使用独立的 `.tools/cad-venv`，不把 OpenCascade 加入应用基础 `.venv`。版本与 Linux x86_64 / CPython 3.12 wheel SHA256 固定在根目录 `cad-requirements.lock`：`cadquery-ocp-novtk==8.0.1.1.0`、`cadquery-ocp-proxy==8.0.1.1.0`、`numpy==2.3.4`、`PyYAML==6.0.3`。
+
+联网准备 CAD worker 并校验哈希：
+
+```bash
+.venv/bin/python scripts/setup_cad_worker.py
+```
+
+已有完整 wheelhouse 时离线安装：
+
+```bash
+.venv/bin/python scripts/setup_cad_worker.py --offline
+```
+
+执行 STEP 检查器时使用 CAD worker 解释器，而不是基础 `.venv`：
+
+```bash
+.tools/cad-venv/bin/python scripts/cad_step_inspect.py tests/fixtures/C00/two_part_mm.step --output artifacts/C00/two-part.json
+```
+
+`scripts/setup_cad_worker.py` 通过哈希锁和 `pip check` 验证依赖；`scripts/accept_phase.py C00` 执行 CAD worker、数值契约和 CLI 集成 gate。step2urdf 的适配器提交和 MIT 许可原文记录在 `third_party/step2urdf-adapter/UPSTREAM.md`；其上游版权字段存在占位文本，最终发行前仍需 Q01 许可复核。
+
+C01 的质量属性 CLI 同样运行在 CAD worker 中。密度必须显式指定；省略密度会保留未知质量/惯量，不会把材料缺失解释为 0 kg。
+
+命令示例：.tools/cad-venv/bin/python scripts/cad_step_mass.py tests/fixtures/C01/box_mm.step --density 1000 --output artifacts/C01/box.json
+
+按零件名提供材料时使用 JSON 对象，例如 {"Box20x10x5": 1000}，通过 --densities-json materials.json 传入。未匹配的零件名会产生警告；此 API 只从 STEP B-rep 实体计算物理属性，不从 URDF visual/collision mesh 推断质量。
+
+
+
 桌面 gate 每次用固定工具链构建源码，校验已安装 Electron 文件，在临时 HOME、无用户 DISPLAY/WAYLAND_DISPLAY/XAUTHORITY 的环境运行 Chromium `--ozone-platform=headless --disable-gpu`。真实 React 挂载、查看→评估点击、preload 隔离、sandbox 和 PNG 截图均有断言；不使用 `--no-sandbox`。这是本地软件渲染验收，不能推断用户 GNOME 会话、GPU/WebGL 或最终安装已验收。单独入口为 `python3 scripts/desktop_smoke.py`。
 
 验收器从 `scripts/acceptance_manifest.json` 注册阶段，S01、S02 已注册实际验收；未知/未来阶段返回 2。每个 stage 有界执行，超时清理整个进程组，保存独立 UTC 时间戳日志及 counts。空测试、全 skip、失败和 expected failure 均不通过。集成验收在全新含空格目录安装，验证 CLI、真实 HTTP 鉴权/Origin、Vite preview 与生产 bundle、SSR、离线失败和真实桌面渲染。机器报告在 `artifacts/acceptance/S01.json`，历史失败保留在 `artifacts/S01/runs/`。

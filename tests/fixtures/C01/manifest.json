@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "fixture_origin": "self-authored analytic B-rep shapes; not vendor or user robot assets",
+  "generator": "scripts/generate_c01_fixtures.py",
+  "kernel_distribution": "cadquery-ocp-novtk",
+  "kernel_version": "8.0.1.1.0",
+  "units": "millimetre",
+  "models": {
+    "box_mm.step": {
+      "name": "Box20x10x5",
+      "dimensions_mm": [
+        20,
+        10,
+        5
+      ]
+    },
+    "offset_double_sphere_mm.step": {
+      "name": "OffsetDoubleSphere",
+      "part_count": 2,
+      "sphere_radius_mm": 10,
+      "sphere_centers_mm": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          50,
+          0,
+          0
+        ]
+      ],
+      "density_test_kg_m3": 1000
+    },
+    "rotated_box_mm.step": {
+      "name": "RotatedBox",
+      "dimensions_mm": [
+        20,
+        10,
+        5
+      ],
+      "rotation_z_rad": 0.7853981633974483,
+      "translation_mm": [
+        100,
+        -20,
+        30
+      ],
+      "density_test_kg_m3": 1000
+    }
+  },
+  "files": {
+    "box_mm.step": {
+      "size_bytes": 15352,
+      "sha256": "a0e9f5c79f5cc80edb530a696f2d0e48e46dd133be919be86a0db2dee121e656"
+    },
+    "offset_double_sphere_mm.step": {
+      "size_bytes": 4128,
+      "sha256": "9919b4b734d6b7d0f2da267148011d5d95cfe0e55eaacd10ae8f819a270484b8"
+    },
+    "rotated_box_mm.step": {
+      "size_bytes": 16965,
+      "sha256": "d9a27532972889b9db46cef5b8eb37250c8cb8f73f7d53e80a264e32dc7914cf"
+    }
+  }
+}

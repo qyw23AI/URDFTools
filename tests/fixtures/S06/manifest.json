@@ -1,0 +1,32 @@
+{
+  "source_repository": "https://github.com/unitreerobotics/unitree_ros",
+  "source_commit": "5994d4faef0a9cadd3287f8de0199a67eeb2a259",
+  "repository_license": "BSD-3-Clause",
+  "copyright": "Copyright (c) 2016-2022 HangZhou YuShu TECHNOLOGY CO.,LTD. (Unitree Robotics)",
+  "models": {
+    "unitree_a1": {
+      "relative_path": "tests/fixtures/S06/a1_description",
+      "urdf": "a1.urdf",
+      "links": 23,
+      "joints": 22,
+      "movable_joints": 12,
+      "urdf_sha256": "b5feb8464ed82f6f6ac1905e915d5177b887e6f338e0f8f810da35fd4395a607",
+      "license_file": "tests/fixtures/S06/a1_description/LICENSE",
+      "license_sha256": "84aac59fd3246e3ddc49d1387644e8fcf43b0def4f0b9fe687f372e90446df2d",
+      "mesh_count": 6,
+      "mesh_bytes": 9085824
+    },
+    "unitree_g1_29dof": {
+      "relative_path": "tests/fixtures/S06/g1_description",
+      "urdf": "g1_29dof_rev_1_0.urdf",
+      "links": 39,
+      "joints": 38,
+      "movable_joints": 29,
+      "urdf_sha256": "c0ae739c640c3e2c00d1bdd8810b5d6e59601487bd1a3995859f9543269ee5c8",
+      "license_file": "tests/fixtures/S06/g1_description/LICENSE",
+      "license_sha256": "84aac59fd3246e3ddc49d1387644e8fcf43b0def4f0b9fe687f372e90446df2d",
+      "mesh_count": 35,
+      "mesh_bytes": 19666440
+    }
+  }
+}
