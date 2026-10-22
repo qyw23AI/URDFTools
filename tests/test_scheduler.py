@@ -138,21 +138,31 @@ class SchedulerTest(unittest.TestCase):
         self.assertNotEqual(self.invoke('run').returncode, 0)
         self.assertEqual(self.calls(), calls)
 
-    def test_preflight_429_never_becomes_unknown_quota_exec(self):
-        self.result('quota_wait', rpc_errors={'account/rateLimits/read': {'status': 429, 'code': 'rate_limit_exceeded'}})
-        self.assertNotIn('exec', self.calls())
+    def test_usage_read_429_allows_one_bounded_exec(self):
+        self.config['phases'].append(self.phase('two', ['one']))
+        self.save_config(commit=True)
+        self.fault(rpc_errors={'account/rateLimits/read': {'status': 429, 'code': 'rate_limit_exceeded'}})
+        result = self.invoke('run')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(self.state()['completed'], ['one'])
+        self.assertEqual(self.state()['quota_snapshot']['status'], 'unknown')
+        self.assertEqual(self.state()['quota_snapshot']['read_error_class'], 'quota_wait')
+        self.assertEqual(self.calls().count('exec'), 1)
+
+    def test_nested_usage_read_429_allows_exec_but_exec_429_stops(self):
+        self.result('quota_wait', rpc_errors={'account/rateLimits/read': {
+            'code': -32603, 'data': None,
+            'codexErrorInfo': {'httpConnectionFailed': {'httpStatusCode': 429}}}},
+            error={'code': 'rate_limit_exceeded', 'status': 429})
+        self.assertEqual(self.calls().count('exec'), 1)
         before = self.calls()
         self.assertNotEqual(self.invoke('run').returncode, 0)
         self.assertEqual(self.calls(), before)
 
-    def test_preflight_nested_http_429_stops_before_exec(self):
-        self.result('quota_wait', rpc_errors={'account/rateLimits/read': {
-            'code': -32603, 'data': None,
-            'codexErrorInfo': {'httpConnectionFailed': {'httpStatusCode': 429}}}})
+    def test_usage_read_401_still_requires_auth(self):
+        self.result('auth_required', rpc_errors={'account/rateLimits/read': {
+            'status': 401, 'code': 'unauthorized'}})
         self.assertNotIn('exec', self.calls())
-        before = self.calls()
-        self.assertNotEqual(self.invoke('run').returncode, 0)
-        self.assertEqual(self.calls(), before)
 
     def test_typed_error_variants_keep_shared_backoff(self):
         self.result('quota_wait', error={'codexErrorInfo': 'UsageLimitExceeded'})
@@ -387,6 +397,14 @@ class SchedulerTest(unittest.TestCase):
         self.assertNotEqual(self.invoke('run').returncode, 0)
         self.assertEqual(self.git('diff', '--cached'), before)
         self.assertEqual(self.calls(), [])
+
+    def test_gitignore_is_safe_phase_wip_but_other_dotfiles_are_not(self):
+        (self.root / '.gitignore').write_text((self.root / '.gitignore').read_text() + 'dist/\n')
+        manifest = scheduler.Scheduler(self.root).manifest()
+        self.assertIn('.gitignore', manifest)
+        (self.root / '.secret').write_text('do not commit')
+        with self.assertRaises(scheduler.Failure):
+            scheduler.Scheduler(self.root).manifest()
 
     def test_concurrent_lock(self):
         directory = self.root / '.scheduler'

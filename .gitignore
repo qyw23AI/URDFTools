@@ -1,2 +1,9 @@
 .scheduler/
 __pycache__/
+.tools/
+.venv/
+node_modules/
+dist/
+*.egg-info/
+build/
+artifacts/S01/clean-room/

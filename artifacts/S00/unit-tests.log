@@ -17,6 +17,7 @@ test_four_model_routes (test_scheduler.SchedulerTest) ... ok
 test_gate_cannot_replace_plan_before_commit (test_scheduler.SchedulerTest) ... ok
 test_gate_counts_numerical_invariants (test_scheduler.SchedulerTest) ... ok
 test_git_success_evidence_and_repeat (test_scheduler.SchedulerTest) ... ok
+test_gitignore_is_safe_phase_wip_but_other_dotfiles_are_not (test_scheduler.SchedulerTest) ... ok
 test_graph_mutation_rejected (test_scheduler.SchedulerTest) ... ok
 test_graph_validation (test_scheduler.SchedulerTest) ... ok
 test_hard_crash_recovers_live_orphan_group (test_scheduler.SchedulerTest) ... ok
@@ -28,10 +29,9 @@ test_isolated_codex_home_excludes_provider_and_mcp (test_scheduler.SchedulerTest
 test_missing_turn_completed (test_scheduler.SchedulerTest) ... ok
 test_model_unavailable_no_downgrade (test_scheduler.SchedulerTest) ... ok
 test_multiple_gates_keep_separate_logs (test_scheduler.SchedulerTest) ... ok
+test_nested_usage_read_429_allows_exec_but_exec_429_stops (test_scheduler.SchedulerTest) ... ok
 test_no_tasks_no_external_calls (test_scheduler.SchedulerTest) ... ok
 test_partial_exit_zero (test_scheduler.SchedulerTest) ... ok
-test_preflight_429_never_becomes_unknown_quota_exec (test_scheduler.SchedulerTest) ... ok
-test_preflight_nested_http_429_stops_before_exec (test_scheduler.SchedulerTest) ... ok
 test_primary_quota_boundary (test_scheduler.SchedulerTest) ... ok
 test_project_provider_config_refused (test_scheduler.SchedulerTest) ... ok
 test_quota_threshold_and_model_buckets (test_scheduler.SchedulerTest) ... ok
@@ -55,11 +55,13 @@ test_unknown_quota_one_bounded_exec (test_scheduler.SchedulerTest) ... ok
 test_unknown_quota_stops_multi_phase_round (test_scheduler.SchedulerTest) ... ok
 test_unrecognized_zero_exit_is_not_gate (test_scheduler.SchedulerTest) ... ok
 test_unsealed_pending_transaction_requires_review (test_scheduler.SchedulerTest) ... ok
+test_usage_read_401_still_requires_auth (test_scheduler.SchedulerTest) ... ok
+test_usage_read_429_allows_one_bounded_exec (test_scheduler.SchedulerTest) ... ok
 test_waiting_experiment_poll_avoids_model (test_scheduler.SchedulerTest) ... ok
 test_zero_tests_rejected (test_scheduler.SchedulerTest) ... ok
 
 ----------------------------------------------------------------------
-Ran 59 tests in 11.000s
+Ran 61 tests in 11.426s
 
 OK
-{"status": "no_op", "completed": ["one"], "tasks": {"one": {"status": "completed", "reason": "gates and Git transaction complete", "last_run": "20261022T035851Z-one-143f966f"}}, "final_release_path": null}
+{"status": "no_op", "completed": ["one"], "tasks": {"one": {"status": "completed", "reason": "gates and Git transaction complete", "last_run": "20261022T042311Z-one-419d6268"}}, "final_release_path": null}

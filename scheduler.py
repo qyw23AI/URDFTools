@@ -256,6 +256,11 @@ class RPC:
                     continue
                 if event.get('id') == self.seq:
                     failure = classify_failure([{'type': 'error', 'error': event.get('error', {})}])
+                    # A 429 from the read-only usage endpoint does not prove that
+                    # model inference is exhausted. Preserve it as unknown usage;
+                    # one bounded exec will confirm whether inference can run.
+                    if method == 'account/rateLimits/read' and failure == 'quota_wait':
+                        return event
                     if failure in {'quota_wait', 'auth_required'}:
                         raise Failure(failure, 'preflight RPC rejected: ' + method)
                     return event
@@ -331,6 +336,8 @@ def preflight(codex, root, env, policy, directory):
                 snapshot['quota']['status'] = 'unknown'
         else:
             snapshot['quota']['error_code'] = response.get('error', {}).get('code', 'unavailable')
+            snapshot['quota']['read_error_class'] = classify_failure(
+                [{'type': 'error', 'error': response.get('error', {})}])
         if STOP:
             raise Failure('interrupted', 'signal during preflight')
         return snapshot
@@ -637,7 +644,8 @@ class Scheduler:
             path = safe_path(self.root, name)
             if path.name.lower() in {'auth.json', 'credentials.json', 'token.json', 'tokens.json'}:
                 raise Failure('blocked_input', 'credential file cannot enter scheduler commit: ' + name)
-            if path.is_symlink() or any(part.startswith('.') for part in Path(name).parts) or (
+            if path.is_symlink() or (name != '.gitignore' and any(
+                    part.startswith('.') for part in Path(name).parts)) or (
                 path.suffix.lower() in {'.pem', '.key', '.step', '.stp', '.fcstd', '.mp4', '.zip', '.pt', '.pth'}):
                 raise Failure('blocked_input', 'manual review required for non-source path: ' + name)
             if path.is_file() and path.stat().st_size > 5 * 1024 * 1024:

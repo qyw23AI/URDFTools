@@ -22,7 +22,7 @@ S00 实施记录（2026-10-22）：当前源码 59 项本地测试通过（含�
 1. 获取独占文件锁；恢复中断状态并写开始记录。重复触发安全返回；无待办不调用模型、不查额度。
 2. 验证任务图、phase ids、prompt 路径、测试 argv、完成证据、Git HEAD 和外部修改。按顺序选择依赖已完成且不处于 backoff/硬件等待的任务；独立任务不被 GPU 阻塞拖死。
 3. 严格 ChatGPT 身份预检，移除继承 API credentials，设置已支持的 `forced_login_method=chatgpt` 和 OpenAI ChatGPT provider，避免用户自定义 provider 偷换成付费后端。认证过期保存 auth_required，不能把任意 Logged in 当作 ChatGPT。
-4. 可选只读 app-server 查询额度：保存 primary/secondary 及 model bucket、window/reset、timestamp。缺失为 unknown。默认 primary 使用率达到 90% 或 secondary 达到 95% 停本轮，每小时检查，额度错误退避 50 分钟后再试；没有官方百分比时允许一次有界 exec，由明确 quota/rate-limit 事件停止。不得消耗 reset credit/购额或后台登录弹窗。
+4. 可选只读 app-server 查询额度：保存 primary/secondary 及 model bucket、window/reset、timestamp。缺失为 unknown。默认 primary 使用率达到 90% 或 secondary 达到 95% 停本轮，每小时检查，实际模型额度错误退避 50 分钟后再试。若只有额度读取 RPC 返回 429，不能据此断言模型额度耗尽；在 ChatGPT 身份和模型目录已确认时，本轮允许一次有界 `codex exec`，由其明确 quota/rate-limit 事件决定是否停轮，且额度未知时不继续第二个阶段。不得消耗 reset credit/购额或后台登录弹窗。
 5. 读取任务说明、架构相关章节、PROGRESS、前次摘要与 diff，启动正确模型；不把整库/视频塞入 prompt。`--output-schema`/`--output-last-message` 保存结构化 completed/partial/blocked 结果。流式写 JSONL，保留进程退出与 turn.completed/turn.failed，不能只看退出码。
 6. 实现阶段写人类摘要和验收材料；调度器运行声明的测试 argv，每个测试独立日志、返回码、耗时。gate 必须有实际测试/结果，禁止 empty discovery 或用全部 skip 充当通过。
 7. 只有结构化 completed、无 blocker、gate 全通过、必要 artifact 存在且内容合法，才提交该阶段并标完成。Git 提交失败有独立状态，可重试提交而不重做阶段。保留 run evidence 和完成 commit 的关联。
