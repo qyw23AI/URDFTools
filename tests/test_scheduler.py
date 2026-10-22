@@ -317,6 +317,24 @@ class SchedulerTest(unittest.TestCase):
         self.assertEqual(self.state()['completed'], ['one'])
         self.assertEqual(self.state()['checkpoints'], {})
 
+    def test_restored_checkpoint_is_reparked_when_quota_threshold_stops_preflight(self):
+        self.result('blocked_hardware', result='blocked', blocker_type='hardware')
+        first = self.state()['checkpoints']['one']
+        self.assertEqual(self.git('status', '--porcelain'), '')
+        self.assertEqual(self.invoke('retry', 'one').returncode, 0)
+        self.fault(primary=90)
+        stopped = self.invoke('run')
+        self.assertEqual(stopped.returncode, 75, stopped.stderr + stopped.stdout)
+        self.assertEqual(self.state()['attempts'][-1]['result'], 'quota_wait')
+        self.assertIn('one', self.state()['checkpoints'])
+        self.assertEqual(self.git('status', '--porcelain'), '')
+        self.assertEqual(self.state()['checkpoints']['one']['files'], first['files'])
+        self.assertEqual(self.invoke('retry', 'one').returncode, 0)
+        self.fault()
+        resumed = self.invoke('run')
+        self.assertEqual(resumed.returncode, 0, resumed.stderr + resumed.stdout)
+        self.assertEqual(self.state()['completed'], ['one'])
+
     def test_waiting_experiment_poll_avoids_model(self):
         self.config['phases'][0]['experiment_status_file'] = 'job.json'
         self.save_config(commit=True)

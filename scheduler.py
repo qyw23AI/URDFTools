@@ -1065,8 +1065,13 @@ class Scheduler:
                 print(json.dumps(self.state['attempts'][-1], ensure_ascii=False))
                 if getattr(self, 'protected_input_changed', False):
                     return 1
-                if result in {'blocked_hardware', 'blocked_input', 'waiting_experiment'}:
+                # A restored checkpoint may contain source edits before preflight.
+                # Park unfinished edits so quota/auth waits and failed gates
+                # leave a clean baseline. Commit failures retain their sealed
+                # transaction and staged files for transaction recovery.
+                if result not in {'completed', 'commit_failed'}:
                     self.park_wip(phase['id'], self.state['attempts'][-1]['run_id'], self.head())
+                if result in {'blocked_hardware', 'blocked_input', 'waiting_experiment'}:
                     if getattr(self, 'unknown_quota_used', False):
                         return 1
                     config = load_config(self.root)

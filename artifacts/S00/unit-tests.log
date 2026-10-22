@@ -38,6 +38,7 @@ test_quota_threshold_and_model_buckets (test_scheduler.SchedulerTest) ... ok
 test_real_systemd_calendar_has_hourly_intervals (test_scheduler.SchedulerTest) ... ok
 test_real_test_failure (test_scheduler.SchedulerTest) ... ok
 test_repository_plan_preserved (test_scheduler.SchedulerTest) ... ok
+test_restored_checkpoint_is_reparked_when_quota_threshold_stops_preflight (test_scheduler.SchedulerTest) ... ok
 test_s00_acceptance_gate_rejects_missing_or_blocked_live (test_scheduler.SchedulerTest) ... ok
 test_s00_timer_gate_requires_deployed_units_and_actual_trigger (test_scheduler.SchedulerTest) ... ok
 test_self_modification_stops_round (test_scheduler.SchedulerTest) ... ok
@@ -61,7 +62,7 @@ test_waiting_experiment_poll_avoids_model (test_scheduler.SchedulerTest) ... ok
 test_zero_tests_rejected (test_scheduler.SchedulerTest) ... ok
 
 ----------------------------------------------------------------------
-Ran 61 tests in 11.426s
+Ran 62 tests in 11.430s
 
 OK
-{"status": "no_op", "completed": ["one"], "tasks": {"one": {"status": "completed", "reason": "gates and Git transaction complete", "last_run": "20261022T042311Z-one-419d6268"}}, "final_release_path": null}
+{"status": "no_op", "completed": ["one"], "tasks": {"one": {"status": "completed", "reason": "gates and Git transaction complete", "last_run": "20261022T042923Z-one-46ab58b3"}}, "final_release_path": null}
