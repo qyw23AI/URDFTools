@@ -1,0 +1,71 @@
+{
+  "status": "passed",
+  "timestamp": "2026-10-22T03:29:26+00:00",
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit=urdftools-s00-probe-884eeb726ba3",
+    "--on-active=2s",
+    "--timer-property=AccuracySec=100ms",
+    "--collect",
+    "/usr/bin/python3",
+    "/home/qyw/URDFTools/scripts/verify_scheduler_timer.py",
+    "--probe",
+    "/home/qyw/URDFTools/artifacts/S00/timer/trigger-884eeb726ba34f2b96839a0f081f3982.json",
+    "145686.269471161",
+    "884eeb726ba34f2b96839a0f081f3982"
+  ],
+  "process": {
+    "argv": [
+      "systemd-run",
+      "--user",
+      "--unit=urdftools-s00-probe-884eeb726ba3",
+      "--on-active=2s",
+      "--timer-property=AccuracySec=100ms",
+      "--collect",
+      "/usr/bin/python3",
+      "/home/qyw/URDFTools/scripts/verify_scheduler_timer.py",
+      "--probe",
+      "/home/qyw/URDFTools/artifacts/S00/timer/trigger-884eeb726ba34f2b96839a0f081f3982.json",
+      "145686.269471161",
+      "884eeb726ba34f2b96839a0f081f3982"
+    ],
+    "exit_code": 0,
+    "status": null,
+    "duration_seconds": 0.005
+  },
+  "actual_trigger": {
+    "token": "884eeb726ba34f2b96839a0f081f3982",
+    "elapsed_seconds": 2.1354732449981384,
+    "timestamp": "2026-10-22T03:29:26+00:00"
+  },
+  "source_sha256": "b4cef2983e92a639a1f36b8f1646073daca8e2e208634c28aaeccd76b55d883e",
+  "timer_sha256": "8dabedd79ef75acc4aa2c2f34346b7c998d40de0fe46e81de9ac169df4705d17",
+  "verifier_sha256": "d0b0ec76ce4ba9ffb87d14626ad9b44bff302b621bafc6d59ac2dfd25edf4c08",
+  "deployment": {
+    "urdftools-dev.service": {
+      "source_sha256": "b4cef2983e92a639a1f36b8f1646073daca8e2e208634c28aaeccd76b55d883e",
+      "installed_sha256": "b4cef2983e92a639a1f36b8f1646073daca8e2e208634c28aaeccd76b55d883e"
+    },
+    "urdftools-dev.timer": {
+      "source_sha256": "8dabedd79ef75acc4aa2c2f34346b7c998d40de0fe46e81de9ac169df4705d17",
+      "installed_sha256": "8dabedd79ef75acc4aa2c2f34346b7c998d40de0fe46e81de9ac169df4705d17"
+    }
+  },
+  "deployment_matches": true,
+  "timer_active": true,
+  "timer_process": {
+    "argv": [
+      "systemctl",
+      "--user",
+      "show",
+      "urdftools-dev.timer",
+      "--property=ActiveState,TimersCalendar,Persistent"
+    ],
+    "exit_code": 0,
+    "status": null,
+    "duration_seconds": 0.006
+  },
+  "calendar": "*-*-* 00/6:00:00",
+  "permanent_timer_modified": false
+}

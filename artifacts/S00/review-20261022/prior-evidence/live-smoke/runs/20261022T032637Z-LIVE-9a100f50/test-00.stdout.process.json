@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "numeric_gate.py"
+  ],
+  "exit_code": 0,
+  "status": null,
+  "duration_seconds": 0.011
+}

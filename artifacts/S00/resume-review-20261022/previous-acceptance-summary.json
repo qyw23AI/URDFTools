@@ -1,0 +1,110 @@
+{
+  "phase": "S00",
+  "timestamp": "2026-10-22T03:37:53.326615+00:00",
+  "status": "blocked",
+  "blocker_type": "input",
+  "summary": "59 local tests pass; Git retry evidence seal and structured 429/401 handling fixed. Current-source real CLI acceptance blocked before exec by ChatGPT workspace routing.",
+  "blockers": [
+    "account/read workspace routing discovery failed; current-source real model edit/test/commit/repeat flow not reached.",
+    "Current sandbox rejects user systemd bus access; installed units match source and prior same-version trigger evidence is retained, but fresh trigger could not be verified."
+  ],
+  "tests": {
+    "unit": {
+      "timestamp": "2026-10-22T03:35:27+00:00",
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_scheduler*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "tests_run": 59,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_sha256": "b120248a9db7a10fdb912248fa444b480aa56d245fd81cce7869a4eeb77b060f",
+      "tests_sha256": "f93c6a155466d8494741093a547d0587dd5565b753e2662c27776589cb3e98dc",
+      "fixture_sha256": "10008bfa28af0c0fed92bbc611f2fefcfd2965825e88eef79fe6756c3ceef10a",
+      "evidence_sha256": "cdb7e36156357b33d4aa022bb239b206688a433577bfcfb2555298d88453811c"
+    },
+    "declared_validation_exit_code": 0,
+    "declared_final_gate_exit_code": 1,
+    "declared_final_gate": {
+      "checks": [
+        {
+          "report": "artifacts/S00/unit-report.json",
+          "passed": true,
+          "reported_status": "passed"
+        },
+        {
+          "report": "artifacts/S00/live-smoke/report.json",
+          "passed": false,
+          "reported_status": "blocked"
+        },
+        {
+          "report": "artifacts/S00/timer/report.json",
+          "passed": true,
+          "reported_status": "passed"
+        }
+      ],
+      "scheduler_gate": {
+        "executed": 3,
+        "passed": 2,
+        "failed": 1,
+        "skipped": 0
+      }
+    },
+    "live_cli_report": "artifacts/S00/live-smoke/report.json",
+    "live_cli_status": "blocked",
+    "live_cli_attempts_this_review": 1,
+    "live_cli_inner_exit_code": 75,
+    "timer_current_report": "artifacts/S00/review-20261022/timer/report.json",
+    "timer_current_status": "blocked",
+    "timer_prior_accepted_report": "artifacts/S00/timer/report.json",
+    "timer_deployment_matches": true,
+    "calendar_interval_seconds": [
+      21600,
+      21600,
+      21600
+    ]
+  },
+  "project_invariants": {
+    "timestamp": "2026-10-22T03:37:53.326615+00:00",
+    "state_sha256_before": "acfe0401171de0c3e71642ab66083fb46f7272bbb64fb14fe82c541880a8a7ef",
+    "state_sha256_after": "acfe0401171de0c3e71642ab66083fb46f7272bbb64fb14fe82c541880a8a7ef",
+    "head_before": "8d1d0e9eb1d1ed7baaf2d97adcbbef14acaa2102",
+    "head_after": "8d1d0e9eb1d1ed7baaf2d97adcbbef14acaa2102",
+    "phases_sha256_before": "af0237107802fa42ad9e6d381d5030084acfd2aa6dc5ea02f1ce5cf89e870b23",
+    "phases_sha256_after": "af0237107802fa42ad9e6d381d5030084acfd2aa6dc5ea02f1ce5cf89e870b23",
+    "project_state_unchanged": true,
+    "project_head_unchanged": true,
+    "phase_graph_unchanged": true,
+    "scheduler_json_unchanged": true,
+    "project_commits_created": false,
+    "phases": 50
+  },
+  "future_phases_completed": [],
+  "artifacts": [
+    "docs/acceptance/S00.md",
+    "PROGRESS.md",
+    "artifacts/S00/fault-evidence.tar.gz",
+    "artifacts/S00/review-20261022/regression-before.log",
+    "artifacts/S00/review-20261022/nested-429-before.log",
+    "artifacts/S00/review-20261022/project-invariants.json"
+  ],
+  "remaining_work": [
+    "Run current-source real CLI smoke once existing ChatGPT routing is usable; do not use API-key/provider fallback.",
+    "Reverify timer from a user session with permitted systemd bus access; keep six-hour schedule.",
+    "Rerun declared S00 gates; only scheduler decides completion and creates project commit."
+  ],
+  "limitations": [
+    "Unsealed legacy pending Git journals require manual review; existing committed trailer hashing remains compatible.",
+    "Same-UID concurrent edits, checkpoint hard crashes, future CLI protocol changes and evidence capacity remain operational risks."
+  ]
+}

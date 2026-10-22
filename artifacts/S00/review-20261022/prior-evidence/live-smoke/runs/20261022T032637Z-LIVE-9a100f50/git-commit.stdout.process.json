@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "git",
+    "-c",
+    "core.hooksPath=/dev/null",
+    "-c",
+    "commit.gpgSign=false",
+    "commit",
+    "--allow-empty",
+    "-m",
+    "Complete phase LIVE\n\nScheduler-Run: 20261022T032637Z-LIVE-9a100f50\nScheduler-Phase: LIVE\nScheduler-Evidence: 13a6f50445ee05af4c1a7a86e2f43733660b19d714f09f634a2758436733fc45"
+  ],
+  "exit_code": 0,
+  "status": null,
+  "duration_seconds": 0.015
+}

@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "tests": [
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "numeric_gate.py"
+      ],
+      "exit_code": 0,
+      "status": null,
+      "duration_seconds": 0.011,
+      "counts": {
+        "executed": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "passed": true
+    }
+  ]
+}

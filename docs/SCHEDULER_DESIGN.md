@@ -1,6 +1,6 @@
 # 开发调度与跨会话恢复设计
 
-S00 实施记录（2026-10-22）：本轮复核后 54 项本地测试通过（含真实六小时 calendar 数值断言），修复工作区登录隔离、锁内重读、预检 429、gate 后保护及日志证据校验；真实身份路由发现和 systemd 部署/触发仍阻塞，小任务未到 exec。详见 `acceptance/S00.md`，仍不得标记 S00 完成。以下保留设计与完整后续约束，首段中的 bootstrap 描述为实施前基线。
+S00 实施记录（2026-10-22）：当前源码 59 项本地测试通过（含真实四小时 calendar 数值断言），补齐 Git 重试证据固定哈希、嵌套 HTTP 429/401 和错误枚举兼容。宿主真实 CLI 数值任务、Git 事务与重复运行、已部署四小时 timer 的短触发均通过；续接复核已校验当前源码/测试/部署哈希及原始证据，综合 gate 3/3。详见 `acceptance/S00.md` 最新复核，正式阶段完成及提交仍由外层调度器决定。以下保留设计与完整后续约束，首段中的 bootstrap 描述为实施前基线。
 
 现有实现是 bootstrap，仅可执行线性单阶段。首个 S00 由 Sol High 通过现有调度器实现下列加固；当前架构模型不直接编写产品功能或调度器实现。已有 systemd timer 正常工作，沿用一个定时来源，避免同时创建 Codex 自动化和 systemd 重复启动。默认阶段已下调为 Sol Medium 20、Sol High 28、Astra High 2、Astra xHigh 0；xHigh 保留为未来有证据的显式复核档。
 
@@ -22,7 +22,7 @@ S00 实施记录（2026-10-22）：本轮复核后 54 项本地测试通过（�
 1. 获取独占文件锁；恢复中断状态并写开始记录。重复触发安全返回；无待办不调用模型、不查额度。
 2. 验证任务图、phase ids、prompt 路径、测试 argv、完成证据、Git HEAD 和外部修改。按顺序选择依赖已完成且不处于 backoff/硬件等待的任务；独立任务不被 GPU 阻塞拖死。
 3. 严格 ChatGPT 身份预检，移除继承 API credentials，设置已支持的 `forced_login_method=chatgpt` 和 OpenAI ChatGPT provider，避免用户自定义 provider 偷换成付费后端。认证过期保存 auth_required，不能把任意 Logged in 当作 ChatGPT。
-4. 可选只读 app-server 查询额度：保存 primary/secondary 及 model bucket、window/reset、timestamp。缺失为 unknown。默认 primary 使用率达到 90% 或 secondary 达到 95% 停本轮，6 小时后再查；没有官方百分比时允许一次有界 exec，由明确 quota/rate-limit 事件停止。不得消耗 reset credit/购额或后台登录弹窗。
+4. 可选只读 app-server 查询额度：保存 primary/secondary 及 model bucket、window/reset、timestamp。缺失为 unknown。默认 primary 使用率达到 90% 或 secondary 达到 95% 停本轮，4 小时后再查；没有官方百分比时允许一次有界 exec，由明确 quota/rate-limit 事件停止。不得消耗 reset credit/购额或后台登录弹窗。
 5. 读取任务说明、架构相关章节、PROGRESS、前次摘要与 diff，启动正确模型；不把整库/视频塞入 prompt。`--output-schema`/`--output-last-message` 保存结构化 completed/partial/blocked 结果。流式写 JSONL，保留进程退出与 turn.completed/turn.failed，不能只看退出码。
 6. 实现阶段写人类摘要和验收材料；调度器运行声明的测试 argv，每个测试独立日志、返回码、耗时。gate 必须有实际测试/结果，禁止 empty discovery 或用全部 skip 充当通过。
 7. 只有结构化 completed、无 blocker、gate 全通过、必要 artifact 存在且内容合法，才提交该阶段并标完成。Git 提交失败有独立状态，可重试提交而不重做阶段。保留 run evidence 和完成 commit 的关联。
@@ -33,6 +33,8 @@ S00 实施记录（2026-10-22）：本轮复核后 54 项本地测试通过（�
 ## 状态与事务
 
 状态包含 task statuses、attempt history、HEAD、last checkpoint、quota snapshot、next eligible time、blocked reason、usage。文件原子写 + fsync；Git 与 JSON 无法原子跨系统提交，用 write-ahead journal/commit trailers 实现崩溃恢复，覆盖“commit 已完成但 JSON 未更新”和反向状态。最少保留 stdout/stderr、prompt hash、config hash、test logs、structured result 和摘要。
+
+gate 通过后、首次 Git 提交前，在 journal 中固定 `evidence_sha256`；提交和未完成事务的每次重试都核对该哈希，不重新认可等待期间变更的证据。哈希保存在 `completion.json` 外，避免自引用。旧版尚未提交且缺失该字段的 journal 停止并要求人工核对，不自动补齐；已提交事务继续用原有 Git trailer 验证，哈希计算格式保持兼容。
 
 失败分类 `quota_wait/auth_required/wait_model/blocked_hardware/blocked_input/partial/test_failed/timeout/interrupted/commit_failed/internal_error`。错误分类基于结构化错误，不让正文中的“429 示例”触发停机。认证/额度异常不进行密集重试；每轮最多一次外部失败尝试。网络短暂错误最多一次带退避重试且不得重复应用修改。
 
@@ -46,6 +48,6 @@ S00 实施记录（2026-10-22）：本轮复核后 54 项本地测试通过（�
 
 ## 定时服务
 
-已有 `urdftools-dev.timer`：`OnCalendar=*-*-* 00/6:00:00`，Persistent=true。本机 Linger=yes，用户 systemd 可在注销后继续；关机/睡眠期间不会执行，开机恢复后 catch-up 不补跑所有错过轮次。使用本地 Asia/Shanghai 的 00/06/12/18 点。service TimeoutStartSec=5h、KillMode=control-group；round timeout 比 service 短，给保存留时间。修订部署后必须重载并用短临时 timer 真实验证触发，不能只测试手动 start 就说自动触发已验证。
+已有 `urdftools-dev.timer`：`OnCalendar=*-*-* 00/4:00:00`，Persistent=true。本机 Linger=yes，用户 systemd 可在注销后继续；关机/睡眠期间不会执行，开机恢复后 catch-up 不补跑所有错过轮次。使用本地 Asia/Shanghai 的 00/04/08/12/16/20 点。service TimeoutStartSec=5h、KillMode=control-group；round timeout 比 service 短，给保存留时间。修订部署后必须重载并用短临时 timer 真实验证触发，不能只测试手动 start 就说自动触发已验证。
 
 所有必需阶段完成后自然 no-op，并记录 final release path；可禁用 timer 以免空跑，但必须保留进度和日志供用户查看。独立硬件阻塞应明确展示且允许其它工作继续。

@@ -35,7 +35,7 @@ def main():
     timer_process = scheduler.run_process(timer_command, SOURCE, 10, args.output / 'installed-timer.stdout')
     timer_details = (args.output / 'installed-timer.stdout').read_text(errors='replace')
     timer_active = (timer_process['exit_code'] == 0 and 'ActiveState=active' in timer_details and
-                    'Persistent=yes' in timer_details and '*-*-* 00/6:00:00' in timer_details)
+                    'Persistent=yes' in timer_details and '*-*-* 00/4:00:00' in timer_details)
     token = uuid.uuid4().hex
     marker = args.output.resolve() / ('trigger-' + token + '.json')
     unit = 'urdftools-s00-probe-' + token[:12]
@@ -60,7 +60,7 @@ def main():
                   verifier_sha256=scheduler.file_hash(Path(__file__)),
                   deployment=deployment, deployment_matches=deployment_matches,
                   timer_active=timer_active, timer_process=timer_process,
-                  calendar='*-*-* 00/6:00:00', permanent_timer_modified=False)
+                  calendar='*-*-* 00/4:00:00', permanent_timer_modified=False)
     scheduler.atomic_json(args.output / 'report.json', report)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0 if passed else 1

@@ -23,7 +23,7 @@ URDFTools 是本地优先的机器人设计工作台。用户流程是导入/绘
 | RL | Gymnasium + Stable-Baselines3 PPO 的 CPU 基线；mjlab/RSL-RL 的 GPU 适配 | CPU 可做真实管道验证与有界训练。GPU 配置与结果分别标记，禁止不同求解器/预算直接混比。MuJoCo Playground 用作环境与配置参考。 |
 | 结果 | SQLite 索引 + 本地内容寻址文件；JSON/CSV/Parquet/MP4/HTML | 不把视频、模型权重、用户 CAD 放到源码 Git；每项保存哈希和来源。默认不上传。 |
 | Agent | Codex CLI/provider adapter + 本地模型 adapter；受约束 JSON tool calls；可用 MCP stdio facade | 与 UI 共享工具，不由模型绕过校验修改生产资产。第三方 API 接口可做未启用的扩展点。 |
-| 自动开发 | 现有 Python 调度器，systemd 用户 timer 每 6 小时；先执行 S00 加固 | 每任务单独 `codex exec -m ... -c model_reasoning_effort=...`；真实模型由命令和 CLI 会话元数据记录。 |
+| 自动开发 | 现有 Python 调度器，systemd 用户 timer 每 4 小时；先执行 S00 加固 | 每任务单独 `codex exec -m ... -c model_reasoning_effort=...`；真实模型由命令和 CLI 会话元数据记录。 |
 
 开源代码/资产的许可须在固定提交后复核，维护 `third_party/manifest.json` 与 notices。仓库级许可证不代表所有模型资产都同许可。未证实许可的参考站只借鉴交互，不能复制其代码或素材。
 
@@ -46,10 +46,10 @@ flowchart TD
   SKILL[类型和动力学 skills] --> RULE
   SKILL --> REPORT
   REF[版本化模型 / 实验参照库] --> JOB
-  DEV[6 小时开发调度器] --> GIT[源码 Git / 验收文档]
+  DEV[4 小时开发调度器] --> GIT[源码 Git / 验收文档]
 ```
 
-开发调度器与产品实验队列是两个生命周期。前者消耗 Codex 额度并修改源码；后者运行已实现的确定性训练程序、保存模型，不持续调用 LLM。开发阶段可创建实验作业并等待/查询，不能把 6 小时开发定时器直接当作训练进程。
+开发调度器与产品实验队列是两个生命周期。前者消耗 Codex 额度并修改源码；后者运行已实现的确定性训练程序、保存模型，不持续调用 LLM。开发阶段可创建实验作业并等待/查询，不能把 4 小时开发定时器直接当作训练进程。
 
 建议目录：
 

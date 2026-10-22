@@ -1,0 +1,28 @@
+{
+  "codex_bin": "/usr/lib/chatgpt/resources/codex",
+  "policy": {
+    "max_phases_per_round": 1,
+    "phase_timeout_seconds": 90,
+    "round_timeout_seconds": 120,
+    "preflight_timeout_seconds": 20,
+    "test_timeout_seconds": 15
+  },
+  "phases": [
+    {
+      "id": "LIVE",
+      "level": "ordinary",
+      "depends_on": [],
+      "prompt_file": "prompt.md",
+      "tests": [
+        [
+          "/usr/bin/python3",
+          "numeric_gate.py"
+        ]
+      ],
+      "required": true,
+      "acceptance_artifacts": [
+        "acceptance.md"
+      ]
+    }
+  ]
+}

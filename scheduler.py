@@ -31,7 +31,7 @@ LEVELS = {
 POLICY = dict(max_phases_per_round=3, round_timeout_seconds=14400,
               phase_timeout_seconds=4200, test_timeout_seconds=1200,
               preflight_timeout_seconds=45, primary_used_pause_percent=90,
-              secondary_used_pause_percent=95, retry_seconds=21600)
+              secondary_used_pause_percent=95, retry_seconds=14400)
 RESULT_SCHEMA = {
     'type': 'object', 'additionalProperties': False,
     'properties': {
@@ -374,12 +374,22 @@ def classify_failure(events):
         if not isinstance(error, dict):
             continue
         info = error.get('codexErrorInfo') or error.get('code') or error.get('type')
-        encoded = json.dumps(info)
-        if (error.get('status') == 429 or error.get('http_status') == 429 or
-                any(code in encoded for code in ('usageLimitExceeded', 'rateLimitExceeded',
-                                                 'rate_limit_exceeded', 'insufficient_quota'))):
+        encoded = re.sub(r'[^a-z0-9]', '', json.dumps(info).lower())
+        # Upstream statuses can be inside a tagged codexErrorInfo variant.
+        # Read only structured status fields, never numbers in agent prose.
+        def statuses(value):
+            if not isinstance(value, dict):
+                return []
+            found = [value.get(k) for k in ('status', 'http_status', 'httpStatusCode', 'code')]
+            for nested in value.values():
+                if isinstance(nested, dict):
+                    found.extend(statuses(nested))
+            return found
+        http_codes = statuses(error)
+        if (429 in http_codes or any(code in encoded for code in (
+                'usagelimitexceeded', 'ratelimitexceeded', 'insufficientquota'))):
             return 'quota_wait'
-        if error.get('status') == 401 or any(code in encoded for code in ('unauthorized', 'authentication', 'auth_required')):
+        if 401 in http_codes or any(code in encoded for code in ('unauthorized', 'authentication', 'authrequired')):
             return 'auth_required'
         # This CLI version sometimes emits only a typed error's message, no numeric code.
         message = error.get('message', '')
@@ -805,6 +815,15 @@ class Scheduler:
         if self.head() != journal['base_head'] or self.manifest() != journal['files']:
             raise Failure('blocked_input', 'HEAD/files changed since gate')
         directory = self.root / journal['log']
+        # Seal at gate completion, before the first commit attempt. Retrying Git
+        # must not legitimize evidence modified while waiting for a ref lock or
+        # recovering from a crash. Older pending journals require manual review;
+        # already committed evidence remains verifiable through its Git trailer.
+        evidence = journal.get('evidence_sha256')
+        if not evidence:
+            raise Failure('blocked_input', 'unsealed pending transaction requires manual review')
+        if evidence != self.evidence_hash(directory):
+            raise Failure('blocked_input', 'transaction evidence changed after gates; manual review required')
         index = directory / 'git.index'
         index.unlink(missing_ok=True)
         env = chatgpt_environment() | {'GIT_INDEX_FILE': str(index)}
@@ -814,7 +833,7 @@ class Scheduler:
                 self.git('add', '--', *journal['files'], env=env)
             message = ('Complete phase ' + journal['phase'] +
                      '\n\nScheduler-Run: ' + journal['run_id'] + '\nScheduler-Phase: ' + journal['phase'] +
-                     '\nScheduler-Evidence: ' + self.evidence_hash(directory))
+                     '\nScheduler-Evidence: ' + evidence)
             # Declared phase gates are the validation boundary. Unreviewed local/global
             # hooks or signing helpers cannot mutate the private index during commit.
             process = run_process(['git', '-c', 'core.hooksPath=/dev/null', '-c', 'commit.gpgSign=false',
@@ -962,6 +981,8 @@ class Scheduler:
                 files = self.manifest()
                 journal.update(stage='prepared', files=files)
                 atomic_json(directory / 'completion.json', journal)
+                # Stored outside completion.json to avoid hashing the seal itself.
+                journal['evidence_sha256'] = self.evidence_hash(directory)
                 atomic_json(self.journal_path, journal)
                 self.commit(journal)
                 return 'completed'

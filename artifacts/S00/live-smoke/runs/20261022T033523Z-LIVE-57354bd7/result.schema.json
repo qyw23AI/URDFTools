@@ -1,0 +1,55 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "partial",
+        "blocked",
+        "waiting_experiment"
+      ]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "job_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "blocker_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "hardware",
+        "input",
+        null
+      ]
+    }
+  },
+  "required": [
+    "status",
+    "summary",
+    "blockers",
+    "artifacts",
+    "job_id",
+    "blocker_type"
+  ]
+}

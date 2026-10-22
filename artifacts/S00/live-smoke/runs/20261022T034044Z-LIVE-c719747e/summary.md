@@ -1,0 +1,1 @@
+Implemented LIVE squares(n). Numeric gate passed all 4 assertions with exit code 0. Recorded actual results in acceptance.md. Only feature.py and acceptance.md were added; no commits or scheduler state edits.

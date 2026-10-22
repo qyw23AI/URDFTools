@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests",
+    "-p",
+    "test_scheduler.py",
+    "-k",
+    "failed_commit_tampered_evidence",
+    "-v"
+  ],
+  "exit_code": 1,
+  "expected": "failure demonstrating stale evidence accepted"
+}

@@ -1,0 +1,12 @@
+{
+  "stage": "prepared",
+  "phase": "LIVE",
+  "run_id": "20261022T034044Z-LIVE-c719747e",
+  "base_head": "e2e477e3405f3779497fd4d635bf067d0b5e6883",
+  "log": ".scheduler/runs/20261022T034044Z-LIVE-c719747e",
+  "index_sha256": "440e294682e840dc8c08c303bc80a4e06c592114c114c7067c5555c42f64ce0e",
+  "files": {
+    "acceptance.md": "2459fea223096c36f2a818b0b3c38568ac32a9141b8beb875aad6f89e8fe0b08",
+    "feature.py": "6caf8dc12fa8cb448b0097582720f663508df3f8d48a5ea14b63e9866e2164f1"
+  }
+}

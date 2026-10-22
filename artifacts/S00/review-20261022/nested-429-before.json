@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests",
+    "-p",
+    "test_scheduler.py",
+    "-k",
+    "preflight_nested_http",
+    "-v"
+  ],
+  "exit_code": 1
+}

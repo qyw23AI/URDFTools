@@ -1,0 +1,15 @@
+test_failed_commit_tampered_evidence_never_resealed (test_scheduler.SchedulerTest) ... FAIL
+
+======================================================================
+FAIL: test_failed_commit_tampered_evidence_never_resealed (test_scheduler.SchedulerTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/qyw/URDFTools/tests/test_scheduler.py", line 445, in test_failed_commit_tampered_evidence_never_resealed
+    self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 0 == 0 : {"status": "no_op", "completed": ["one"], "tasks": {"one": {"status": "completed", "reason": "gates and Git transaction complete", "last_run": "20261022T033413Z-one-f6632c80"}}, "final_release_path": null}
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.347s
+
+FAILED (failures=1)

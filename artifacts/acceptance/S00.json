@@ -1,16 +1,14 @@
 {
   "phase": "S00",
-  "timestamp": "2026-10-22T03:11:07+00:00",
-  "status": "blocked",
-  "blocker_type": "input",
-  "summary": "Local scheduler implementation and 54 tests pass; required live CLI and timer acceptance remain blocked.",
-  "blockers": [
-    "ChatGPT account/read workspace routing discovery failed; real model edit/test/commit/repeat flow not reached.",
-    "User systemd bus denied; installed service/timer differ from source; deployment and actual timer trigger unverified."
-  ],
+  "timestamp": "2026-10-22T03:45:52+00:00",
+  "status": "passed",
+  "scheduler_completion_pending": true,
+  "blocker_type": null,
+  "summary": "S00 implementation and declared tests pass. Current-source host CLI/Git/repeat and four-hour timer evidence verified; scheduler retains completion/commit authority.",
+  "blockers": [],
   "tests": {
     "unit": {
-      "timestamp": "2026-10-22T03:08:18+00:00",
+      "timestamp": "2026-10-22T03:40:06+00:00",
       "command": [
         "/usr/bin/python3",
         "-m",
@@ -24,48 +22,127 @@
       ],
       "exit_code": 0,
       "status": "passed",
-      "tests_run": 54,
+      "tests_run": 59,
       "failures": 0,
       "errors": 0,
       "skipped": 0,
-      "source_sha256": "ab49215fbe77b5d2f99ad263bd814194755e830a395b3e72a49315a3e6f0af44",
-      "tests_sha256": "7676893bbc84540fd041d23e871d6b71bd7fbb61de5320f4c6528b9ac4166e40",
+      "source_sha256": "b51ca019013645332681c18d697353aa8e9efeee44dc28261be5b06ed968ccfe",
+      "tests_sha256": "5147d7e6a0ac2f07c5213414a2ae6b451593d74818c12847b2edd0dc1734dd54",
       "fixture_sha256": "10008bfa28af0c0fed92bbc611f2fefcfd2965825e88eef79fe6756c3ceef10a",
-      "evidence_sha256": "24df1568fb28dc499ed39f994065fa6be5876d846926e8824669eb46f02fdf12"
+      "evidence_sha256": "b8a8e15e2d42da4d345af5c955818f8d6836cfdd07e461a20f91acaa3e5a1b0a"
+    },
+    "resume_declared_unit": {
+      "timestamp": "2026-10-22T03:44:19+00:00",
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_scheduler*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "duration_seconds": 10.96,
+      "counts": {
+        "executed": 59,
+        "passed": 59,
+        "failed": 0,
+        "skipped": 0
+      },
+      "source_sha256": "b51ca019013645332681c18d697353aa8e9efeee44dc28261be5b06ed968ccfe",
+      "tests_sha256": "5147d7e6a0ac2f07c5213414a2ae6b451593d74818c12847b2edd0dc1734dd54"
     },
     "declared_validation_exit_code": 0,
-    "declared_final_gate_exit_code": 1,
+    "declared_final_gate_exit_code": 0,
+    "declared_final_gate": {
+      "checks": [
+        {
+          "report": "artifacts/S00/unit-report.json",
+          "passed": true,
+          "reported_status": "passed"
+        },
+        {
+          "report": "artifacts/S00/live-smoke/report.json",
+          "passed": true,
+          "reported_status": "passed"
+        },
+        {
+          "report": "artifacts/S00/timer/report.json",
+          "passed": true,
+          "reported_status": "passed"
+        }
+      ],
+      "scheduler_gate": {
+        "executed": 3,
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
     "live_cli_report": "artifacts/S00/live-smoke/report.json",
-    "live_cli_status": "blocked",
+    "live_cli_status": "passed",
+    "live_cli_host_duration_seconds": 56.425,
+    "live_cli_calls_this_review": 0,
     "timer_report": "artifacts/S00/timer/report.json",
-    "timer_status": "blocked",
+    "timer_status": "passed",
+    "timer_deployment_matches": true,
+    "timer_actual_trigger": {
+      "token": "bc22cbd7be4f4805b6e53657e7a0f536",
+      "elapsed_seconds": 2.113285460975021,
+      "timestamp": "2026-10-22T03:39:46+00:00"
+    },
     "calendar_interval_seconds": [
-      21600,
-      21600,
-      21600
-    ]
+      14400,
+      14400,
+      14400
+    ],
+    "handoff_evidence_audit": "artifacts/S00/resume-review-20261022/handoff-evidence-audit.json"
   },
   "project_invariants": {
-    "timestamp": "2026-10-22T03:11:07+00:00",
+    "timestamp": "2026-10-22T03:45:52+00:00",
+    "head_before": "8d1d0e9eb1d1ed7baaf2d97adcbbef14acaa2102",
+    "head_after": "8d1d0e9eb1d1ed7baaf2d97adcbbef14acaa2102",
+    "state_sha256_before": "c3cd84624de66e6f104515d7371c69751e18b389e18b9579c5210c8ce15e8b76",
+    "state_sha256_after": "c3cd84624de66e6f104515d7371c69751e18b389e18b9579c5210c8ce15e8b76",
     "project_state_unchanged": true,
     "project_head_unchanged": true,
-    "project_head": "cc596899c847300ed8ee3a3dde24561c6f791cf0",
-    "state_sha256": "e43e00d7012b691a5f053f8b2f699a2ba60ddb4735fddfe162846b0bd5d5aa08",
-    "plan_sha256": "c0c80f7d8bfbbcd0473d9d21c54a0fea99e92a50ffe21b4044ace558c96df371",
-    "phases": 50,
-    "original_phase_requirements_preserved": true,
+    "scheduler_json_unchanged": true,
+    "implementation_and_tests_unchanged_during_review": true,
     "project_commits_created": false,
-    "note": "Pre-existing plan and S00 gate preserved without scheduler.json edits; unrelated artifacts/ ignore edit left untouched."
+    "phases": 50,
+    "future_phases_match_baseline": true,
+    "source_and_test_hashes": {
+      "scheduler.py": "b51ca019013645332681c18d697353aa8e9efeee44dc28261be5b06ed968ccfe",
+      "tests/test_scheduler.py": "5147d7e6a0ac2f07c5213414a2ae6b451593d74818c12847b2edd0dc1734dd54",
+      "tests/fixtures/scheduler/codex_fault.py": "10008bfa28af0c0fed92bbc611f2fefcfd2965825e88eef79fe6756c3ceef10a",
+      "scripts/run_scheduler_checks.py": "51014de28776ae096e925a47c266e34a90be7ec050fddaaa3644e1b7a930626e",
+      "scripts/scheduler_live_smoke.py": "803e6fa473ee1e4e633517aada60b222371fc54eaf04085c462b4427196bd5c3",
+      "scripts/check_s00_acceptance.py": "d7ed8da2235eb9b2c1b5c878e337f7449c4583ce7876e0bbb6a317527b2f4987",
+      "scripts/verify_scheduler_timer.py": "1f807d035ab8db18b060ecb1f0cf358106466272ec24997e9ef56ba07c82b053",
+      "systemd/urdftools-dev.service": "b4cef2983e92a639a1f36b8f1646073daca8e2e208634c28aaeccd76b55d883e",
+      "systemd/urdftools-dev.timer": "298fae390a5176593e73d663a8af066a8c755cffc64f8cf1a4693d5d51c0c6e3",
+      "scheduler.json": "c0c80f7d8bfbbcd0473d9d21c54a0fea99e92a50ffe21b4044ace558c96df371",
+      ".scheduler/state.json": "c3cd84624de66e6f104515d7371c69751e18b389e18b9579c5210c8ce15e8b76"
+    }
   },
   "future_phases_completed": [],
   "artifacts": [
     "docs/acceptance/S00.md",
+    "PROGRESS.md",
     "artifacts/S00/fault-evidence.tar.gz",
-    "artifacts/S00/revision-checks.json"
+    "artifacts/S00/live-smoke/report.json",
+    "artifacts/S00/timer/report.json",
+    "artifacts/S00/resume-review-20261022/"
   ],
   "remaining_work": [
-    "Run final-source real CLI smoke with existing ChatGPT routing available.",
-    "Deploy/reload authorized service and timer in a permitted user-session environment; verify actual automatic trigger.",
-    "Rerun S00 gates; scheduler decides completion and commit."
+    "Outer scheduler must evaluate structured result/gates and perform its own Git transaction; no project phase state was changed by this review."
+  ],
+  "limitations": [
+    "Host CLI/timer evidence was verified and reused as explicitly authorized; no new live model or systemd request was made during this review.",
+    "Unsealed legacy pending Git journals require manual review; committed trailer hashes remain compatible.",
+    "Same-UID concurrent edits, checkpoint hard crashes, future CLI protocol changes and evidence capacity remain operational risks."
   ]
 }

@@ -145,6 +145,32 @@ class SchedulerTest(unittest.TestCase):
         self.assertNotEqual(self.invoke('run').returncode, 0)
         self.assertEqual(self.calls(), before)
 
+    def test_preflight_nested_http_429_stops_before_exec(self):
+        self.result('quota_wait', rpc_errors={'account/rateLimits/read': {
+            'code': -32603, 'data': None,
+            'codexErrorInfo': {'httpConnectionFailed': {'httpStatusCode': 429}}}})
+        self.assertNotIn('exec', self.calls())
+        before = self.calls()
+        self.assertNotEqual(self.invoke('run').returncode, 0)
+        self.assertEqual(self.calls(), before)
+
+    def test_typed_error_variants_keep_shared_backoff(self):
+        self.result('quota_wait', error={'codexErrorInfo': 'UsageLimitExceeded'})
+        before = self.calls()
+        self.assertNotEqual(self.invoke('run').returncode, 0)
+        self.assertEqual(self.calls(), before)
+
+    def test_structured_http_error_classification(self):
+        for error in ({'code': 429}, {'httpStatusCode': 429},
+                      {'codexErrorInfo': {'httpStatusCode': 429}},
+                      {'codexErrorInfo': 'RateLimitExceeded'}):
+            with self.subTest(error=error):
+                self.assertEqual(scheduler.classify_failure([{'type': 'turn.failed', 'error': error}]), 'quota_wait')
+        for error in ({'code': 401}, {'codexErrorInfo': 'Unauthorized'},
+                      {'codexErrorInfo': {'httpConnectionFailed': {'httpStatusCode': 401}}}):
+            with self.subTest(error=error):
+                self.assertEqual(scheduler.classify_failure([{'type': 'error', 'error': error}]), 'auth_required')
+
     def test_text_429_does_not_match(self):
         self.assertEqual(self.invoke('run').returncode, 0)
 
@@ -432,6 +458,41 @@ class SchedulerTest(unittest.TestCase):
         self.assertEqual(self.git('rev-list', '--count', 'HEAD'), '2')
         self.assertEqual(self.git('status', '--porcelain'), '')
 
+    def test_failed_commit_tampered_evidence_never_resealed(self):
+        hook = self.root / '.git' / (self.git('symbolic-ref', 'HEAD') + '.lock')
+        hook.parent.mkdir(parents=True, exist_ok=True)
+        hook.write_text('real ref lock fault')
+        self.result('commit_failed')
+        hook.unlink()
+        log = self.root / self.state()['attempts'][-1]['log']
+        (log / 'test-00.stdout').write_text('changed after successful numeric gate\n')
+        before = self.calls()
+        result = self.invoke('run')
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('evidence changed', result.stderr)
+        self.assertEqual(self.calls(), before)
+        self.assertEqual(self.state()['completed'], [])
+        self.assertEqual(self.git('rev-list', '--count', 'HEAD'), '1')
+        self.assertEqual((log / 'test-00.stdout').read_text(), 'changed after successful numeric gate\n')
+
+    def test_unsealed_pending_transaction_requires_review(self):
+        hook = self.root / '.git' / (self.git('symbolic-ref', 'HEAD') + '.lock')
+        hook.parent.mkdir(parents=True, exist_ok=True)
+        hook.write_text('real ref lock fault')
+        self.result('commit_failed')
+        hook.unlink()
+        journal_path = self.root / '.scheduler/journal.json'
+        journal = scheduler.read_json(journal_path)
+        journal.pop('evidence_sha256', None)
+        scheduler.atomic_json(journal_path, journal)
+        before = self.calls()
+        result = self.invoke('run')
+        self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('unsealed', result.stderr)
+        self.assertEqual(self.calls(), before)
+        self.assertEqual(self.state()['completed'], [])
+        self.assertEqual(self.git('rev-list', '--count', 'HEAD'), '1')
+
     def test_commit_done_state_not_saved_recovery(self):
         # Crash exactly after Git commit, before JSON state; real Git, no process mocks.
         script = '''import scheduler\ns=scheduler.Scheduler(scheduler.ROOT)\ndef crash(*args):\n import os\n os._exit(91)\ns.finish=crash\ns.run()\n'''
@@ -551,12 +612,12 @@ class SchedulerTest(unittest.TestCase):
         first['tests'] = first['tests'][:len(baseline['phases'][0]['tests'])]
         self.assertEqual(first, baseline['phases'][0])
 
-    def test_real_systemd_calendar_has_six_hour_intervals(self):
+    def test_real_systemd_calendar_has_four_hour_intervals(self):
         timer = configparser.ConfigParser(interpolation=None)
         timer.read(SOURCE / 'systemd/urdftools-dev.timer')
         self.assertTrue(timer.getboolean('Timer', 'Persistent'))
         calendar = timer['Timer']['OnCalendar']
-        self.assertEqual(calendar, '*-*-* 00/6:00:00')
+        self.assertEqual(calendar, '*-*-* 00/4:00:00')
         command = ['systemd-analyze', 'calendar', '--base-time=2026-10-22 00:00:01', '--iterations=4', calendar]
         result = subprocess.run(command, env=os.environ | {'TZ': 'Asia/Shanghai', 'LC_ALL': 'C'},
                                 capture_output=True, text=True, timeout=5)
@@ -564,8 +625,8 @@ class SchedulerTest(unittest.TestCase):
         times = [dt.datetime.strptime(line.split('(in UTC): ', 1)[1], '%a %Y-%m-%d %H:%M:%S UTC')
                  for line in result.stdout.splitlines() if '(in UTC): ' in line]
         self.assertEqual(len(times), 4)
-        self.assertEqual(times[0], dt.datetime(2026, 10, 21, 22))
-        self.assertEqual([(b - a).total_seconds() for a, b in zip(times, times[1:])], [21600] * 3)
+        self.assertEqual(times[0], dt.datetime(2026, 10, 21, 20))
+        self.assertEqual([(b - a).total_seconds() for a, b in zip(times, times[1:])], [14400] * 3)
         if os.environ.get('S00_EVIDENCE_DIR'):
             target = Path(os.environ['S00_EVIDENCE_DIR']) / self._testMethodName / 'calendar.json'
             scheduler.atomic_json(target, {'command': command, 'exit_code': result.returncode,

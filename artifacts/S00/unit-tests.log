@@ -11,6 +11,7 @@ test_dependency_order (test_scheduler.SchedulerTest) ... ok
 test_existing_user_changes_protected (test_scheduler.SchedulerTest) ... ok
 test_explicit_sol_fallback (test_scheduler.SchedulerTest) ... ok
 test_failed_commit_changed_files_not_committed (test_scheduler.SchedulerTest) ... ok
+test_failed_commit_tampered_evidence_never_resealed (test_scheduler.SchedulerTest) ... ok
 test_false_completed_without_commit_rejected (test_scheduler.SchedulerTest) ... ok
 test_four_model_routes (test_scheduler.SchedulerTest) ... ok
 test_gate_cannot_replace_plan_before_commit (test_scheduler.SchedulerTest) ... ok
@@ -30,10 +31,11 @@ test_multiple_gates_keep_separate_logs (test_scheduler.SchedulerTest) ... ok
 test_no_tasks_no_external_calls (test_scheduler.SchedulerTest) ... ok
 test_partial_exit_zero (test_scheduler.SchedulerTest) ... ok
 test_preflight_429_never_becomes_unknown_quota_exec (test_scheduler.SchedulerTest) ... ok
+test_preflight_nested_http_429_stops_before_exec (test_scheduler.SchedulerTest) ... ok
 test_primary_quota_boundary (test_scheduler.SchedulerTest) ... ok
 test_project_provider_config_refused (test_scheduler.SchedulerTest) ... ok
 test_quota_threshold_and_model_buckets (test_scheduler.SchedulerTest) ... ok
-test_real_systemd_calendar_has_six_hour_intervals (test_scheduler.SchedulerTest) ... ok
+test_real_systemd_calendar_has_four_hour_intervals (test_scheduler.SchedulerTest) ... ok
 test_real_test_failure (test_scheduler.SchedulerTest) ... ok
 test_repository_plan_preserved (test_scheduler.SchedulerTest) ... ok
 test_s00_acceptance_gate_rejects_missing_or_blocked_live (test_scheduler.SchedulerTest) ... ok
@@ -42,19 +44,22 @@ test_self_modification_stops_round (test_scheduler.SchedulerTest) ... ok
 test_signal_kills_descendants_and_releases_lock (test_scheduler.SchedulerTest) ... ok
 test_staged_user_changes_protected (test_scheduler.SchedulerTest) ... ok
 test_stale_instance_reloads_after_lock (test_scheduler.SchedulerTest) ... ok
+test_structured_http_error_classification (test_scheduler.SchedulerTest) ... ok
 test_tampered_completion_evidence_rejected (test_scheduler.SchedulerTest) ... ok
 test_tampered_raw_test_log_rejected (test_scheduler.SchedulerTest) ... ok
 test_text_429_does_not_match (test_scheduler.SchedulerTest) ... ok
 test_three_phase_round_ceiling (test_scheduler.SchedulerTest) ... ok
 test_timeout_kills_descendants (test_scheduler.SchedulerTest) ... ok
+test_typed_error_variants_keep_shared_backoff (test_scheduler.SchedulerTest) ... ok
 test_unknown_quota_one_bounded_exec (test_scheduler.SchedulerTest) ... ok
 test_unknown_quota_stops_multi_phase_round (test_scheduler.SchedulerTest) ... ok
 test_unrecognized_zero_exit_is_not_gate (test_scheduler.SchedulerTest) ... ok
+test_unsealed_pending_transaction_requires_review (test_scheduler.SchedulerTest) ... ok
 test_waiting_experiment_poll_avoids_model (test_scheduler.SchedulerTest) ... ok
 test_zero_tests_rejected (test_scheduler.SchedulerTest) ... ok
 
 ----------------------------------------------------------------------
-Ran 54 tests in 10.191s
+Ran 59 tests in 10.583s
 
 OK
-{"status": "no_op", "completed": ["one"], "tasks": {"one": {"status": "completed", "reason": "gates and Git transaction complete", "last_run": "20261022T032151Z-one-eae67d31"}}, "final_release_path": null}
+{"status": "no_op", "completed": ["one"], "tasks": {"one": {"status": "completed", "reason": "gates and Git transaction complete", "last_run": "20261022T034002Z-one-08b2ed59"}}, "final_release_path": null}

@@ -1,0 +1,2 @@
+[2m2026-10-22T03:35:27.140836Z[0m [31mERROR[0m [2mcodex_models_manager::manager[0m[2m:[0m failed to refresh available models: Connection failed: error sending request
+[2m2026-10-22T03:35:27.276277Z[0m [31mERROR[0m [2mcodex_models_manager::manager[0m[2m:[0m failed to refresh available models: Connection failed: error sending request

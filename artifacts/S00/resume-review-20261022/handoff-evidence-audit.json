@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-10-22T03:45:11+00:00",
+  "status": "passed",
+  "checks": {
+    "unit_current_source": true,
+    "unit_current_tests": true,
+    "unit_current_fixture": true,
+    "unit_archive_hash": true,
+    "unit_raw_counts": true,
+    "archive_has_no_auth_or_links": true,
+    "calendar_real_exit_zero": true,
+    "live_current_source": true,
+    "live_fixture_current_source": true,
+    "live_git_parent": true,
+    "live_git_count": true,
+    "live_completion_verifies": true,
+    "live_exported_evidence_matches": true,
+    "live_raw_turn_completed": true,
+    "live_chatgpt_route": true,
+    "live_repeated_no_op": true,
+    "live_numeric_rechecked": true,
+    "timer_service_source": true,
+    "timer_current_source": true,
+    "timer_current_verifier": true,
+    "timer_deployed_bytes": true,
+    "timer_raw_marker": true,
+    "timer_raw_active_calendar": true,
+    "timer_processes_exit_zero": true
+  },
+  "archive_entries": 1582,
+  "numeric_recheck_command": [
+    "python3",
+    "numeric_gate.py"
+  ],
+  "numeric_recheck_cwd": "/home/qyw/URDFTools/.scheduler/live-repositories/urdftools-live-S00-7y5hw8yk",
+  "numeric_recheck_exit_code": 0,
+  "host_reports_reused": true,
+  "live_cli_calls_this_review": 0,
+  "systemd_calls_this_review": 0
+}

@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "/usr/lib/chatgpt/resources/codex",
+    "exec",
+    "--ignore-user-config",
+    "--ephemeral",
+    "--json",
+    "--model",
+    "gpt-6.1-sol",
+    "--config",
+    "model_reasoning_effort=medium",
+    "--config",
+    "forced_login_method=\"chatgpt\"",
+    "--config",
+    "model_provider=\"openai\"",
+    "--config",
+    "approval_policy=\"never\"",
+    "--sandbox",
+    "workspace-write",
+    "--cd",
+    "/home/qyw/URDFTools/.scheduler/live-repositories/urdftools-live-S00-7y5hw8yk",
+    "--output-schema",
+    "/home/qyw/URDFTools/.scheduler/live-repositories/urdftools-live-S00-7y5hw8yk/.scheduler/runs/20261022T034044Z-LIVE-c719747e/result.schema.json",
+    "--output-last-message",
+    "/home/qyw/URDFTools/.scheduler/live-repositories/urdftools-live-S00-7y5hw8yk/.scheduler/runs/20261022T034044Z-LIVE-c719747e/result.json",
+    "-"
+  ],
+  "exit_code": 0,
+  "status": null,
+  "duration_seconds": 49.865
+}

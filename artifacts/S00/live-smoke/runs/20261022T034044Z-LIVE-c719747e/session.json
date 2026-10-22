@@ -1,0 +1,15 @@
+{
+  "thread_ids": [
+    "01a161b2-8226-7351-9793-bad597522b34"
+  ],
+  "usage": [
+    {
+      "input_tokens": 93421,
+      "cached_input_tokens": 61952,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 711,
+      "reasoning_output_tokens": 0
+    }
+  ],
+  "exit_code": 0
+}

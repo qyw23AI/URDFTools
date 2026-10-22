@@ -1,0 +1,9 @@
+{
+  "cli_path": "/usr/lib/chatgpt/resources/codex",
+  "cli_version": "codex-cli 0.160.0",
+  "cli_sha256": "12eb3e81114588aca3b7998f4f19e8997b056aca08e57a7ca7c8a3ec8c652aad",
+  "scheduler_sha256": "b120248a9db7a10fdb912248fa444b480aa56d245fd81cce7869a4eeb77b060f",
+  "official_source": "https://learn.chatgpt.com/docs/app-server",
+  "source_kind": "official documentation opened during review",
+  "dependencies": "Python standard library and existing installed CLI/Git/systemd; no downloaded source or installed packages"
+}
