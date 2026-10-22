@@ -1,0 +1,9 @@
+{
+  "name": "urdftools-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "main": "main.cjs",
+  "scripts": {"start":"electron .", "smoke":"electron . --smoke"},
+  "devDependencies": {"electron":"39.2.7"},
+  "description": "Project-local Electron shell; npm dependencies and Linux runtime archive are separately locked."
+}

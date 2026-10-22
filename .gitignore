@@ -7,3 +7,4 @@ dist/
 *.egg-info/
 build/
 artifacts/S01/clean-room/
+artifacts/S01/

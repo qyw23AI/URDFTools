@@ -1,6 +1,8 @@
 # URDFTools 项目进度
 
-> 当前状态（2026-10-22 11:50 CST）：**S00 已由调度器正式完成**，完成提交 `52929b2`，50 阶段中完成 1 项。S01 的第一次与一次人工重试均在只读额度预检停轮，尚未进入模型 exec；最早可重试 15:49:19 CST，四小时 timer 下一次可执行轮次为 16:00。timer active/enabled，GNOME 进度终端持续刷新。下文保留此前各轮的历史记录，以机器状态 `.scheduler/state.json` 为准。
+2026-10-22 14:06 CST — S01 保留 WIP 再验：先检查 diff 并读取指定配置/文档，重跑 `python3 scripts/accept_phase.py S01` 退出 0；12 单元、8 全新目录集成全部通过、0 skip，desktop 真实无头渲染/点击/隔离断言通过，3/3 stage。证据 `artifacts/S01/runs/20261022T060641296645Z/`、`artifacts/acceptance/S01.json`；已查看本轮截图。既有来源/发行许可限制保留，未实现未来阶段。未修改调度状态、创建 Git 提交或改动 HEAD；正式完成由调度器决定。
+
+> 当前状态（2026-10-22，S01 网络恢复续做）：S00 既有完成记录保留；S01 实现和验收材料就绪，真实声明测试退出 0：12/12 单元、8/8 全新目录集成、desktop 渲染通过，整体 3/3 stage、0 skip。正式阶段完成和 Git 保存由调度器决定；未执行或声明后续阶段完成。
 
 2026-10-22：已完成需求基线、整体架构、开源研究、评估方法、数据契约和阶段队列设计。产品功能尚未实现，不标记任何开发阶段完成。
 
@@ -67,3 +69,36 @@ S00 综合 gate 退出 1（local/历史同版本 timer 通过、当前源码 liv
 
 
 2026-10-22 11:52 运维修订：systemd 用户 service 现以 `SuccessExitStatus=75` 识别调度器主动的额度/认证/模型等待，调度状态仍保留 `quota_wait` 与最早可重试时间；其它非零退出仍为失败。四小时 timer 保持 active/enabled，安装 unit 与源码匹配，独立短探针 2.131 秒实际触发，S00 当前验收门禁仍为 3/3。
+
+
+## 2026-10-22 — S01 独立工具链与应用骨架，整体验收阻塞
+
+仅处理 S01。新增独立 Python 3.12.14 / Node 24.19.0 / npm 10.9.9 引导、Python SHA256 完整锁、24 包 Linux npm integrity 锁、安装后的 CLI、FastAPI 回环服务骨架、React/TypeScript 中文空壳及待运行 Electron 主进程/preload。新增真实多阶段验收器，零发现/全 skip/失败明确非零，未知未来阶段拒绝运行；记录 238 条开发第三方组件及可取得的原始许可。
+
+阶段声明命令 `python3 scripts/accept_phase.py S01` 实际退出 **1**：单元 **9/9 通过、0 skip**；全新含空格目录集成 **6 项发现、4 通过、2 失败、0 skip**。独立安装、CLI/prefix/pip check、生产构建及同进程 React SSR 的 **2 个真实用例**通过；真实服务 socket 和 Vite preview 启动被沙箱 EPERM 拒绝。Electron gate 退出 2，因固定版本 lock/Linux runtime 未在离线缓存中，未启动 GUI。最终多阶段 gate **1/3 通过**，不以构建或 SSR 代替 GUI。50 阶段配置 validate 通过仅代表配置有效。
+
+证据：`docs/acceptance/S01.md`、`docs/TOOLCHAIN.md`、`artifacts/acceptance/S01.json`、`artifacts/S01/runs/`、`artifacts/S01/clean-install-commands.json`、`third_party/manifest.json`。保留复制 symlink、缺 Node lock、Node 测试隔离未登记用例及账本 duplicate key 的失败迭代与修复记录；最终计数强制核对实际测试数量。运行时 seed 已复制到本项目，不依赖 Codex 缓存长期存在，但上游完整构建 provenance/Node combined notice/部分 bundled 组件许可尚待补齐，不能作为发行包。Three.js viewer、CAD/GPU、训练和其它后续阶段未实现或验收。
+
+本轮未编辑 `.scheduler/state.json`，未创建 Git commit/push、未变更阶段图/后续任务要求、未启用模型或付费 API、未修改系统 Python/驱动、未上传 CAD/私有仓库。下一步仍为补齐 S01：在允许回环 socket 的环境复验服务/preview，取得并审查 Electron lock/runtime/notices，执行真实桌面 smoke，再由调度器决定阶段完成。
+
+
+## 2026-10-22 — S01 保留 WIP 续接复核
+
+先检查 Git diff，并读取任务、scheduler.json、需求、架构、调度授权与既有验收记录。仅续做 S01：引导子进程改用环境白名单，屏蔽继承的 Python/Node 注入、包索引配置及凭据，并隔离 npm 用户/全局配置；文档使用 `python3 -E`，使引导解释器本身也不继承 Python 环境变量。全新含空格目录实际在无效 PYTHONHOME/PYTHONPATH/NODE_OPTIONS/PIP_TARGET/npm 配置输入下完成安装、CLI/pip check、生产构建和两个 SSR 用例。
+
+验收超时现在终止整个 stage 进程组，保留超时前输出；真实父子进程延迟写入回归验证没有留下继续运行的子进程。修正 fixture 初始化错误导致负数 passed 的计数问题，改为统计实际成功用例。首轮新增测试导入和 npm 配置路径失败均保留在 `artifacts/S01/resume-declared-first.log`，随后修正并重跑。
+
+声明命令 `python3 scripts/accept_phase.py S01` 最终退出 1：单元 **12/12 通过**；集成 **6 发现、4 通过、2 失败**；均 0 skip。两个失败仍为 socket EPERM；Electron gate 退出 2，固定依赖 lock/runtime 未取得。独立探测再次确认 registry DNS 失败、回环 socket 创建 EPERM。整体 gate **1/3**，**S01 未完成**。`scheduler.py validate` 50 节点有效仅为配置检查。最终日志 `artifacts/S01/resume-declared-final.log`，报告 `artifacts/acceptance/S01.json`，完整来源/剩余许可与运行时 provenance 风险仍见 `docs/acceptance/S01.md`。未改 state、scheduler.json、任务要求或 HEAD；未创建提交、调用其它模型、执行后续阶段。
+
+
+## 2026-10-22 — S01 网络恢复、完整真实验收通过
+
+先检查保留 diff 并读取阶段/设计授权，仅处理 S01。重新实测服务与 Vite preview 回环成功；新增 desktop 官方 npm lock（70 个固定 integrity 包）、Electron 39.2.7 Linux runtime lock、显式离线安装器及真实 headless/offscreen 渲染验收。GitHub 资产直链 TLS 失败后，公开镜像归档与官方发布 API digest/SHASUMS 双重比对通过，74 文件安装校验；补齐 Electron/Chromium 和 Node combined notices，账本 309 个开发组件。未继承 registry 凭据/付费 API，未关闭 Chromium sandbox。
+
+真实渲染暴露 React 异步挂载时序问题，修为有界等待，实际点击工作区、隔离/preload/sandbox 断言和 1200×800 PNG 均通过。全新含空格目录离线安装包含桌面 runtime，另实测缺失/损坏归档在安装前明确失败。最终 `python3 scripts/accept_phase.py S01` 退出 0：12/12 单元、8/8 集成、0 skip，desktop 独立通过，整体 3/3 stage；SSR 额外两个真实用例通过。命令、输入、输出、失败迭代及截图见 `docs/acceptance/S01.md`、`artifacts/S01/network-declared-final.log`、`artifacts/acceptance/S01.json`、`artifacts/S01/clean-desktop/`。
+
+S01 材料交调度器决定正式完成/提交。本轮没有改 state、scheduler.json、项目 HEAD 或任务图，没有 Git commit/push、子模型、未来阶段实现。开发 seed 的完整上游构建 provenance、keyv 缺许可全文及部分 bundled 组件发行审查、真实 GNOME/GPU/打包验收仍有明确限制；不把它们宣称完成，详见验收记录。
+
+## 2026-10-22 用户范围修订与恢复
+
+产品采用外部训练结果库与证据分析架构，详见 docs/RESULTS_DATABASE.md、docs/TASKS.md；不实现 RL 训练器。普通/复杂/关键分别 Sol Low/Medium/High，Astra 当前不启用。S01 上次真实 gate 通过，但 Chromium 许可证触发大文件检查而未提交；已逐字节核验官方运行时文件并精确放行。本次保留原始成果，交调度器真实重验与提交，不能将该运维修订当 S01 已完成。小时 timer 和防并发锁保留。

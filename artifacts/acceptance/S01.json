@@ -1,0 +1,68 @@
+{
+  "phase": "S01",
+  "timestamp": "20261022T060740200686Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "python",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/run_test_suite.py",
+        "--directory",
+        "tests/unit",
+        "--report",
+        "/home/qyw/URDFTools/artifacts/S01/runs/20261022T060740200686Z/python.json"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/S01/runs/20261022T060740200686Z/python.log",
+      "log_sha256": "123e57547591cf25ef8d478d76240a2186b7273420a586b27ddfc5fce30a8522",
+      "counts": {
+        "discovered": 12,
+        "executed": 12,
+        "passed": 12,
+        "skipped": 0,
+        "failed": 0,
+        "expected_failures": 0,
+        "unexpected_successes": 0,
+        "status": "passed"
+      },
+      "status": "passed"
+    },
+    {
+      "id": "clean-install",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/run_test_suite.py",
+        "--directory",
+        "tests/integration",
+        "--report",
+        "/home/qyw/URDFTools/artifacts/S01/runs/20261022T060740200686Z/clean-install.json"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/S01/runs/20261022T060740200686Z/clean-install.log",
+      "log_sha256": "7234c493d31bb5defbb80f4f7ad1aa4e4164bd946a74cd2b76f56df407aaa70d",
+      "counts": {
+        "discovered": 8,
+        "executed": 8,
+        "passed": 8,
+        "skipped": 0,
+        "failed": 0,
+        "expected_failures": 0,
+        "unexpected_successes": 0,
+        "status": "passed"
+      },
+      "status": "passed"
+    },
+    {
+      "id": "desktop",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/S01/runs/20261022T060740200686Z/desktop.log",
+      "log_sha256": "bb2e807a02116c5f9de9324c91128c6921c3aaa250cd7ab80978c04c46094166",
+      "status": "passed"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools==75.3.4", "wheel==0.41.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "urdftools"
+version = "0.1.0"
+description = "Local robot design workbench"
+requires-python = ">=3.12,<3.13"
+dependencies = ["fastapi==0.115.7", "pydantic==2.14.1", "uvicorn==0.29.0"]
+
+[project.scripts]
+urdftools = "urdftools.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["python"]
