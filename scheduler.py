@@ -811,11 +811,15 @@ class Scheduler:
         if not index.is_absolute():
             index = self.root / index
         current_hash = file_hash(index)
-        if current_hash != journal.get('index_sha256'):
-            if self.git('diff', '--cached', '--name-only'):
-                raise Failure('blocked_input', 'user index changed during transaction; commit retained for recovery')
-        else:
+        def index_matches(revision):
+            # Git may refresh stat/cache bytes without changing staged content.
+            # Compare the staged tree to the pre-commit base and new commit.
+            return subprocess.run(['git', 'diff', '--cached', '--quiet', revision],
+                                  cwd=self.root, capture_output=True).returncode == 0
+        if current_hash == journal.get('index_sha256') or index_matches(journal['base_head']):
             self.git('read-tree', commit)
+        elif not index_matches(commit):
+            raise Failure('blocked_input', 'user index changed during transaction; commit retained for recovery')
         ident = journal['phase']
         evidence = dict(commit=commit, run_id=journal['run_id'], log=journal['log'])
         self.state['completions'][ident] = evidence

@@ -424,6 +424,35 @@ class SchedulerTest(unittest.TestCase):
         self.assertEqual(self.calls(), [])
         self.assertEqual(self.git('rev-list', '--count', 'HEAD'), '1')
 
+    def test_commit_recovery_accepts_semantically_unchanged_index(self):
+        result = self.invoke('run')
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        state = self.state()
+        log = self.root / state['attempts'][-1]['log']
+        journal = json.loads((log / 'completion.json').read_text())
+        # Recreate the original index after HEAD advanced. Git status now shows
+        # staged deletions, but the index content still equals base_head.
+        self.git('read-tree', journal['base_head'])
+        journal['index_sha256'] = '0' * 64
+        instance = scheduler.Scheduler(self.root)
+        instance.finish(journal, self.git('rev-parse', 'HEAD'))
+        self.assertEqual(self.git('diff', '--cached', '--name-only'), '')
+        self.assertEqual(instance.state['completed'], ['one'])
+
+    def test_commit_recovery_preserves_real_new_staging(self):
+        result = self.invoke('run')
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        log = self.root / self.state()['attempts'][-1]['log']
+        journal = json.loads((log / 'completion.json').read_text())
+        self.git('read-tree', journal['base_head'])
+        (self.root / 'user-staged.txt').write_text('preserve me')
+        self.git('add', 'user-staged.txt')
+        journal['index_sha256'] = '0' * 64
+        instance = scheduler.Scheduler(self.root)
+        with self.assertRaises(scheduler.Failure):
+            instance.finish(journal, self.git('rev-parse', 'HEAD'))
+        self.assertIn('user-staged.txt', self.git('diff', '--cached', '--name-only'))
+
     def test_staged_user_changes_protected(self):
         (self.root / 'user.txt').write_text('keep me')
         self.git('add', 'user.txt')
