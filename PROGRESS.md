@@ -1,5 +1,12 @@
 # URDFTools 项目进度
 
+## 2026-10-22 — C03 STEP 到 URDF/ROS 包技术验收通过
+
+独立导出闭合 STEP 实体的 STL 视觉网格、物理惯量、显式密度和驱动限值；ZIP/目录可重新导入。MuJoCo 独立编译原始固定基座及注入自由关节的浮动基座模型，明确报告固定根质量排除和训练未就绪。真实 ROS 2 colcon 安装包可重新导入，Electron UI 完成实际导出。
+
+`.venv/bin/python scripts/accept_phase.py C03`：**4/4 gate 通过，0 failed，0 skipped**。详见 `docs/acceptance/C03.md`、`docs/CAD_EXPORT_GUIDE.md` 和 `artifacts/acceptance/C03.json`。下一阶段按任务依赖开展建模/评估模块；旧调度器状态不再作为进度依据。
+
+
 ## 2026-10-22 — C02 关节分组与转换向导完成技术验收
 
 实现真实 STEP 读取与单位/装配一致性核对、圆柱面轴线候选、可编辑 Link 分组及单根父子树、关节类型/轴/原点/限位、人工确认和 SHA-256 绑定的配置复用。Electron“转换”工作区接入独立 CAD worker 与自动三维预览。预览明确仅为视觉包围盒，不含物理属性和最终导出。

@@ -1,0 +1,59 @@
+{
+  "phase": "C03",
+  "timestamp": "20261022T134204575926Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "sim-worker-lock",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/setup_sim_worker.py",
+        "--offline"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C03/runs/20261022T134204575926Z/sim-worker-lock.log",
+      "log_sha256": "3e123a32b8b91099bf93fe0ebd138d30bfd8000631085e3012aeba23b9e1d842",
+      "status": "passed"
+    },
+    {
+      "id": "cad-package-contracts",
+      "command": [
+        ".tools/cad-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/c03",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C03/runs/20261022T134204575926Z/cad-package-contracts.log",
+      "log_sha256": "5f8d2bd9c6a77ee53110b589b3286739c3f529e0817d92e829238039efb080fa",
+      "status": "passed"
+    },
+    {
+      "id": "ros2-colcon",
+      "command": [
+        ".tools/cad-venv/bin/python",
+        "scripts/c03_colcon_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C03/runs/20261022T134204575926Z/ros2-colcon.log",
+      "log_sha256": "5c4e7067b8518c72d4711a2613b8dd47c3ae399430e29e4aca9061bcd7b966c2",
+      "status": "passed"
+    },
+    {
+      "id": "desktop-export",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/c03_desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/C03/runs/20261022T134204575926Z/desktop-export.log",
+      "log_sha256": "a4ededfb49aa0281c0ab6407b4ef47824e77d16f1f248f73071dbb28c9e96e75",
+      "status": "passed"
+    }
+  ]
+}

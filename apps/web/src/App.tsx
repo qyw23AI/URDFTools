@@ -15,7 +15,8 @@ declare global {
     chooseImport(kind: string): Promise<ImportReport | null>;
     selectImport(operation: string, model: string): Promise<ImportReport>;
     chooseCadStep(): Promise<Discovery | null>; cadPreview(config: Configuration): Promise<RobotImport>;
-    saveCadConfig(config: Configuration): Promise<boolean>; loadCadConfig(): Promise<Configuration | null>}; }
+    saveCadConfig(config: Configuration): Promise<boolean>; loadCadConfig(): Promise<Configuration | null>;
+    exportCadPackage(config: Configuration, densities: Record<string, number>): Promise<{path: string; sha256: string; validation: {mujoco_raw: {fixed_base_mass_excluded_kg: number}; mujoco_floating: {mass_kg: number}; training_ready: boolean}} | null>}; }
 }
 export function App() {
   const [workspace, setWorkspace] = useState<typeof workspaces[number]>('查看');

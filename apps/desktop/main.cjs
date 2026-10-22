@@ -84,13 +84,12 @@ ipcMain.handle('select-import', (event, operation_id, model) => {
   return importRequest({ action: 'select', operation_id, model });
 });
 let cadSource = null;
-function cadWorker(args) {
+function runPythonWorker(python, script, args, timeoutMs = 120000) {
   return new Promise((resolve, reject) => {
-    const child = spawn(path.join(root, '.tools/cad-venv/bin/python'),
-      [path.join(root, 'scripts/cad_joint_wizard.py'), ...args],
+    const child = spawn(path.join(root, python), [path.join(root, script), ...args],
       { cwd: root, env: { PATH: process.env.PATH }, stdio: ['ignore', 'pipe', 'pipe'] });
     let output = ''; let errors = '';
-    const deadline = setTimeout(() => child.kill('SIGKILL'), 120000);
+    const deadline = setTimeout(() => child.kill('SIGKILL'), timeoutMs);
     child.stdout.on('data', data => {
       output += data;
       if (output.length > 16 * 1024 * 1024) child.kill('SIGKILL');
@@ -99,10 +98,13 @@ function cadWorker(args) {
     child.on('error', reject);
     child.on('close', code => {
       clearTimeout(deadline);
-      if (code !== 0) return reject(new Error(errors || 'CAD worker failed'));
+      if (code !== 0) return reject(new Error(errors || 'Python worker failed or timed out'));
       try { resolve(JSON.parse(output)); } catch (error) { reject(error); }
     });
   });
+}
+function cadWorker(args) {
+  return runPythonWorker('.tools/cad-venv/bin/python', 'scripts/cad_joint_wizard.py', args);
 }
 function assertRenderer(event) {
   if (!window || event.sender !== window.webContents) throw new Error('无效窗口');
@@ -159,6 +161,41 @@ ipcMain.handle('load-cad-config', async event => {
   if ((await fs.promises.stat(file)).size > 1024 * 1024) throw new Error('转换配置过大');
   const result = await cadWorker([cadSource, '--config', file]);
   return result.configuration;
+});
+ipcMain.handle('export-cad-package', async (event, config, densities) => {
+  assertRenderer(event);
+  if (!cadSource || !config || typeof config !== 'object' || !densities || typeof densities !== 'object') {
+    throw new Error('请先选择 STEP 并填写转换配置与密度');
+  }
+  const encodedConfig = JSON.stringify(config), encodedDensities = JSON.stringify(densities);
+  if (encodedConfig.length > 1024*1024 || encodedDensities.length > 1024*1024) throw new Error('转换配置过大');
+  let destination = smoke ? process.env.URDFTOOLS_CAD_EXPORT_SMOKE : null;
+  if (!destination) {
+    const choice = await dialog.showSaveDialog(window, { defaultPath: 'urdftools_robot.zip',
+      filters: [{ name: 'URDF / ROS ZIP', extensions: ['zip'] }] });
+    if (choice.canceled) return null;
+    destination = choice.filePath;
+  }
+  if (path.extname(destination).toLowerCase() !== '.zip') throw new Error('导出目标必须是 ZIP');
+  const directory = await fs.promises.mkdtemp(path.join(app.getPath('userData'), 'cad-export-'));
+  const temporaryDestination = destination + '.partial-' + randomBytes(6).toString('hex');
+  try {
+    const configPath = path.join(directory, 'config.json');
+    const densitiesPath = path.join(directory, 'densities.json');
+    const zipPath = path.join(directory, 'robot.zip');
+    await fs.promises.writeFile(configPath, encodedConfig, { mode: 0o600 });
+    await fs.promises.writeFile(densitiesPath, encodedDensities, { mode: 0o600 });
+    const exported = await runPythonWorker('.tools/cad-venv/bin/python', 'scripts/cad_export_package.py',
+      [cadSource, '--config', configPath, '--densities', densitiesPath, '--output', zipPath], 300000);
+    const validation = await runPythonWorker('.tools/sim-venv/bin/python', 'scripts/validate_cad_package.py', [zipPath], 120000);
+    if (validation.status !== 'passed') throw new Error('独立交叉校验未通过');
+    await fs.promises.copyFile(zipPath, temporaryDestination);
+    await fs.promises.rename(temporaryDestination, destination);
+    return { path: destination, sha256: exported.sha256, validation };
+  } finally {
+    await fs.promises.rm(temporaryDestination, { force: true });
+    await fs.promises.rm(directory, { recursive: true, force: true });
+  }
 });
 function stopService() {
   stopping = true;
@@ -478,6 +515,32 @@ app.whenReady().then(() => {
           const png = (await window.webContents.capturePage()).toPNG();
           fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'cad-wizard.png'), png);
           console.log(JSON.stringify({ event: 'desktop_cad_wizard_smoke', ...event, zQuaternion, xQuaternion, screenshotBytes: png.length }));
+          if (process.env.URDFTOOLS_CAD_EXPORT_SMOKE) {
+            const setNumber = async (label, value) => {
+              await window.webContents.executeJavaScript(`(() => {
+                const el=document.querySelector('[aria-label="${label}"]');
+                const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;
+                setter.call(el,'${value}'); el.dispatchEvent(new Event('input',{bubbles:true}));
+                el.dispatchEvent(new Event('change',{bubbles:true}));
+              })()`);
+            };
+            await window.webContents.executeJavaScript(`([...document.querySelectorAll('button')].find(b => b.textContent === '导出并交叉校验 URDF / ROS ZIP')).click()`);
+            await waitForCad(`[...document.querySelectorAll('[role="alert"]')].some(x => x.textContent.includes('缺少明确的材料密度'))`);
+            await setNumber('BasePart density', 2700);
+            await setNumber('OffsetPart density', 2700);
+            await setNumber('OffsetPart_joint effort', 10);
+            await setNumber('OffsetPart_joint velocity', 2);
+            await waitForCad(`document.querySelector('.cad-wizard').textContent.includes('未确认关节：1')`);
+            await window.webContents.executeJavaScript(`document.querySelector('[aria-label="OffsetPart_joint confirmed"]').click()`);
+            await window.webContents.executeJavaScript(`([...document.querySelectorAll('button')].find(b => b.textContent === '导出并交叉校验 URDF / ROS ZIP')).click()`);
+            await waitForCad(`[...document.querySelectorAll('[role="status"]')].some(x => x.textContent.includes('导出完成'))`);
+            const output = process.env.URDFTOOLS_CAD_EXPORT_SMOKE;
+            const size = fs.statSync(output).size;
+            const summary = await window.webContents.executeJavaScript(`[...document.querySelectorAll('[role="status"]')].find(x => x.textContent.includes('导出完成'))?.textContent`);
+            if (size < 1000 || !summary.includes('训练就绪：尚未验证')) throw new Error('CAD ZIP export report invalid');
+            fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'cad-export.png'), (await window.webContents.capturePage()).toPNG());
+            console.log(JSON.stringify({ event: 'desktop_cad_export_smoke', zipBytes: size, summary }));
+          }
         }
         await window.webContents.executeJavaScript(`document.querySelectorAll('nav button')[3].click()`);
         await new Promise(resolve => setTimeout(resolve, 100));

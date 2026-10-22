@@ -7,5 +7,6 @@ contextBridge.exposeInMainWorld('urdftools', Object.freeze({
   chooseCadStep: () => ipcRenderer.invoke('choose-cad-step'),
   cadPreview: config => ipcRenderer.invoke('cad-preview', config),
   saveCadConfig: config => ipcRenderer.invoke('save-cad-config', config),
-  loadCadConfig: () => ipcRenderer.invoke('load-cad-config')
+  loadCadConfig: () => ipcRenderer.invoke('load-cad-config'),
+  exportCadPackage: (config, densities) => ipcRenderer.invoke('export-cad-package', config, densities)
 }));

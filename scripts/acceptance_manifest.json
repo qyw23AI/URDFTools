@@ -204,6 +204,48 @@
           "scripts/c02_desktop_smoke.py"
         ]
       }
+    ],
+    "C03": [
+      {
+        "id": "sim-worker-lock",
+        "kind": "command",
+        "argv": [
+          "{python}",
+          "scripts/setup_sim_worker.py",
+          "--offline"
+        ]
+      },
+      {
+        "id": "cad-package-contracts",
+        "kind": "command",
+        "argv": [
+          ".tools/cad-venv/bin/python",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests/c03",
+          "-p",
+          "test_*.py",
+          "-v"
+        ]
+      },
+      {
+        "id": "ros2-colcon",
+        "kind": "command",
+        "argv": [
+          ".tools/cad-venv/bin/python",
+          "scripts/c03_colcon_smoke.py"
+        ]
+      },
+      {
+        "id": "desktop-export",
+        "kind": "command",
+        "argv": [
+          "{python}",
+          "scripts/c03_desktop_smoke.py"
+        ]
+      }
     ]
   }
 }
