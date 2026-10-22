@@ -36,6 +36,8 @@ python3 scripts/check_s00_acceptance.py
 
 认证：使用现有 `codex login` 的 ChatGPT 会话。会话过期需用户自行重新登录；不得把 token 写进项目。CLI app-server 额度读取由 S00 实测，无法读取时明确显示 unavailable，按实际限额事件退出。不要自动兑换重置次数。
 
+额度字段说明：`auth=chatgpt` 只表示登录方式；`account/rateLimits/read` 返回的 `rateLimits.limitId=codex` 才是此调度器用于停轮的 Codex 限额桶（`primary` 为 5 小时窗口、`secondary` 为周窗口）。它不查询普通 ChatGPT Chat 的消息上限；Chat 与 Work/Codex 使用规则按产品和计划区分，具体以账号 Usage 页面为准。OpenAI 文档：[Codex usage with a ChatGPT plan](https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan)、[GPT-6 usage limits and product distinctions](https://help.openai.com/en/articles/20001354-gpt-6-and-other-models-in-chatgpt).
+
 开发引导观测到的可用路径（S01 要验证并写工具链清单）：
 
 - Codex CLI：`/usr/lib/chatgpt/resources/codex`（0.160.0）
