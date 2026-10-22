@@ -16,8 +16,11 @@ declare global {
     chooseImport(kind: string): Promise<ImportReport | null>;
     selectImport(operation: string, model: string): Promise<ImportReport>;
     chooseCadStep(): Promise<Discovery | null>; cadPreview(config: Configuration): Promise<RobotImport>;
-    modelCurrent(): Promise<{revision: number; recipe: ModelRecipe}>;
+    modelCurrent(): Promise<{revision: number; recipe: ModelRecipe; built?: ModelApplyResult | null; returnWarning?: string | null}>;
     modelApply(recipe: ModelRecipe, expectedRevision: number): Promise<ModelApplyResult>;
+    modelReconcile(config: Configuration): Promise<{proposal: import('./ModelingWorkspace').CadReturnProposal;
+      exchange: {source_sha256: string; output_sha256: string; losses: string[]}} | null>;
+    modelAcceptReturn(config: Configuration): Promise<Discovery>;
     saveCadConfig(config: Configuration): Promise<boolean>; loadCadConfig(): Promise<Configuration | null>;
     exportCadPackage(config: Configuration, densities: Record<string, number>): Promise<{path: string; sha256: string; validation: {mujoco_raw: {fixed_base_mass_excluded_kg: number}; mujoco_floating: {mass_kg: number}; training_ready: boolean}} | null>}; }
 }

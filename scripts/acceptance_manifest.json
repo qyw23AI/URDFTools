@@ -280,6 +280,19 @@
         ]
       }
     ],
+    "M02": [
+      {
+        "id": "freecad-return-contracts",
+        "kind": "command",
+        "argv": [".tools/cad-venv/bin/python", "-m", "unittest", "discover",
+          "-s", "tests/m02", "-p", "test_*.py", "-v"]
+      },
+      {
+        "id": "freecad-return-desktop",
+        "kind": "command",
+        "argv": ["{python}", "scripts/m02_desktop_smoke.py"]
+      }
+    ],
     "M01": [
       {
         "id": "model-assembly-contracts",

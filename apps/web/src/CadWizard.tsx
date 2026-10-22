@@ -17,7 +17,9 @@ function parseVector(raw: string): number[] | null {
 }
 function join(values: number[]): string { return values.map(value => Number(value.toPrecision(8))).join(' '); }
 
-export function CadWizard({ initialDiscovery, modeling = false }: { initialDiscovery?: Discovery; modeling?: boolean } = {}) {
+export function CadWizard({ initialDiscovery, modeling = false, onConfigurationChange }: {
+  initialDiscovery?: Discovery; modeling?: boolean; onConfigurationChange?: (config: Configuration | null) => void
+} = {}) {
   const [draft, setDraft] = useState<Draft | null>(initialDiscovery?.draft || null);
   const [exchangeReport, setExchangeReport] = useState<Discovery['exchangeReport']>(null);
   const [config, setConfig] = useState<Configuration | null>(initialDiscovery?.configuration || null);
@@ -29,6 +31,7 @@ export function CadWizard({ initialDiscovery, modeling = false }: { initialDisco
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [previewBusy, setPreviewBusy] = useState(false);
+  useEffect(() => { onConfigurationChange?.(config); }, [config, onConfigurationChange]);
 
   async function chooseStep() {
     if (!window.urdftools) { setError('请在桌面应用中选择 STEP 文件'); return; }

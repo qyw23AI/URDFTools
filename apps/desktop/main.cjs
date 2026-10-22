@@ -86,6 +86,7 @@ ipcMain.handle('select-import', (event, operation_id, model) => {
 });
 let cadSource = null;
 let cadExchangeDirectory = null;
+let pendingCadReturn = null;
 function runPythonWorker(python, script, args, timeoutMs = 120000) {
   return new Promise((resolve, reject) => {
     const child = spawn(path.join(root, python), [path.join(root, script), ...args],
@@ -117,11 +118,47 @@ ipcMain.handle('model-current', async event => {
   assertRenderer(event);
   const project = modelProject();
   const pointer = path.join(project, 'current.json');
-  if (!fs.existsSync(pointer)) return { revision: 0, recipe: { schema_version: 1, parts: [] } };
+  if (!fs.existsSync(pointer)) return { revision: 0, recipe: { schema_version: 1, parts: [] }, built: null };
   const current = JSON.parse(await fs.promises.readFile(pointer, 'utf-8'));
   const revision = path.join(project, 'revisions', String(current.revision).padStart(6, '0'));
   const recipe = JSON.parse(await fs.promises.readFile(path.join(revision, 'recipe.json'), 'utf-8'));
-  return { revision: current.revision, recipe };
+  const report = JSON.parse(await fs.promises.readFile(path.join(revision, 'report.json'), 'utf-8'));
+  let step = path.join(revision, 'assembly.step');
+  let configuration = null;
+  let returnWarning = null;
+  const returnPath = path.join(project, 'return.json');
+  if (fs.existsSync(returnPath)) {
+    try {
+      const saved = JSON.parse(await fs.promises.readFile(returnPath, 'utf-8'));
+      if (saved.model_revision !== current.revision) throw new Error('回流记录对应旧建模版本');
+      const hash = createHash('sha256').update(await fs.promises.readFile(saved.step)).digest('hex');
+      if (hash !== saved.sha256 || saved.configuration.source_sha256 !== hash) throw new Error('回流 STEP 或配置已变化');
+      step = saved.step; configuration = saved.configuration;
+    } catch (error) { returnWarning = String(error); }
+  }
+  if (!fs.existsSync(step)) return { revision: current.revision, recipe, built: null,
+    returnWarning: returnWarning || '本版本缺少装配 STEP，请重新生成' };
+  let discovery;
+  if (configuration) {
+    const directory = await fs.promises.mkdtemp(path.join(app.getPath('userData'), 'model-restore-'));
+    try {
+      const configPath = path.join(directory, 'config.json');
+      await fs.promises.writeFile(configPath, JSON.stringify(configuration), { mode: 0o600 });
+      discovery = await cadWorker([step, '--config', configPath]);
+    } catch (error) {
+      returnWarning = `回流配置未通过校验：${String(error)}`;
+      step = path.join(revision, 'assembly.step');
+      discovery = await cadWorker([step]);
+      configuration = null;
+    } finally { await fs.promises.rm(directory, { recursive: true, force: true }); }
+  } else discovery = await cadWorker([step]);
+  cadSource = step;
+  cadExchangeDirectory = configuration ? path.dirname(step) : null;
+  const digest = createHash('sha256').update(await fs.promises.readFile(step)).digest('hex');
+  return { revision: current.revision, recipe,
+    built: { revision: current.revision, package: revision, report,
+      assembly: { path: step, sha256: digest, parts: discovery.draft.parts.map(part => part.name) }, discovery },
+    returnWarning };
 });
 ipcMain.handle('model-apply', async (event, recipe, expectedRevision) => {
   assertRenderer(event);
@@ -139,8 +176,84 @@ ipcMain.handle('model-apply', async (event, recipe, expectedRevision) => {
       [result.package, '--output', step], 180000);
     const discovery = await cadWorker([step]);
     cadSource = step;
+    await fs.promises.rm(path.join(modelProject(), 'return.json'), { force: true });
     return { ...result, assembly, discovery };
   } finally { await fs.promises.rm(temporary, { recursive: true, force: true }); }
+});
+ipcMain.handle('model-reconcile', async (event, config) => {
+  assertRenderer(event);
+  if (!cadSource || !config || typeof config !== 'object') throw new Error('请先生成建模版本并完成 Link 分组');
+  const encoded = JSON.stringify(config);
+  if (encoded.length > 1024*1024 || typeof config.source_sha256 !== 'string') throw new Error('无效的来源配置');
+  const currentHash = createHash('sha256').update(await fs.promises.readFile(cadSource)).digest('hex');
+  if (currentHash !== config.source_sha256) throw new Error('建模来源已变化，请先重新生成');
+  const fixture = smoke ? process.env.URDFTOOLS_MODEL_RETURN_SMOKE : null;
+  let source = fixture;
+  if (!source) {
+    const choice = await dialog.showOpenDialog(window, { properties: ['openFile'],
+      filters: [{ name: 'FreeCAD FCStd', extensions: ['FCStd'] }] });
+    if (choice.canceled) return null;
+    source = choice.filePaths[0];
+  }
+  if (path.extname(source).toLowerCase() !== '.fcstd') throw new Error('回流文件必须是 FCStd');
+  const mapping = {};
+  for (const link of config.links || []) for (const part of link.parts || []) {
+    if (Object.hasOwn(mapping, part)) throw new Error('一个 CAD 零件被分给多个 Link');
+    mapping[part] = link.name;
+  }
+  const directory = await fs.promises.mkdtemp(path.join(app.getPath('userData'), 'cad-return-'));
+  try {
+    const step = path.join(directory, 'returned.step');
+    const mapPath = path.join(directory, 'mapping.json');
+    await fs.promises.writeFile(mapPath, JSON.stringify(mapping), { mode: 0o600 });
+    const exchange = await runPythonWorker('.tools/cad-venv/bin/python', 'scripts/freecad_bridge.py',
+      [source, '--output', step], 300000);
+    const proposal = await runPythonWorker('.tools/cad-venv/bin/python', 'scripts/model_reconcile.py',
+      [cadSource, step, '--baseline-sha256', currentHash, '--mapping', mapPath], 180000);
+    if (pendingCadReturn) await fs.promises.rm(pendingCadReturn.directory, { recursive: true, force: true });
+    pendingCadReturn = { directory, step, proposal, baseline: cadSource, baselineHash: currentHash,
+      source, sourceHash: exchange.source_sha256 };
+    return { proposal, exchange };
+  } catch (error) {
+    await fs.promises.rm(directory, { recursive: true, force: true });
+    throw error;
+  }
+});
+ipcMain.handle('model-accept-return', async (event, config) => {
+  assertRenderer(event);
+  const pending = pendingCadReturn;
+  if (!pending || pending.proposal.status !== 'review_required' || pending.proposal.conflicts.length) {
+    throw new Error('回流存在冲突或没有待审阅方案，不能应用');
+  }
+  if (!config || config.source_sha256 !== pending.baselineHash || cadSource !== pending.baseline) {
+    throw new Error('原始建模配置已变化，请重新比较');
+  }
+  const candidateHash = createHash('sha256').update(await fs.promises.readFile(pending.step)).digest('hex');
+  if (candidateHash !== pending.proposal.returned_sha256) throw new Error('回流 STEP 在审阅后发生变化');
+  const rename = Object.fromEntries(pending.proposal.relinks.map(item => [item.baseline_part, item.returned_part]));
+  const fresh = await cadWorker([pending.step]);
+  const updated = { ...config, source_sha256: fresh.draft.source_sha256,
+    links: config.links.map(link => ({ ...link, parts: link.parts.map(part => rename[part]) })),
+    joints: config.joints.map(joint => ({ ...joint, confirmed: false })) };
+  const directory = await fs.promises.mkdtemp(path.join(app.getPath('userData'), 'cad-return-check-'));
+  try {
+    const configPath = path.join(directory, 'config.json');
+    await fs.promises.writeFile(configPath, JSON.stringify(updated), { mode: 0o600 });
+    const checked = await cadWorker([pending.step, '--config', configPath]);
+    const returnPath = path.join(modelProject(), 'return.json');
+    const record = { model_revision: JSON.parse(await fs.promises.readFile(path.join(modelProject(), 'current.json'), 'utf-8')).revision,
+      step: pending.step, sha256: candidateHash, baseline_sha256: pending.baselineHash,
+      source_fcstd: pending.source, source_sha256: pending.sourceHash,
+      configuration: updated, accepted_at: new Date().toISOString() };
+    const temporaryRecord = returnPath + '.partial-' + randomBytes(6).toString('hex');
+    await fs.promises.writeFile(temporaryRecord, JSON.stringify(record), { mode: 0o600 });
+    await fs.promises.rename(temporaryRecord, returnPath);
+    if (cadExchangeDirectory) await fs.promises.rm(cadExchangeDirectory, { recursive: true, force: true });
+    cadSource = pending.step;
+    cadExchangeDirectory = pending.directory;
+    pendingCadReturn = null;
+    return checked;
+  } finally { await fs.promises.rm(directory, { recursive: true, force: true }); }
 });
 ipcMain.handle('choose-cad-step', async event => {
   assertRenderer(event);
@@ -306,9 +419,25 @@ app.whenReady().then(() => {
         if (title !== '查看') throw new Error('Renderer did not mount');
         const isolated = await window.webContents.executeJavaScript(`typeof require === 'undefined' && window.urdftools.version === '0.1.0'`);
         if (!isolated) throw new Error('Renderer isolation/preload failed');
+        if (process.env.URDFTOOLS_MODEL_RESTORE_SMOKE) {
+          await window.webContents.executeJavaScript(`([...document.querySelectorAll('nav button')].find(button => button.textContent === '建模')).click()`);
+          const deadline = Date.now() + 15000;
+          let restored = false;
+          while (Date.now() < deadline) {
+            restored = await window.webContents.executeJavaScript(`document.querySelector('[aria-label="STEP 转换向导"]')?.textContent.includes('未确认关节：1') && document.querySelector('main')?.textContent.includes('returned.step')`);
+            if (restored) break;
+            await new Promise(resolve => setTimeout(resolve, 50));
+          }
+          if (!restored) throw new Error('Accepted FreeCAD return was not restored after restart');
+          console.log(JSON.stringify({ event: 'desktop_model_restore_smoke', restored: true }));
+        }
         if (process.env.URDFTOOLS_MODEL_SMOKE) {
           const runModelSmoke = require(path.join(root, 'scripts/m01_desktop_smoke_hook.cjs'));
           await runModelSmoke(window, process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR);
+          if (process.env.URDFTOOLS_MODEL_RETURN_SMOKE) {
+            const runReturnSmoke = require(path.join(root, 'scripts/m02_desktop_smoke_hook.cjs'));
+            await runReturnSmoke(window, process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR);
+          }
         }
         if (process.env.URDFTOOLS_IMPORT_SMOKE) {
           const fixture = process.env.URDFTOOLS_IMPORT_SMOKE;

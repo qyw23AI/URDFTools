@@ -7,6 +7,8 @@ contextBridge.exposeInMainWorld('urdftools', Object.freeze({
   chooseCadStep: () => ipcRenderer.invoke('choose-cad-step'),
   modelCurrent: () => ipcRenderer.invoke('model-current'),
   modelApply: (recipe, expectedRevision) => ipcRenderer.invoke('model-apply', recipe, expectedRevision),
+  modelReconcile: config => ipcRenderer.invoke('model-reconcile', config),
+  modelAcceptReturn: config => ipcRenderer.invoke('model-accept-return', config),
   cadPreview: config => ipcRenderer.invoke('cad-preview', config),
   saveCadConfig: config => ipcRenderer.invoke('save-cad-config', config),
   loadCadConfig: () => ipcRenderer.invoke('load-cad-config'),

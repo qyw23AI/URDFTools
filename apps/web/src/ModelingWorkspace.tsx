@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CadWizard, type Discovery } from './CadWizard';
+import { CadWizard, type Configuration, type Discovery } from './CadWizard';
 
 type Part = { name: string; material: string; density_kg_m3: number;
   profile: { kind: string; width_mm?: number; height_mm?: number; radius_mm?: number; holes?: unknown[] };
@@ -8,6 +8,11 @@ type Part = { name: string; material: string; density_kg_m3: number;
 export type ModelRecipe = { schema_version: number; parts: Part[] };
 export type ModelApplyResult = { revision: number; package: string; report: { parts: {name: string; step_sha256: string}[] };
   assembly: {path: string; sha256: string; parts: string[]}; discovery: Discovery };
+export type CadReturnProposal = { status: 'review_required' | 'conflict'; baseline_sha256: string;
+  returned_sha256: string; relinks: {baseline_part: string; returned_part: string; link: string;
+    renamed: boolean; volume_delta_mm3: number; center_delta_mm: number[]}[];
+  conflicts: {part: string; kind: string; preserved_link: string | null}[];
+  automatically_applied: boolean; requires_human_confirmation: boolean };
 const empty: ModelRecipe = { schema_version: 1, parts: [] };
 const clone = (value: ModelRecipe): ModelRecipe => JSON.parse(JSON.stringify(value));
 
@@ -16,6 +21,8 @@ export function ModelingWorkspace() {
   const [cursor, setCursor] = useState(0);
   const [revision, setRevision] = useState(0);
   const [built, setBuilt] = useState<ModelApplyResult | null>(null);
+  const [modelConfig, setModelConfig] = useState<Configuration | null>(null);
+  const [cadReturn, setCadReturn] = useState<CadReturnProposal | null>(null);
   const [name, setName] = useState('Base');
   const [width, setWidth] = useState(20);
   const [height, setHeight] = useState(10);
@@ -30,12 +37,14 @@ export function ModelingWorkspace() {
     window.urdftools?.modelCurrent().then(current => {
       if (cancelled) return;
       setRevision(current.revision); setHistory([current.recipe]); setCursor(0);
+      if (current.built) { setBuilt(current.built); setModelConfig(current.built.discovery.configuration); }
+      if (current.returnWarning) setError(`回流记录未恢复：${current.returnWarning}`);
     }).catch(cause => { if (!cancelled) setError(String(cause)); });
     return () => { cancelled = true; };
   }, []);
   function edit(next: ModelRecipe) {
     setHistory(previous => [...previous.slice(0, cursor + 1), clone(next)]);
-    setCursor(previous => previous + 1); setBuilt(null); setJson(''); setError('');
+    setCursor(previous => previous + 1); setBuilt(null); setModelConfig(null); setCadReturn(null); setJson(''); setError('');
   }
   function addPart() {
     if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name) || recipe.parts.some(part => part.name === name)) {
@@ -69,11 +78,31 @@ export function ModelingWorkspace() {
     setBusy(true); setError('');
     try {
       const result = await window.urdftools.modelApply(recipe, revision);
-      setRevision(result.revision); setBuilt(result);
+      setRevision(result.revision); setBuilt(result); setModelConfig(result.discovery.configuration); setCadReturn(null);
     } catch (cause) {
       setError(String(cause));
       try { const current = await window.urdftools.modelCurrent(); setRevision(current.revision); } catch { /* retain the visible error */ }
     } finally { setBusy(false); }
+  }
+  async function compareReturn() {
+    if (!modelConfig || !window.urdftools) return;
+    setBusy(true); setError(''); setCadReturn(null);
+    try { const result=await window.urdftools.modelReconcile(modelConfig);
+      if (result) setCadReturn(result.proposal);
+    } catch (cause) { setError(String(cause)); }
+    finally { setBusy(false); }
+  }
+  async function acceptReturn() {
+    if (!built || !modelConfig || !cadReturn || !window.urdftools) return;
+    setBusy(true); setError('');
+    try {
+      const discovery=await window.urdftools.modelAcceptReturn(modelConfig);
+      setBuilt({ ...built, discovery,
+        assembly: { ...built.assembly, path: discovery.draft.source_name, sha256: discovery.draft.source_sha256,
+          parts: discovery.draft.parts.map(part => part.name) } });
+      setModelConfig(discovery.configuration); setCadReturn(null);
+    } catch (cause) { setError(String(cause)); }
+    finally { setBusy(false); }
   }
   return <section aria-label="机器人建模工作台" className="cad-wizard">
     <p>在本机编辑参数化 CAD 配方。尺寸用 mm，密度用 kg/m³；导出前需人工确认关节及材料。每次生成保存不可变版本。</p>
@@ -106,7 +135,17 @@ export function ModelingWorkspace() {
     <p><button disabled={busy} onClick={() => void build()}>生成 CAD 与 URDF 预览来源</button></p>
     {busy && <p role="status">正在生成并重新载入 STEP 装配…</p>}
     {error && <p role="alert">{error}</p>}
-    {built && <><p role="status">版本 {built.revision}：{built.assembly.parts.join('、')}；STEP SHA-256 {built.assembly.sha256}</p>
-      <CadWizard key={built.revision} initialDiscovery={built.discovery} modeling /></>}
+    {built && <><p role="status">版本 {built.revision}：{built.assembly.parts.join('、')}；当前 STEP SHA-256 {built.assembly.sha256}</p>
+      <h2>FreeCAD 回流审阅</h2>
+      <p>选择本机 FCStd，对照当前 STEP 的零件名称、体积、质心和拓扑。比较只生成提案；接受后所有关节需重新确认，原 CAD 版本保留。</p>
+      <button disabled={busy || !modelConfig} onClick={() => void compareReturn()}>比较 FreeCAD 回流</button>
+      {cadReturn && <section aria-label="FreeCAD 回流差异" data-return-status={cadReturn.status}>
+        <p>{cadReturn.status === 'conflict' ? '发现冲突，禁止自动应用；请在 FreeCAD 中修正或重新分组。' : '零件可重关联；请审阅后明确接受。'}</p>
+        {cadReturn.relinks.map(item => <p key={item.baseline_part}>{item.baseline_part} → {item.returned_part} / Link {item.link}；体积变化 {item.volume_delta_mm3.toPrecision(6)} mm³；质心位移 {item.center_delta_mm.map(x => x.toPrecision(4)).join(', ')} mm</p>)}
+        {cadReturn.conflicts.map((item, index) => <p role="alert" key={index}>{item.part}：{item.kind}；原 Link {item.preserved_link || '未分配'} 保留</p>)}
+        {cadReturn.status === 'review_required' && <button disabled={busy} onClick={() => void acceptReturn()}>接受回流并重新确认关节</button>}
+      </section>}
+      <CadWizard key={`${built.revision}-${built.discovery.draft.source_sha256}`} initialDiscovery={built.discovery}
+        modeling onConfigurationChange={setModelConfig} /></>}
   </section>;
 }

@@ -25,7 +25,7 @@ def sha(path):
     return digest.hexdigest()
 
 
-def invoke(action, source, output):
+def invoke(action, source, output, fixture_variant='base'):
     if not APPIMAGE.is_file() or sha(APPIMAGE)!=APPIMAGE_SHA256:
         raise ValueError('Official FreeCAD 1.1.4 AppImage is missing or hash mismatch')
     if not (APPDIR/'AppRun').is_file():
@@ -39,7 +39,8 @@ def invoke(action, source, output):
         work=Path(folder)
         request=work/'request.json';result=work/'result.json'
         temporary=work/('output.FCStd' if action=='fixture' else 'output.step')
-        request.write_text(json.dumps({'action':action,'source':str(source),'output':str(temporary)}))
+        request.write_text(json.dumps({'action':action,'source':str(source),'output':str(temporary),
+                                       'fixture_variant':fixture_variant}))
         env={key:value for key,value in os.environ.items() if key not in ('PYTHONPATH','PYTHONHOME','LD_LIBRARY_PATH')}
         env.update({'URDFTOOLS_FREECAD_REQUEST':str(request),'URDFTOOLS_FREECAD_RESULT':str(result),
                     'HOME':str(work),'QT_QPA_PLATFORM':'offscreen'})
@@ -75,11 +76,15 @@ def main():
     parser.add_argument('source',type=Path,nargs='?')
     parser.add_argument('--output',required=True,type=Path)
     parser.add_argument('--make-fixture',action='store_true',help='create an original two-part FCStd fixture')
+    parser.add_argument('--fixture-variant',choices=['base','resized','topology','renamed','model_same','model_topology'],default='base',
+                        help='original test fixture variant; only with --make-fixture')
     args=parser.parse_args()
     try:
         if not args.make_fixture and args.source is None:
             parser.error('source FCStd is required')
-        result=invoke('fixture' if args.make_fixture else 'export',args.source,args.output)
+        if not args.make_fixture and args.fixture_variant!='base':
+            parser.error('--fixture-variant requires --make-fixture')
+        result=invoke('fixture' if args.make_fixture else 'export',args.source,args.output,args.fixture_variant)
         print(json.dumps(result,ensure_ascii=False))
         return 0
     except (OSError,ValueError,RuntimeError,subprocess.TimeoutExpired) as exc:

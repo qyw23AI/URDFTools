@@ -1,0 +1,36 @@
+{
+  "phase": "M02",
+  "timestamp": "20261022T184810208138Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "freecad-return-contracts",
+      "command": [
+        ".tools/cad-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/m02",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/M02/runs/20261022T184810208138Z/freecad-return-contracts.log",
+      "log_sha256": "62d1a3e590eabb98211d40d9d75b80c76749c4ff623e3f03350afeb6a182b313",
+      "status": "passed"
+    },
+    {
+      "id": "freecad-return-desktop",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/m02_desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/M02/runs/20261022T184810208138Z/freecad-return-desktop.log",
+      "log_sha256": "131cf4192b470f2472f2306a83d4d3807113e72ab4f7f83a4a50829277ba63bf",
+      "status": "passed"
+    }
+  ]
+}

@@ -1,5 +1,9 @@
 # URDFTools 项目进度
 
+## 2026-10-23 — M02 FreeCAD 回流与版本差异验收通过
+
+真实 FreeCAD FCStd 改名/尺寸/拓扑变体经 STEP 回流；零件可重关联，新增孔导致的拓扑变化产生冲突且不覆盖用户 Link/关节编辑。Electron 人工接受后关节确认清零，重启恢复已接受 STEP/hash/配置。`.venv/bin/python scripts/accept_phase.py M02` **2/2 gate 通过**；C04 3/3、M01 2/2 回归通过。详见 `docs/acceptance/M02.md` 和 `docs/MODEL_RETURN_GUIDE.md`。下一阶段按依赖推进 A00 Agent 工具层或 E00 评估方法。
+
 ## 2026-10-23 — M01 建模工作台验收通过
 
 已实现 Electron 建模工作区、命名 STEP 装配桥、关节轴显示、空配方新增零件/镜像/撤销重做、C02/C03 预览和导出连接。正式 `.venv/bin/python scripts/accept_phase.py M01` **2/2 gate 通过**：真实双连杆 STEP→URDF ZIP→MuJoCo，Electron 从空项目完成新增、位移编辑、撤销/重做、关节确认、预览、导出；版本恢复核对资产哈希。M00 3/3、C02 2/2、C03 4/4 回归通过，生产构建通过。详见 `docs/acceptance/M01.md`。下一阶段 M02 FreeCAD 往返与版本差异；镜像目前仅对称复制位置，任意不对称几何的真正镜像仍有限制。
