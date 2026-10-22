@@ -1,0 +1,25 @@
+{
+  "phase": "A02",
+  "timestamp": "20261022T191524647050Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "cli-mcp-real-workflows",
+      "command": [
+        ".tools/model-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/a02",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/A02/runs/20261022T191524647050Z/cli-mcp-real-workflows.log",
+      "log_sha256": "7aa1ae4a52540c32e78ea50f211198c2724bc89f6ef7566b16a6a03c5b53fa6d",
+      "status": "passed"
+    }
+  ]
+}

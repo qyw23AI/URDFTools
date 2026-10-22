@@ -1,6 +1,9 @@
 {
   "schema_version": 1,
   "phases": {
+    "A02": [
+      {"id": "cli-mcp-real-workflows", "kind": "command", "argv": [".tools/model-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/a02", "-p", "test_*.py", "-v"], "timeout_seconds": 300}
+    ],
     "A01": [
       {"id": "two-link-real-cli", "kind": "command", "argv": [".tools/model-venv/bin/python", "scripts/a01_cli_smoke.py"], "timeout_seconds": 480},
       {"id": "agent-desktop", "kind": "command", "argv": ["{python}", "scripts/a01_desktop_smoke.py"], "timeout_seconds": 600}

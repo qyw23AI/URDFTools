@@ -19,7 +19,25 @@ def main():
     importer.add_argument('--storage', required=True)
     importer.add_argument('--model', help='Explicit model path from import discovery')
     importer.add_argument('--json', action='store_true')
+    tool = commands.add_parser('tool', help='Call a bounded local product tool and print JSON')
+    tool.add_argument('--workspace', required=True)
+    tool.add_argument('--name', required=True)
+    tool.add_argument('--arguments', required=True, help='JSON object of tool arguments')
+    mcp = commands.add_parser('mcp', help='Serve local MCP over stdio')
+    mcp.add_argument('--workspace', required=True)
     args = parser.parse_args()
+    if args.command == 'tool':
+        from urdftools.agent.facade import call_tool
+        try:
+            arguments = json.loads(args.arguments)
+        except ValueError as exc:
+            arguments = None
+        result = call_tool(args.workspace, args.name, arguments)
+        print(json.dumps(result, ensure_ascii=False))
+        return 0 if result['status'] == 'ok' else 2
+    if args.command == 'mcp':
+        from urdftools.agent.facade import serve_mcp
+        return serve_mcp(args.workspace)
     if args.command == "doctor":
         print(json.dumps(runtime_status(), ensure_ascii=False))
         return 0

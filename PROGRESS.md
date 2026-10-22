@@ -224,3 +224,6 @@ scheduler.json 或创建提交；配置中既有阈值 diff 原样保留。仅 S
 ## 2026-10-23 — A01 Agent 辅助建模
 
 完成 Electron 建模工作台的自然语言建议、参数/质量差异与完整配方预览、拒绝、人工确认应用及复制配方后微调。真实 ChatGPT Codex 对原创双连杆只修改 Arm 宽度；拒绝不改工程，接受后版本 1→2，URDF 独立校验 2 Link/1 Joint，撤销并重建为版本 3。正式 `.venv/bin/python scripts/accept_phase.py A01` 2/2 门禁通过、0 skip；TypeScript/Vite 构建通过。证据见 `docs/acceptance/A01.md`、`artifacts/acceptance/A01.json`、`artifacts/A01/desktop/`。训练性能仍未评估，A02 CLI/MCP 接口尚待开发。
+## 2026-10-23 — A02 CLI 与 MCP 受限工具接口
+
+完成共享的 CLI JSON/MCP stdio 工具信封，开放导入、CAD 隔离预览、STEP 转换检查、URDF ZIP MuJoCo 验证四项能力。相对路径、符号链接逃逸和内部存储目录逃逸被拒绝；模型接口没有直接应用工具。正式 `.venv/bin/python scripts/accept_phase.py A02` 1/1 门禁通过、0 skip，真实多模型 ZIP、双零件 STEP、CAD 质量变化与 2 Link/1 Joint 物理包均实际验证；CLI/MCP 成功与错误信封一致。证据见 `docs/acceptance/A02.md`、`artifacts/acceptance/A02.json`；用法见 `docs/AGENT_TOOLS.md`。目前 MCP 只支持 2025-06-18 初始化协议，评估工具仅验证物理包，训练结果比较仍在后续阶段。
