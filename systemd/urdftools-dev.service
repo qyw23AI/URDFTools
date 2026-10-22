@@ -5,6 +5,7 @@ Description=URDFTools bounded Codex development attempt
 Type=oneshot
 WorkingDirectory=%h/URDFTools
 ExecStart=/usr/bin/python3 %h/URDFTools/scheduler.py run
+SuccessExitStatus=75
 TimeoutStartSec=5h
 KillMode=control-group
 TimeoutStopSec=30s

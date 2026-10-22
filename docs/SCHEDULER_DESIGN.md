@@ -51,3 +51,6 @@ gate 通过后、首次 Git 提交前，在 journal 中固定 `evidence_sha256`�
 已有 `urdftools-dev.timer`：`OnCalendar=*-*-* 00/4:00:00`，Persistent=true。本机 Linger=yes，用户 systemd 可在注销后继续；关机/睡眠期间不会执行，开机恢复后 catch-up 不补跑所有错过轮次。使用本地 Asia/Shanghai 的 00/04/08/12/16/20 点。service TimeoutStartSec=5h、KillMode=control-group；round timeout 比 service 短，给保存留时间。修订部署后必须重载并用短临时 timer 真实验证触发，不能只测试手动 start 就说自动触发已验证。
 
 所有必需阶段完成后自然 no-op，并记录 final release path；可禁用 timer 以免空跑，但必须保留进度和日志供用户查看。独立硬件阻塞应明确展示且允许其它工作继续。
+
+
+运维补充（2026-10-22）：调度器返回 75 表示额度/认证/模型暂不可用的安全等待，用户级 service 通过 `SuccessExitStatus=75` 将其显示为正常停轮；详细原因和最早重试时间仍以 `.scheduler/state.json`、终端进度和 run evidence 为准。其它失败退出码继续由 systemd 标为 failed。

@@ -64,3 +64,6 @@ S00 综合 gate 退出 1（local/历史同版本 timer 通过、当前源码 liv
 先检查 diff，保留既有调度实现与四小时 timer。本轮实际运行声明测试：59/59 通过、0 skip；50 阶段图有效；综合 gate 3/3，全部退出 0。独立 fixture 的数值重算 4/4，通过 24 项只读断言核对宿主源码/测试/部署哈希、真实 CLI 的 ChatGPT/Sol Medium 请求、Git 父提交及证据 trailer、重复运行 no-op、timer 原始进程和 2.113 秒触发标记。宿主报告均与当前文件匹配，按任务授权复用；未另启模型或 systemd 探针。
 
 更新验收首页与机器摘要，保留旧 blocked 摘要及失败记录。证据见 `artifacts/S00/resume-review-20261022/`、`docs/acceptance/S00.md`、`artifacts/acceptance/S00.json`。源码/测试/timer/verifier 未再修改；项目 HEAD、state 及 scheduler.json 前后哈希相同，未创建项目提交，未来 49 阶段与基线完全一致。S00 实现及验收材料已就绪，正式阶段完成和提交仍交外层调度器决定。旧 pending journal、同 UID 并发编辑、硬崩溃、协议兼容及日志容量风险继续如实保留。
+
+
+2026-10-22 11:52 运维修订：systemd 用户 service 现以 `SuccessExitStatus=75` 识别调度器主动的额度/认证/模型等待，调度状态仍保留 `quota_wait` 与最早可重试时间；其它非零退出仍为失败。四小时 timer 保持 active/enabled，安装 unit 与源码匹配，独立短探针 2.131 秒实际触发，S00 当前验收门禁仍为 3/3。
