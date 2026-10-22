@@ -1,5 +1,10 @@
 # URDFTools 项目进度
 
+## 2026-10-22 — C04 几何交换桥开发中（未完成阶段验收）
+
+已实现 IGES/BREP 闭合实体到 STEP 的本地转换，显式处理无单位 BREP、回读比较实体数/体积/几何质心、输出损失报告；4 个真实 OCP 文件流程测试通过。开放曲面和 Ubuntu 上的原生 SolidWorks/FCStd 文件会明确拒绝。尚缺 FreeCAD 和 sw2robot graph 实际适配与其往返测试，不能标记 C04 完成。详见 `docs/CAD_EXCHANGE_GUIDE.md`。
+
+
 ## 2026-10-22 — C03 STEP 到 URDF/ROS 包技术验收通过
 
 独立导出闭合 STEP 实体的 STL 视觉网格、物理惯量、显式密度和驱动限值；ZIP/目录可重新导入。MuJoCo 独立编译原始固定基座及注入自由关节的浮动基座模型，明确报告固定根质量排除和训练未就绪。真实 ROS 2 colcon 安装包可重新导入，Electron UI 完成实际导出。
