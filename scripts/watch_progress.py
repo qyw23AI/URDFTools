@@ -66,12 +66,19 @@ def render():
     run_id = latest.get('run_id')
     log_dir = RUNS / run_id if run_id else None
     request = read_json(log_dir / 'request.json') if log_dir else {}
+    phase = latest.get('phase')
+    task = (state.get('tasks') or {}).get(phase, {})
+    eligible_at = task.get('next_eligible_time')
+    retry = (datetime.fromtimestamp(eligible_at).astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
+             if isinstance(eligible_at, (int, float)) else '当前可尝试')
+    call_state = '已进入 exec' if request.get('executed') else '尚未进入 exec'
     now = datetime.now().astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
     lines = [f'URDFTools 自动开发进度   {now}',
              '=' * 72,
              f'完成阶段: {len(completed)}/50  |  当前阶段: {latest.get("phase", "尚未启动")}',
              f'阶段状态: {latest.get("result", "等待")}  |  原因: {latest.get("reason", "")}',
-             f'模型: {request.get("model", request.get("requested_model", "等待预检"))}  |  思考强度: {request.get("effort", "-")}',
+             f'模型路由: {request.get("model", request.get("requested_model", "等待预检"))}  |  思考强度: {request.get("effort", "-")}  |  {call_state}',
+             f'最早可重试: {retry}',
              'timer: ' + timer_status(),
              '运行日志: ' + (str(log_dir) if log_dir else '暂无'),
              '-' * 72]
