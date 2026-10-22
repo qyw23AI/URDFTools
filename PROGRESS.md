@@ -218,3 +218,6 @@ undo/redo；生成 JSON Schema 与只读 TypeScript 类型，不新增第三方�
 详见 `docs/acceptance/S02.md`、`artifacts/acceptance/S02.json`。本轮未改 state、HEAD、
 scheduler.json 或创建提交；配置中既有阈值 diff 原样保留。仅 S02 材料就绪，正式完成由调度器决定，
 未执行或宣称后续阶段完成；既有 JSON/内存事务/文件竞态/物理验证限制仍保留。
+## 2026-10-23 — A00 受约束 Agent 工具层
+
+已完成结构化 CAD 建议的白名单校验、隔离预览与人工确认应用；接入当前 ChatGPT 登录的 Codex CLI 和仅回环本地模型端点。用户明确授权仅发送 CAD 配方与建模指令，未发送本地 STEP/FCStd 或密钥，未启用额外付费 API。真实 CLI 对原创测试配方建议 Body 宽度 20→30 mm，CAD 质量 0.0027→0.00405 kg，确认前版本指针字节不变，确认后版本 1→2。正式 A00 门禁 2/2 通过、0 skip；证据见 `docs/acceptance/A00.md` 与 `artifacts/acceptance/A00.json`。本地模型仅经回环测试服务器验证；A01 界面集成和 A02 MCP 仍待开发。

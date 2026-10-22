@@ -1,0 +1,36 @@
+{
+  "phase": "A00",
+  "timestamp": "20261022T185702087583Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "agent-contracts",
+      "command": [
+        ".tools/model-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/a00",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/A00/runs/20261022T185702087583Z/agent-contracts.log",
+      "log_sha256": "838cb78c70498b2f32461eb3e2ceebc8c5e0cef8eb0a9aa06f67e0e4a07135df",
+      "status": "passed"
+    },
+    {
+      "id": "real-chatgpt-cli",
+      "command": [
+        ".tools/model-venv/bin/python",
+        "scripts/a00_cli_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/A00/runs/20261022T185702087583Z/real-chatgpt-cli.log",
+      "log_sha256": "9d8260790b2a53051494f1269fd022a130c95875dc1f8af7502683a6956ff8be",
+      "status": "passed"
+    }
+  ]
+}
