@@ -446,9 +446,11 @@ class SchedulerTest(unittest.TestCase):
     def test_isolated_codex_home_excludes_provider_and_mcp(self):
         with scheduler.codex_home() as env:
             home = Path(env['CODEX_HOME'])
+            self.assertEqual(home.parent, Path.home() / '.codex' / 'tmp')
             self.assertEqual(set(home.iterdir()), {home / 'auth.json', home / 'config.toml'})
             self.assertIn('forced_login_method = "chatgpt"', (home / 'config.toml').read_text())
             self.assertNotIn('OPENAI_API_KEY', env)
+        self.assertFalse(home.exists())
 
     def test_changed_wip_not_overwritten(self):
         self.result('partial', result='partial')

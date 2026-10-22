@@ -103,7 +103,12 @@ def chatgpt_environment():
 def codex_home():
     """Discard all user/provider/MCP configuration; use only existing ChatGPT auth."""
     auth = Path(os.environ.get('CODEX_HOME', str(Path.home() / '.codex'))) / 'auth.json'
-    with tempfile.TemporaryDirectory(prefix='urdftools-chatgpt-') as directory:
+    # Codex creates its sandbox helper under CODEX_HOME. Recent desktop builds
+    # refuse to create that helper when the isolated home lives beneath /tmp.
+    # Keep the isolated home under the real Codex directory and remove it on exit.
+    isolated_parent = Path.home() / '.codex' / 'tmp'
+    isolated_parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='urdftools-chatgpt-', dir=isolated_parent) as directory:
         home = Path(directory)
         if auth.is_file():
             (home / 'auth.json').symlink_to(auth.resolve())
