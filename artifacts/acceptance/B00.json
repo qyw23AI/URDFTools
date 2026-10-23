@@ -1,0 +1,36 @@
+{
+  "phase": "B00",
+  "timestamp": "20261023T003926125117Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "result-import-queue-contracts",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/b00",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/B00/runs/20261023T003926125117Z/result-import-queue-contracts.log",
+      "log_sha256": "19aaf5469d97ec832a698c5170c80d7eefe652f92aed078c610cd509f45aa8c2",
+      "status": "passed"
+    },
+    {
+      "id": "real-worker-kill-and-resume",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/b00_crash_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/B00/runs/20261023T003926125117Z/real-worker-kill-and-resume.log",
+      "log_sha256": "20367f1f4e7680122526b64258611578642e68ab46b808ed62cd7f3e836e2978",
+      "status": "passed"
+    }
+  ]
+}

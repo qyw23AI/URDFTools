@@ -1,5 +1,9 @@
 # URDFTools 项目进度
 
+## 2026-10-23 — B00 外部结果导入可恢复作业
+
+完成 SQLite WAL 租约队列、分块断点、SHA-256 资产库、bundle/机器人身份绑定、取消与完整导入后单次发布。正式 B00 **2/2 gate、3 项单元、0 skip**；进程级验收在 1000 字节检查点后真实杀死 worker，再由新 worker 接管，完成后只有 1 run/1 asset。首次测试导入路径失败已修正，失败与成功日志均保留。见 `docs/acceptance/B00.md`、`artifacts/acceptance/B00.json`。下一阶段 B01 是外部训练结果 manifest、指标和视频语义导入；不开发 RL 训练器。
+
 ## 2026-10-23 — K02 G1/H1 人形结构与准静态支撑技能
 
 新增白名单 humanoid_urdf 技能：G1/H1 关节链、膝踝限位、足底碰撞、声明质量/惯量与 q=0 根坐标系质心；可选带显式来源标签的世界系接触多边形/COM/躯干姿态/膝踝时序检查。真实固定厂商 G1 131 pass/0 fail/4 unknown、H1 91 pass/0 fail/4 unknown，质量标签求和 35.11514202/59.338 kg（不是硬件称重）；合成 H1 右踝碰撞缺失检测到 fail。正式 K02 **2/2 gate、11 项 unittest + 厂商技能流程、0 skip**；K00/K01 回归及 TypeScript/Vite 生产构建通过。首轮因 G1 修订文件和 CRLF 字节哈希不一致失败后已修复，失败日志保留。详见 docs/acceptance/K02.md、artifacts/acceptance/K02.json、artifacts/K02/humanoid-report.json。没有真实步态/电机/训练数据，动态稳定性始终 unknown；下一阶段 B00 外部结果库作业基础（不开发 RL 训练器）。

@@ -1,6 +1,10 @@
 {
   "schema_version": 1,
   "phases": {
+    "B00": [
+      {"id": "result-import-queue-contracts", "kind": "command", "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests/b00", "-p", "test_*.py", "-v"]},
+      {"id": "real-worker-kill-and-resume", "kind": "command", "argv": ["{python}", "scripts/b00_crash_smoke.py"]}
+    ],
     "K02": [
       {"id": "vendor-humanoid-contracts", "kind": "command", "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests/k02", "-p", "test_*.py", "-v"]},
       {"id": "vendor-humanoid-skill-smoke", "kind": "command", "argv": ["{python}", "scripts/k02_vendor_skill_smoke.py"]}
