@@ -1,0 +1,36 @@
+{
+  "phase": "E00",
+  "timestamp": "20261023T003339948730Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "gold-fixtures",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/e00",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/E00/runs/20261023T003339948730Z/gold-fixtures.log",
+      "log_sha256": "5ea0007ca139dce83bf3c179c11a07b016eaab0641d2ec15b7218c77a04e4bea",
+      "status": "passed"
+    },
+    {
+      "id": "real-mujoco-compile",
+      "command": [
+        ".tools/sim-venv/bin/python",
+        "scripts/e00_mujoco_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/E00/runs/20261023T003339948730Z/real-mujoco-compile.log",
+      "log_sha256": "f24a59cc7f43c6293677a3d32087746780e62d9a4f616538a2f8ff076c60c8f4",
+      "status": "passed"
+    }
+  ]
+}

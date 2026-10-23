@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "contact_basics",
+  "version": "1.0.0",
+  "source": "URDFTools K00 original implementation",
+  "description": "Coulomb contact force consistency, not gait stability.",
+  "rules": [
+    {
+      "id": "friction_cone",
+      "tool": "contact_force",
+      "config": {}
+    }
+  ]
+}

@@ -13,8 +13,8 @@ module.exports = async function runS06ViewerSmoke(window, path, fs, modelLabel) 
     throw new Error('S06 ' + modelLabel + ' timeout: ' + expression + ' | ' + JSON.stringify(diagnostics));
   };
 
-  const expectedLinks = modelLabel === 'go2' ? 42 : 40;
-  const expectedJoints = modelLabel === 'go2' ? 41 : 39;
+  const expectedLinks = modelLabel === 'go2' ? 42 : modelLabel === 'a1' ? 23 : modelLabel === 'h1' ? 25 : 40;
+  const expectedJoints = modelLabel === 'go2' ? 41 : modelLabel === 'a1' ? 22 : modelLabel === 'h1' ? 24 : 39;
   await waitFor("document.querySelector('[data-assets-loaded]')?.dataset.assetsLoaded === 'true'");
   await waitFor("Number(document.querySelector('[data-tree-link-count]')?.dataset.treeLinkCount) === " + expectedLinks);
   await waitFor("Number(document.querySelector('[data-tree-joint-count]')?.dataset.treeJointCount) === " + expectedJoints);
@@ -27,7 +27,7 @@ module.exports = async function runS06ViewerSmoke(window, path, fs, modelLabel) 
       baseline.bounds.length !== 3 || baseline.bounds.some(n => !(n > 0)) || baseline.alerts.length) {
     throw new Error('S06 ' + modelLabel + ' model did not fully load: ' + JSON.stringify(baseline));
   }
-  const expectedName = modelLabel === 'go2' ? 'go2' : 'g1_29dof';
+  const expectedName = modelLabel === 'go2' ? 'go2' : modelLabel === 'a1' ? 'a1' : modelLabel === 'h1' ? 'h1_description' : 'g1_29dof';
   if (!baseline.selectedModel.toLowerCase().includes(expectedName)) {
     throw new Error('Wrong selected reference model: ' + baseline.selectedModel);
   }

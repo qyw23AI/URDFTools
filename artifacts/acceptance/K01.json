@@ -1,0 +1,36 @@
+{
+  "phase": "K01",
+  "timestamp": "20261023T003416919435Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "vendor-quadruped-contracts",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/k01",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/K01/runs/20261023T003416919435Z/vendor-quadruped-contracts.log",
+      "log_sha256": "a3243b406a8184126196a50214623af19a37b5fef0147072778ab88e48f955e6",
+      "status": "passed"
+    },
+    {
+      "id": "vendor-skill-real-urdf-and-mutant",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/k01_vendor_skill_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/K01/runs/20261023T003416919435Z/vendor-skill-real-urdf-and-mutant.log",
+      "log_sha256": "f82a50d2af6039eb0d8793891eb4e797b07244b38ef5d1de65bde1eb97aeb3bc",
+      "status": "passed"
+    }
+  ]
+}

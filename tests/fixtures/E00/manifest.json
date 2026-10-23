@@ -1,0 +1,97 @@
+{
+  "cases": [
+    {
+      "category": "quadruped",
+      "expected": [],
+      "file": "quadruped_valid.urdf"
+    },
+    {
+      "category": "humanoid",
+      "expected": [],
+      "file": "humanoid_valid.urdf"
+    },
+    {
+      "category": "quadruped",
+      "expected": [
+        {
+          "certainty": "context_dependent",
+          "location": "torso/visual/box",
+          "rule": "context_scale_mismatch"
+        }
+      ],
+      "file": "quadruped_misunit_visual.urdf"
+    },
+    {
+      "category": "quadruped",
+      "expected": [
+        {
+          "certainty": "definite",
+          "location": "LF_knee",
+          "rule": "invalid_joint_axis"
+        }
+      ],
+      "file": "quadruped_zero_axis.urdf"
+    },
+    {
+      "category": "quadruped",
+      "expected": [
+        {
+          "certainty": "context_dependent",
+          "location": "LF_knee",
+          "rule": "context_axis_mismatch"
+        }
+      ],
+      "file": "quadruped_axis_context_mismatch.urdf"
+    },
+    {
+      "category": "humanoid",
+      "expected": [
+        {
+          "certainty": "definite",
+          "location": "torso",
+          "rule": "inertia_triangle_violation"
+        }
+      ],
+      "file": "humanoid_triangle_violation.urdf"
+    },
+    {
+      "category": "humanoid",
+      "expected": [
+        {
+          "certainty": "definite",
+          "location": "L_thigh",
+          "rule": "negative_inertia"
+        }
+      ],
+      "file": "humanoid_negative_inertia.urdf"
+    },
+    {
+      "category": "humanoid",
+      "expected": [],
+      "file": "humanoid_fixed_sensor_frame.urdf",
+      "positive_boundary": "massless fixed sensor frame"
+    },
+    {
+      "category": "other",
+      "expected": [],
+      "file": "hollow_frame_valid.urdf",
+      "positive_boundary": "COM in empty cavity with analytic positive inertia"
+    }
+  ],
+  "design_context": {
+    "LF_knee_expected_axis": [
+      0,
+      1,
+      0
+    ],
+    "quadruped_torso_size_m": [
+      0.4,
+      0.2,
+      0.1
+    ]
+  },
+  "license": "CC0-1.0",
+  "not_reference_performance": true,
+  "origin": "synthetic_fixture",
+  "schema_version": 1
+}

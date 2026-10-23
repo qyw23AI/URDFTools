@@ -1,0 +1,36 @@
+{
+  "phase": "E04",
+  "timestamp": "20261023T003353069865Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "real-cpu-probe-contracts",
+      "command": [
+        ".tools/sim-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/e04",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/E04/runs/20261023T003353069865Z/real-cpu-probe-contracts.log",
+      "log_sha256": "d6e1ce9af163463d386808c3fdfaabf5dd04a5e7cdb7ce492e576ce448009689",
+      "status": "passed"
+    },
+    {
+      "id": "real-mujoco-probe-trace-animation",
+      "command": [
+        ".tools/sim-venv/bin/python",
+        "scripts/e04_sim_probes.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/E04/runs/20261023T003353069865Z/real-mujoco-probe-trace-animation.log",
+      "log_sha256": "8de998968cc4fafebfa29447217f5ab86b10bd129b8efa4a098938dac63a5652",
+      "status": "passed"
+    }
+  ]
+}

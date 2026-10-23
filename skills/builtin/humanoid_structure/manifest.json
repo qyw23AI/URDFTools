@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "id": "humanoid_structure",
+  "version": "1.0.0",
+  "source": "URDFTools K02 original checker",
+  "description": "G1/H1 structure and geometric support checks; gait remains unknown.",
+  "rules": [{"id": "humanoid_scan", "tool": "humanoid_urdf", "config": {}}]
+}

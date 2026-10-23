@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "frame_basics",
+  "version": "1.0.0",
+  "source": "URDFTools K00 original implementation",
+  "description": "Orthonormal right-handed rotation check.",
+  "rules": [
+    {
+      "id": "frame_rotation",
+      "tool": "coordinate_frame",
+      "config": {}
+    }
+  ]
+}

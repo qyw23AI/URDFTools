@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "inertia_basics",
+  "version": "1.0.0",
+  "source": "URDFTools K00 original implementation",
+  "description": "Physical inertia tensor with SI provenance.",
+  "rules": [
+    {
+      "id": "mass_matrix",
+      "tool": "inertia_tensor",
+      "config": {}
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "phase": "K00",
+  "timestamp": "20261023T003416845382Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "safe-skill-registry-and-numerics",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/k00",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/K00/runs/20261023T003416845382Z/safe-skill-registry-and-numerics.log",
+      "log_sha256": "cea01d4234637e6ed762d816b08b8cc5936e0b850391ab8a9c1bcb75acaddb6a",
+      "status": "passed"
+    },
+    {
+      "id": "installed-skill-numerical-smoke",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/k00_skill_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/K00/runs/20261023T003416845382Z/installed-skill-numerical-smoke.log",
+      "log_sha256": "44cc0191d22f84796deb2c04ca2e94f2c9a52cd4f6dc54ee8c4eff591e2e5bae",
+      "status": "passed"
+    }
+  ]
+}

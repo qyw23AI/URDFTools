@@ -1,0 +1,36 @@
+{
+  "phase": "K02",
+  "timestamp": "20261023T003417019275Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "vendor-humanoid-contracts",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/k02",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/K02/runs/20261023T003417019275Z/vendor-humanoid-contracts.log",
+      "log_sha256": "9be1b260506a594c39a4ab0dbd846b06f07f92ee447bfe434096902bd687c3b6",
+      "status": "passed"
+    },
+    {
+      "id": "vendor-humanoid-skill-smoke",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/k02_vendor_skill_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/K02/runs/20261023T003417019275Z/vendor-humanoid-skill-smoke.log",
+      "log_sha256": "4829ab94507568454bde8ceeeccfed9f21eb9201fbb9291d057b7dfcac7ca21f",
+      "status": "passed"
+    }
+  ]
+}

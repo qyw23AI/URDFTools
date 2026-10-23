@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="synthetic_humanoid">
+  <link name="torso">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="12" />
+      <inertia ixx="0.2824" ixy="0" ixz="0" iyy="0.3125" iyz="0" izz="0.0949" />
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.25 0.18 0.5" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.25 0.18 0.5" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="L_thigh">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="2" />
+      <inertia ixx="0.02148333333333333" ixy="0" ixz="0" iyy="0.02148333333333333" iyz="0" izz="0.0021333333333333334" />
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.08 0.08 0.35" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.08 0.08 0.35" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="L_shin">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="1.5" />
+      <inertia ixx="0.015924999999999998" ixy="0" ixz="0" iyy="0.015924999999999998" iyz="0" izz="0.0012250000000000002" />
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.07 0.07 0.35" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.07 0.07 0.35" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="L_hip" type="revolute">
+    <parent link="torso" />
+    <child link="L_thigh" />
+    <origin xyz="0 0.09 -0.2" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+    <limit lower="-1" upper="1" effort="10" velocity="2" />
+  </joint>
+  <joint name="L_knee" type="revolute">
+    <parent link="L_thigh" />
+    <child link="L_shin" />
+    <origin xyz="0 0 -0.35" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+    <limit lower="-1" upper="1" effort="10" velocity="2" />
+  </joint>
+  <link name="R_thigh">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="2" />
+      <inertia ixx="0.02148333333333333" ixy="0" ixz="0" iyy="0.02148333333333333" iyz="0" izz="0.0021333333333333334" />
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.08 0.08 0.35" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.08 0.08 0.35" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="R_shin">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="1.5" />
+      <inertia ixx="0.015924999999999998" ixy="0" ixz="0" iyy="0.015924999999999998" iyz="0" izz="0.0012250000000000002" />
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.07 0.07 0.35" />
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.07 0.07 0.35" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="R_hip" type="revolute">
+    <parent link="torso" />
+    <child link="R_thigh" />
+    <origin xyz="0 -0.09 -0.2" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+    <limit lower="-1" upper="1" effort="10" velocity="2" />
+  </joint>
+  <joint name="R_knee" type="revolute">
+    <parent link="R_thigh" />
+    <child link="R_shin" />
+    <origin xyz="0 0 -0.35" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+    <limit lower="-1" upper="1" effort="10" velocity="2" />
+  </joint>
+  <link name="imu_frame" />
+  <joint name="imu_mount" type="fixed">
+    <parent link="torso" />
+    <child link="imu_frame" />
+    <origin xyz="0 0 0.22" rpy="0 0 0" />
+  </joint>
+</robot>

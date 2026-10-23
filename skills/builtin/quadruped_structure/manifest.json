@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "id": "quadruped_structure",
+  "version": "1.0.0",
+  "source": "URDFTools K01 original checker",
+  "description": "Quadruped structural assessment from caller-supplied URDF XML, with unknown motor and gait states.",
+  "rules": [{"id": "quadruped_scan", "tool": "quadruped_urdf", "config": {}}]
+}

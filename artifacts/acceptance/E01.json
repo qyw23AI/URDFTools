@@ -1,0 +1,36 @@
+{
+  "phase": "E01",
+  "timestamp": "20261023T003352247228Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "static-evaluation-rules",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/e01",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/E01/runs/20261023T003352247228Z/static-evaluation-rules.log",
+      "log_sha256": "0feee28ec5d42d827542a3eba0516e966186eaf1b4b520e65db8eeaed488ff64",
+      "status": "passed"
+    },
+    {
+      "id": "gold-workflow-cli",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/e01_real_workflow.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/E01/runs/20261023T003352247228Z/gold-workflow-cli.log",
+      "log_sha256": "e4311f768dd76e5486bd63e9e7d1025e5405c61a1ec1c21053d7998c0ef64b68",
+      "status": "passed"
+    }
+  ]
+}

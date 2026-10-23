@@ -1,6 +1,52 @@
 {
   "schema_version": 1,
   "phases": {
+    "K02": [
+      {"id": "vendor-humanoid-contracts", "kind": "command", "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests/k02", "-p", "test_*.py", "-v"]},
+      {"id": "vendor-humanoid-skill-smoke", "kind": "command", "argv": ["{python}", "scripts/k02_vendor_skill_smoke.py"]}
+    ],
+    "K01": [
+      {"id": "vendor-quadruped-contracts", "kind": "command", "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests/k01", "-p", "test_*.py", "-v"]},
+      {"id": "vendor-skill-real-urdf-and-mutant", "kind": "command", "argv": ["{python}", "scripts/k01_vendor_skill_smoke.py"]}
+    ],
+    "K00": [
+      {"id": "safe-skill-registry-and-numerics", "kind": "command", "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests/k00", "-p", "test_*.py", "-v"]},
+      {"id": "installed-skill-numerical-smoke", "kind": "command", "argv": ["{python}", "scripts/k00_skill_smoke.py"]}
+    ],
+    "R02": [
+      {"id": "pinned-humanoid-source-contracts", "kind": "command", "argv": [".tools/sim-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/r02", "-p", "test_*.py", "-v"]},
+      {"id": "actual-humanoid-bundle-and-compile", "kind": "command", "argv": [".tools/sim-venv/bin/python", "scripts/r02_vendor_model_smoke.py"]},
+      {"id": "g1-h1-electron-viewer", "kind": "command", "argv": ["{python}", "scripts/r02_vendor_desktop_smoke.py"], "timeout_seconds": 330}
+    ],
+    "R01": [
+      {"id": "pinned-unitree-source-contracts", "kind": "command", "argv": [".tools/sim-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/r01", "-p", "test_*.py", "-v"]},
+      {"id": "actual-vendor-bundle-and-compile", "kind": "command", "argv": [".tools/sim-venv/bin/python", "scripts/r01_vendor_model_smoke.py"]},
+      {"id": "a1-go2-electron-viewer", "kind": "command", "argv": ["{python}", "scripts/r01_vendor_desktop_smoke.py"], "timeout_seconds": 330}
+    ],
+    "R00": [
+      {"id": "immutable-model-registry", "kind": "command", "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests/r00", "-p", "test_*.py", "-v"]},
+      {"id": "real-two-version-cli", "kind": "command", "argv": ["{python}", "scripts/r00_registry_smoke.py"]}
+    ],
+    "E04": [
+      {"id": "real-cpu-probe-contracts", "kind": "command", "argv": [".tools/sim-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/e04", "-p", "test_*.py", "-v"]},
+      {"id": "real-mujoco-probe-trace-animation", "kind": "command", "argv": [".tools/sim-venv/bin/python", "scripts/e04_sim_probes.py"]}
+    ],
+    "E03": [
+      {"id": "urdf-compiler-mapping-contracts", "kind": "command", "argv": [".tools/sim-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/e03", "-p", "test_*.py", "-v"]},
+      {"id": "nine-model-real-compiler-audit", "kind": "command", "argv": [".tools/sim-venv/bin/python", "scripts/e03_compile_smoke.py"]}
+    ],
+    "E02": [
+      {"id": "independent-analytic-contracts", "kind": "command", "argv": [".tools/sim-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/e02", "-p", "test_*.py", "-v"]},
+      {"id": "real-mujoco-multipoise", "kind": "command", "argv": [".tools/sim-venv/bin/python", "scripts/e02_dynamics_smoke.py"]}
+    ],
+    "E01": [
+      {"id": "static-evaluation-rules", "kind": "command", "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests/e01", "-p", "test_*.py", "-v"]},
+      {"id": "gold-workflow-cli", "kind": "command", "argv": ["{python}", "scripts/e01_real_workflow.py"]}
+    ],
+    "E00": [
+      {"id": "gold-fixtures", "kind": "command", "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests/e00", "-p", "test_*.py", "-v"]},
+      {"id": "real-mujoco-compile", "kind": "command", "argv": [".tools/sim-venv/bin/python", "scripts/e00_mujoco_smoke.py"]}
+    ],
     "A02": [
       {"id": "cli-mcp-real-workflows", "kind": "command", "argv": [".tools/model-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/a02", "-p", "test_*.py", "-v"], "timeout_seconds": 300}
     ],

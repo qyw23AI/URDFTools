@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "statistics_basics",
+  "version": "1.0.0",
+  "source": "URDFTools K00 original implementation",
+  "description": "Descriptive sample statistics with uncertainty caveat.",
+  "rules": [
+    {
+      "id": "sample_summary",
+      "tool": "sample_statistics",
+      "config": {}
+    }
+  ]
+}

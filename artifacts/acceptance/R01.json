@@ -1,0 +1,47 @@
+{
+  "phase": "R01",
+  "timestamp": "20261023T003353886384Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "pinned-unitree-source-contracts",
+      "command": [
+        ".tools/sim-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/r01",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/R01/runs/20261023T003353886384Z/pinned-unitree-source-contracts.log",
+      "log_sha256": "7c17ec8df0b62687e4686a586ada9993ec343680f6ed2ef9ff5801482211033f",
+      "status": "passed"
+    },
+    {
+      "id": "actual-vendor-bundle-and-compile",
+      "command": [
+        ".tools/sim-venv/bin/python",
+        "scripts/r01_vendor_model_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/R01/runs/20261023T003353886384Z/actual-vendor-bundle-and-compile.log",
+      "log_sha256": "d4df3491e431bd92271097eaeadc031aac2c497d61c3854312e2fe6eeeb2d211",
+      "status": "passed"
+    },
+    {
+      "id": "a1-go2-electron-viewer",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/r01_vendor_desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/R01/runs/20261023T003353886384Z/a1-go2-electron-viewer.log",
+      "log_sha256": "12d74e83bc8096206a2941b2cbfbb275fa1084268b51b72a30336f98a5d9183f",
+      "status": "passed"
+    }
+  ]
+}

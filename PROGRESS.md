@@ -1,5 +1,51 @@
 # URDFTools 项目进度
 
+## 2026-10-23 — K02 G1/H1 人形结构与准静态支撑技能
+
+新增白名单 humanoid_urdf 技能：G1/H1 关节链、膝踝限位、足底碰撞、声明质量/惯量与 q=0 根坐标系质心；可选带显式来源标签的世界系接触多边形/COM/躯干姿态/膝踝时序检查。真实固定厂商 G1 131 pass/0 fail/4 unknown、H1 91 pass/0 fail/4 unknown，质量标签求和 35.11514202/59.338 kg（不是硬件称重）；合成 H1 右踝碰撞缺失检测到 fail。正式 K02 **2/2 gate、11 项 unittest + 厂商技能流程、0 skip**；K00/K01 回归及 TypeScript/Vite 生产构建通过。首轮因 G1 修订文件和 CRLF 字节哈希不一致失败后已修复，失败日志保留。详见 docs/acceptance/K02.md、artifacts/acceptance/K02.json、artifacts/K02/humanoid-report.json。没有真实步态/电机/训练数据，动态稳定性始终 unknown；下一阶段 B00 外部结果库作业基础（不开发 RL 训练器）。
+
+## 2026-10-23 — R02 G1/H1 人形参照模型技术验收
+
+固定 Unitree 官方 commit `5994d4fa`，新增 H1 无手原始 URDF、21 个 STL、上游 package.xml，共 23 文件全部通过 Git blob SHA-1 与 SHA-256 核验；沿用 G1 原始 29-DOF 资源。G1/H1 分别 40/39 与 25/24 Link/Joint，关节分组 12/14/3 与 10/8/1。原始 MuJoCo 解析拒绝后独立派生保留全部碰撞/惯量、移除 36/24 个 visual，G1 重定位 25 个 collision mesh；真实 MuJoCo 编译 29/19 DOF，原始 Electron 查看/关节/碰撞/截图均通过。首次 G1 路径重复失败已修复并保留日志。R02 正式 **3/3 gate、4 项单元、0 skipped**，见 `docs/acceptance/R02.md`、`artifacts/acceptance/R02.json`。无真机或训练性能验证；下一阶段 K02。
+
+## 2026-10-23 — K01 四足结构与准静态接触评估技能
+
+基于已固定来源的 Unitree A1/Go2 原始 URDF，新增四足腿链、12 DOF、足端碰撞、关节轴/限位/effort/velocity 规则及中点姿态足端 FK/凸包几何；缺失电机标定和动态步态保持 unknown。支持显式带来源标签的 COM/接触时序准静态投影检查，但只使用合成时序做正反例，不冒充真实机器人测量。正式 `.venv/bin/python scripts/accept_phase.py K01` **2/2 gate、9 项单元与厂商源技能流程通过，0 skipped**；A1/Go2 各 60 pass/0 fail/2 unknown，合成足端碰撞缺失负例 1 fail。K00 回归 2/2、8 项单元通过；Python 编译、diff 检查与 Electron 生产构建通过（首次缺 PATH 修正后通过）。详见 `docs/acceptance/K01.md`、`artifacts/acceptance/K01.json`、`artifacts/K01/quadruped-report.json`。下一阶段 R02 G1/H1 或 K02 人形技能；技能桌面/MCP 接入与真实动态数据仍未完成。
+
+
+## 2026-10-23 — K00 本地技能机制与动力学基础
+
+新增仅加载 JSON manifest 的受约束技能注册表，四项基础数值规则覆盖惯量、坐标、接触和样本统计；用户本地新技能可发现和执行，拒绝未知工具/字段/符号链接/非有限输入。正式 `.venv/bin/python scripts/accept_phase.py K00` **2/2 gate、8 项单元 + 4 项实际数值 smoke 通过，0 skip**；首次非 editable Python 路径失败已修复，历史日志保留。证据 `docs/acceptance/K00.md`、`artifacts/acceptance/K00.json`，使用说明 `docs/SKILLS_GUIDE.md`。目前仅 Python API，未接入 Electron/MCP，尚非四足/人形真实验证；下一阶段 K01 或 R02。
+
+
+## 2026-10-23 — R01 Unitree A1/Go2 厂商资源和 MuJoCo/Electron 双链路验收
+
+复用已有 Unitree 固定 commit 的 A1 和 Go2 原始 URDF/DAE/许可记录，不改原文件；真实资源导入与 Electron 3D 查看器 (A1 23 Link/22 Joint，Go2 42/41) 全部通过。MuJoCo 原生编译 A1 12 DOF，Go2 原始重复 material 被拒绝，因此明确生成仅供仿真的无视觉派生副本（移除 17 visual），编译 12 DOF 并记录损失/hash。R01 首轮独立临时目录测试发现路径报告问题后已修复，正式 **3/3 gate、3 项单元 + 两套真实 Electron E2E 通过**。见 docs/acceptance/R01.md、artifacts/acceptance/R01.json；后续 R02 G1/H1 与 K00 技能机制。
+
+## 2026-10-23 — R00 模型版本注册表与不可变 SHA256 本地缓存
+
+已实现 SQLite WAL 模型版本/来源/许可记录、哈希资产缓存、同名多版本和审核后发行门禁，以及本地 CLI；同版本冲突不覆盖，下载失联不污染记录，synthetic_fixture/user_upload 无法被自动打包。正式 R00 **2/2 gate、4 项测试 + 实际 2 版本 CLI 流程通过，0 skip**；测试并非在线用户生产库与真实参考实验。见 docs/acceptance/R00.md、artifacts/acceptance/R00.json。下一阶段 R01/R02 厂商参照资产整包注册或 K00 技能系统。
+
+## 2026-10-23 — E04 无训练仿真动态探测和时序回放
+
+真实 MuJoCo 3.16 CPU 执行单关节阶跃、错误负阻尼对照、短脉冲恢复、自由体落地接触、25 姿态扫掠、浮动四足站立探测和从仿真 qpos 生成的 30 帧示意 GIF。真实记录错误 PD 末态误差 2.687 rad 对正确 PD 7.61e-8 rad；落球 1066 接触步，四足站立样例失稳（绝非站立成功）。正式 E04 工具验收 **2/2 gate、4 项测试通过**，无真实训练或机械因果结论。证据 docs/acceptance/E04.md、artifacts/acceptance/E04.json、artifacts/E04/probe-report.json。后续可按依赖推进 R00 参照模型注册表与 K00 技能机制。
+
+## 2026-10-23 — E03 MuJoCo 编译与来源/映射/质量损失审计
+
+新增只读转换编译审计：真实 MuJoCo 3.16 对 E00 的九份原创 URDF 6 接受、3 拒绝；四足 8 DOF/3.2 kg 动态质量（源 11.2 kg）、人形 4 DOF/7 kg（源 19 kg），明确报告根 Link 固定后失去独立动力学质量和固定传感器 frame 合并。E03 正式 **2/2 gate 通过，4 项合同测试，0 skip**；无自动惯量修补，不宣称适用 RL。见 docs/acceptance/E03.md、artifacts/acceptance/E03.json；下一阶段 E04 无训练探测。
+
+## 2026-10-23 — E02 双连杆解析动力学与真实 MuJoCo 多姿态对账
+
+已实现独立二维双连杆质量矩阵/重力项公式并实际对比 MuJoCo 3.16 的 3 份原创模型、4 组姿态，正常最大质量/重力误差约 1e-16，错肘关节 frame 导致约 0.24 kg*m² 和 6.15 N*m 差异，固定无惯量传感器 frame 无假阳性。首次因新 MuJoCo API 签名失败，修复后正式 E02 2/2 gate、3 项数值测试通过；未声称真实机器人验证。见 docs/acceptance/E02.md 和 artifacts/acceptance/E02.json。下一阶段 E03 转换与映射校验。
+
+## 2026-10-23 — E01 静态语义与物理规则
+
+新增可复用只读 URDF 静态检查与 CLI，输出带规则版本、来源 SHA-256、对象位置、数值/单位、可信设计上下文和复核动作的 Finding。九份金标准对应 5 条错误，2 个边界反例无误报；缺少设计 sidecar 不将合法非零关节轴/视觉尺寸判为确定错误。正式 .venv/bin/python scripts/accept_phase.py E01 **2/2 通过**（5 项单元 + 9 个 CLI 实际扫描），0 skipped。见 docs/acceptance/E01.md、artifacts/acceptance/E01.json。下一阶段 E02。
+
+## 2026-10-23 — E00 评估协议与九个金标准故障/合法反例
+
+继续已有 E00 WIP，登记正式验收入口；4 项原创数值/结构测试通过，真实 MuJoCo 对 9 份 URDF 编译判断符合预期（6 接受、3 拒绝），正式 .venv/bin/python scripts/accept_phase.py E00 **2/2 gate 通过，0 skip**。评估结果仅针对自制夹具和 MuJoCo 编译语义，不能作为真实机器人性能证据。详见 docs/EVALUATION_PROTOCOL.md、docs/acceptance/E00.md 和 artifacts/acceptance/E00.json。下一阶段 E01 静态语义和物理规则。
+
 ## 2026-10-23 — M02 FreeCAD 回流与版本差异验收通过
 
 真实 FreeCAD FCStd 改名/尺寸/拓扑变体经 STEP 回流；零件可重关联，新增孔导致的拓扑变化产生冲突且不覆盖用户 Link/关节编辑。Electron 人工接受后关节确认清零，重启恢复已接受 STEP/hash/配置。`.venv/bin/python scripts/accept_phase.py M02` **2/2 gate 通过**；C04 3/3、M01 2/2 回归通过。详见 `docs/acceptance/M02.md` 和 `docs/MODEL_RETURN_GUIDE.md`。下一阶段按依赖推进 A00 Agent 工具层或 E00 评估方法。

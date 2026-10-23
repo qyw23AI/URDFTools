@@ -1,0 +1,36 @@
+{
+  "phase": "E03",
+  "timestamp": "20261023T003352797324Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "urdf-compiler-mapping-contracts",
+      "command": [
+        ".tools/sim-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/e03",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/E03/runs/20261023T003352797324Z/urdf-compiler-mapping-contracts.log",
+      "log_sha256": "f5989f2c71d11b204b7fd2ff6c02f3340a744ecce21a5abb075373d06606842c",
+      "status": "passed"
+    },
+    {
+      "id": "nine-model-real-compiler-audit",
+      "command": [
+        ".tools/sim-venv/bin/python",
+        "scripts/e03_compile_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/E03/runs/20261023T003352797324Z/nine-model-real-compiler-audit.log",
+      "log_sha256": "c946e25e8d0fc2855e66f8eaf12e6fbe3e1e72e09d725756dfcd62267db52e31",
+      "status": "passed"
+    }
+  ]
+}

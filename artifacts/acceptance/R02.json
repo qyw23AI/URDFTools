@@ -1,0 +1,47 @@
+{
+  "phase": "R02",
+  "timestamp": "20261023T003403762977Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "pinned-humanoid-source-contracts",
+      "command": [
+        ".tools/sim-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/r02",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/R02/runs/20261023T003403762977Z/pinned-humanoid-source-contracts.log",
+      "log_sha256": "8f14cf1b73d32d4c2fe4ab62174e6a49013ab0465e4f0e7b4bd425283bb94b92",
+      "status": "passed"
+    },
+    {
+      "id": "actual-humanoid-bundle-and-compile",
+      "command": [
+        ".tools/sim-venv/bin/python",
+        "scripts/r02_vendor_model_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/R02/runs/20261023T003403762977Z/actual-humanoid-bundle-and-compile.log",
+      "log_sha256": "1454dd4c272bf506f7bd5fc9e2225e31b202a48eb98d6b4ab34ac3cc41183d64",
+      "status": "passed"
+    },
+    {
+      "id": "g1-h1-electron-viewer",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/r02_vendor_desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/R02/runs/20261023T003403762977Z/g1-h1-electron-viewer.log",
+      "log_sha256": "117b3c3137153c2ce2c0c6d0da591bd5bf9d9ae2f81eca8385d371b78eaee97a",
+      "status": "passed"
+    }
+  ]
+}
