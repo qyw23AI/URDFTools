@@ -1,6 +1,10 @@
 {
   "schema_version": 1,
   "phases": {
+    "B01": [
+      {"id": "result-schema-and-negative-contracts", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/b01", "-p", "test_*.py", "-v"]},
+      {"id": "four-real-format-readers", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "scripts/b01_format_smoke.py"]}
+    ],
     "B00": [
       {"id": "result-import-queue-contracts", "kind": "command", "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests/b00", "-p", "test_*.py", "-v"]},
       {"id": "real-worker-kill-and-resume", "kind": "command", "argv": ["{python}", "scripts/b00_crash_smoke.py"]}

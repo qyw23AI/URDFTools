@@ -1,5 +1,9 @@
 # URDFTools 项目进度
 
+## 2026-10-23 — B01 外部指标结果入库
+
+完成 B00 原始资产后的 CSV/JSON/Parquet/TensorBoard 标量读取和事务性规范化结果库。四种真实文件格式均解析出相同数值与时间戳；源 SHA、单位、来源、算法/协议与可缺字段状态可追溯，旧 v0 输入显式迁移且原字节保留。正式 B01 **2/2 gate、4 项单元、0 skip**；NaN、缺单位、哈希损坏、重复 run、pickle 均拒绝。详见 `docs/acceptance/B01.md`、`artifacts/acceptance/B01.json`。视频与可比性及真实参照成绩仍在后续阶段。
+
 ## 2026-10-23 — B00 外部结果导入可恢复作业
 
 完成 SQLite WAL 租约队列、分块断点、SHA-256 资产库、bundle/机器人身份绑定、取消与完整导入后单次发布。正式 B00 **2/2 gate、3 项单元、0 skip**；进程级验收在 1000 字节检查点后真实杀死 worker，再由新 worker 接管，完成后只有 1 run/1 asset。首次测试导入路径失败已修正，失败与成功日志均保留。见 `docs/acceptance/B00.md`、`artifacts/acceptance/B00.json`。下一阶段 B01 是外部训练结果 manifest、指标和视频语义导入；不开发 RL 训练器。

@@ -1,0 +1,42 @@
+{
+  "phase": "B01",
+  "timestamp": "20261023T004751455676Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "result-schema-and-negative-contracts",
+      "command": [
+        "env",
+        "-u",
+        "PYTHONPATH",
+        ".tools/results-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/b01",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/B01/runs/20261023T004751455676Z/result-schema-and-negative-contracts.log",
+      "log_sha256": "5a06f03a5eb74a449497c74f8f260b47ed8c1b8bf9e26cb4307ed0231efa7bd8",
+      "status": "passed"
+    },
+    {
+      "id": "four-real-format-readers",
+      "command": [
+        "env",
+        "-u",
+        "PYTHONPATH",
+        ".tools/results-venv/bin/python",
+        "scripts/b01_format_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/B01/runs/20261023T004751455676Z/four-real-format-readers.log",
+      "log_sha256": "0f9f140eaf517950fd88962d1684756546b93b19f50e8ef39db4b68c9ffe46f0",
+      "status": "passed"
+    }
+  ]
+}
