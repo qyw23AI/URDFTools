@@ -80,6 +80,18 @@ ipcMain.handle('choose-import', async (event, kind) => {
     filters: kind === 'folder' ? [] : [{ name: 'URDF / ZIP', extensions: ['urdf', 'zip'] }] });
   return choice.canceled ? null : importRequest({ action: 'import', source: choice.filePaths[0] });
 });
+ipcMain.handle('result-runs', async event => {
+  assertRenderer(event);
+  return runPythonWorker('.venv/bin/python', 'scripts/b08_results_worker.py',
+    ['list', '--store', path.join(app.getPath('userData'), 'external-results')]);
+});
+ipcMain.handle('result-import', async event => {
+  assertRenderer(event);
+  const choice = await dialog.showOpenDialog(window, { properties: ['openDirectory'] });
+  if (choice.canceled) return null;
+  return runPythonWorker('.venv/bin/python', 'scripts/b08_results_worker.py',
+    ['import', '--store', path.join(app.getPath('userData'), 'external-results'), '--source', choice.filePaths[0]], 300000);
+});
 ipcMain.handle('select-import', (event, operation_id, model) => {
   if (!window || event.sender !== window.webContents || typeof operation_id !== 'string' || typeof model !== 'string') throw new Error('无效选择');
   return importRequest({ action: 'select', operation_id, model });

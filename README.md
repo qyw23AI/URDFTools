@@ -1,16 +1,27 @@
 # URDFTools
 
-> **2026-10-22 开发方式更新**：网页版 ChatGPT + WebCodex 负责主要构建；任务调度器仅用于阶段性检查和改进。S03–S06 查看模块通过各自声明 gate 与真实 Electron 验收；C00 STEP 检查与 C01 CAD 质量/惯量后端原型均通过 3/3 技术 gate，阶段完成状态仍待调度器复核。最终 GNOME 收藏夹应用、CAD→URDF 生成、材料分配 UI、Agent 和训练结果评估仍未全部交付。
+> **当前开发方式**：在本对话按小时继续开发、运行真实验收并保存 Git 证据。历史 Python/systemd 开发调度器不再使用。最新阶段状态以 [PROGRESS.md](PROGRESS.md) 为准；正式安装包和完整评估功能仍在开发。
 
-面向强化学习机器人研发的本地桌面工作台、Python 工具包与 agent 工具。目标功能为 URDF 查看、CAD→URDF 转换、参数化 CAD/机器人建模，以及有证据的训练适用性评估与机械反馈。**S01 工具链、S02 数据契约、S03–S06 查看模块（含真实 Go2/G1 模型）、C00 STEP 检查与 C01 CAD 质量/惯量后端原型均已有实际技术验收；完整 CAD→URDF 生成、关节推断、材料分配 UI、Agent、真实机器人物理合理性/训练结果评估和正式发行包仍未全部实现。阶段技术 gate 通过不等于全部应用交付。**
+面向强化学习机器人研发的本地桌面工作台、Python 工具包与 agent 工具。已有 URDF 查看、CAD→URDF 转换、参数化建模、静态/无训练物理检查和外部训练结果导入的阶段性能力；评估结论仍需明确实验来源、协议和不确定性。本项目不开发或运行 RL 训练器。阶段 gate 通过不等于全部应用交付。
 
 ## 本地开发版启动（非正式安装包）
+
+`apps/web/index.html` 是 Vite 源码入口，不能通过浏览器的 `file://` 直接运行。
+若只想查看界面，在项目根目录启动本机预览：
+
+```bash
+cd ~/URDFTools
+PATH="$PWD/.tools/node/bin:$PATH" .tools/node/bin/node .tools/npm/bin/npm-cli.js run build
+PATH="$PWD/.tools/node/bin:$PATH" .tools/node/bin/node .tools/npm/bin/npm-cli.js run preview -- --port 5173
+```
+
+随后打开 `http://127.0.0.1:5173/`。浏览器预览会明确标出需要桌面端的操作；URDF 文件夹导入、CAD 转换与参数化建模由 Electron 的本地接口提供。
 
 在本机 GNOME 图形会话中执行：
 
 ```bash
 cd ~/URDFTools
-bash scripts/launch-dev-desktop.sh
+./scripts/launch-dev-desktop.sh
 ```
 
 在「查看」页面拖入 URDF 所在文件夹或 ZIP，选择模型后可旋转/缩放，浏览 Link/Joint 树，切换 Visual/Collision，查看显式质心/惯量、近似包围盒，并用关节滑块调整姿态或导出 PNG。此脚本从源代码本地构建，不关闭 Electron 沙箱，也不会打开外部训练器。若未配置 S01 的独立工具链，请先阅读 `docs/TOOLCHAIN.md`；正式 AppImage/GNOME 收藏夹安装仍安排在 Q01/Q02。
@@ -23,6 +34,7 @@ bash scripts/launch-dev-desktop.sh
 - [自动调度设计](docs/SCHEDULER_DESIGN.md)
 - [运行与交接](docs/OPERATIONS.md)
 - [当前进度](PROGRESS.md)
+- [外部结果包导入指南（B08 开发中）](docs/RESULTS_IMPORT_GUIDE.md)
 - [开发环境与离线输入](docs/TOOLCHAIN.md)
 - [S01 实际验收](docs/acceptance/S01.md)
 - [S03 导入验收](docs/acceptance/S03.md)
@@ -34,9 +46,7 @@ bash scripts/launch-dev-desktop.sh
 - [C00 STEP/OpenCascade 内核预检历史记录](docs/CAD_KERNEL_PREFLIGHT.md)
 - [C01 CAD 质量、质心、惯量与坐标变换验收](docs/acceptance/C01.md)
 
-按用户 2026-10-22 最新决定，主要功能由当前网页版 ChatGPT + WebCodex 主动构建并逐阶段验收；任务调度器仅用于后续成果复核与改进，不是开发入口或前置条件。
-
-默认模型配置已经下调：50 个阶段中 Sol Low 20、Sol Medium 28、Sol High 2、Astra 0。高难模型仍可作为明示、受预算约束的复核档，但不会自动升级。
+当前按 `AGENTS.md` 和 `PROGRESS.md` 直接开发、逐阶段验收。旧调度器文件仅保留历史记录。
 
 ## 2026-10-22 用户范围修订与恢复
 

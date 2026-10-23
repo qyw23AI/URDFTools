@@ -22,4 +22,6 @@ test('initial import workspace exposes local input choices', () => {
   assert.match(html, /单独导入 URDF 仅包含该文件/);
   assert.match(html, /本地导入/);
   assert.match(html, /尚未连接/);
+  assert.match(html, /当前是浏览器界面预览/);
+  assert.match(html, /<button disabled=""[^>]*>选择文件夹<\/button>/);
 });
