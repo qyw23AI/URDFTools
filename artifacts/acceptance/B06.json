@@ -1,0 +1,28 @@
+{
+  "phase": "B06",
+  "timestamp": "20261023T010334573576Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "offline-log-adapters-end-to-end",
+      "command": [
+        "env",
+        "-u",
+        "PYTHONPATH",
+        ".tools/results-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/b06",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/B06/runs/20261023T010334573576Z/offline-log-adapters-end-to-end.log",
+      "log_sha256": "88b017e780193b8c751258811102c600f38e506ab40269cf05db443871b65f52",
+      "status": "passed"
+    }
+  ]
+}

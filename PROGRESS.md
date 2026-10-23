@@ -1,5 +1,9 @@
 # URDFTools 项目进度
 
+## 2026-10-23 — B06 外部日志适配与交换
+
+新增版本化 SB3 CSV、RSL-RL/Isaac Lab TensorBoard tag 映射及本地 MLflow 三列指标交换。正式 B06 **1/1 gate、2 项端到端测试、0 skip**；SB3 格式夹具和 TensorBoard 官方写入器文件经 B00/B01 入库，MLflow 本地往返值/时间一致，未映射字段显式报告。详见 `docs/acceptance/B06.md`、`artifacts/acceptance/B06.json`。未运行上游训练器或验证真实用户成绩；下一阶段 B07 视频时序与交互对照。
+
 ## 2026-10-23 — B05 外部结果公平对照与统计
 
 完成固定配方/有界调参分轨、奖励/算法/任务/预算/地形协议核对及独立训练 seed 层统计。正式 B05 **1/1 gate、3 项测试、0 skip**；已知夹具差值 0.25，显式配对 CI `[0.25,0.25]`，单 seed 无 CI，缺失 run 禁排名。见 `docs/acceptance/B05.md`、`artifacts/acceptance/B05.json`。真实参考成绩仍为零，下一阶段 B06 外部日志适配。

@@ -1,6 +1,9 @@
 {
   "schema_version": 1,
   "phases": {
+    "B06": [
+      {"id": "offline-log-adapters-end-to-end", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/b06", "-p", "test_*.py", "-v"]}
+    ],
     "B05": [
       {"id": "seed-level-fair-comparison", "kind": "command", "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests/b05", "-p", "test_*.py", "-v"]}
     ],
