@@ -1,6 +1,9 @@
 {
   "schema_version": 1,
   "phases": {
+    "B02": [
+      {"id": "quadruped-timeseries-and-real-model-links", "kind": "command", "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests/b02", "-p", "test_*.py", "-v"]}
+    ],
     "B01": [
       {"id": "result-schema-and-negative-contracts", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/b01", "-p", "test_*.py", "-v"]},
       {"id": "four-real-format-readers", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "scripts/b01_format_smoke.py"]}

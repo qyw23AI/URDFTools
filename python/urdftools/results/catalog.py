@@ -23,7 +23,27 @@ class ResultCatalog:
           run_id TEXT NOT NULL,metric TEXT NOT NULL,step INTEGER NOT NULL,value REAL NOT NULL,
           wall_time REAL,unit TEXT NOT NULL,source_sha TEXT NOT NULL,row_index INTEGER NOT NULL,
           PRIMARY KEY(run_id,source_sha,row_index));
+        CREATE TABLE IF NOT EXISTS result_models(
+          run_id TEXT PRIMARY KEY,model_id TEXT NOT NULL,model_sha TEXT NOT NULL,
+          model_name TEXT NOT NULL,model_version TEXT NOT NULL,model_origin TEXT NOT NULL);
         """)
+
+    def link_model(self, run_id: str, model_id: str, registry) -> dict:
+        """Associate a completed external run with an exact pinned URDF asset."""
+        row = self.queue.db.execute("SELECT robot_hash,metadata_json FROM experiments WHERE run_id=?", (run_id,)).fetchone()
+        if row is None:
+            raise ImportFailure("Unknown external run")
+        model = registry.get(model_id)
+        if row["robot_hash"] != model["sha256"] or json.loads(row["metadata_json"])["robot_category"] != model["category"]:
+            raise ImportFailure("Robot hash or category does not match registry model")
+        prior = self.queue.db.execute("SELECT model_id FROM result_models WHERE run_id=?", (run_id,)).fetchone()
+        if prior is not None and prior["model_id"] != model_id:
+            raise ImportFailure("Run already bound to another model")
+        self.queue.db.execute("INSERT OR IGNORE INTO result_models VALUES(?,?,?,?,?,?)",
+                              (run_id, model_id, model["sha256"], model["name"], model["version"], model["origin"]))
+        return {"run_id": run_id, "model_id": model_id, "model_sha": model["sha256"],
+                "model_name": model["name"], "model_version": model["version"], "origin": model["origin"],
+                "reference_performance": False}
 
     @staticmethod
     def _rows(format_name: str, raw: bytes):

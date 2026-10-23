@@ -1,5 +1,9 @@
 # URDFTools 项目进度
 
+## 2026-10-23 — B02 四足外部结果语义
+
+完成显式四足足端映射、接触占空比/步频/滑移/跟踪/跌倒的确定性计算，以及 A1/Go2/用户 URDF 的精确哈希结果关联。正式 B02 **1/1 gate、4 项测试、0 skip**；无外部测量时扭矩、滑移或接触指标保持 unknown，合成结果不升格为参考成绩。见 `docs/acceptance/B02.md`、`artifacts/acceptance/B02.json`。下一阶段 B03 人形结果语义。
+
 ## 2026-10-23 — B01 外部指标结果入库
 
 完成 B00 原始资产后的 CSV/JSON/Parquet/TensorBoard 标量读取和事务性规范化结果库。四种真实文件格式均解析出相同数值与时间戳；源 SHA、单位、来源、算法/协议与可缺字段状态可追溯，旧 v0 输入显式迁移且原字节保留。正式 B01 **2/2 gate、4 项单元、0 skip**；NaN、缺单位、哈希损坏、重复 run、pickle 均拒绝。详见 `docs/acceptance/B01.md`、`artifacts/acceptance/B01.json`。视频与可比性及真实参照成绩仍在后续阶段。
