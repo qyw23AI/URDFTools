@@ -10,7 +10,7 @@
 - 更新 PROGRESS.md、docs/acceptance/<id>.md 和必要机器验收结果；准确记录未执行、未验证、硬件不足和失败。完成前不能虚构模拟视频或训练成绩。
 - 不手改历史 `.scheduler/state.json`；当前直接开发流程由实际 gate 与验收文档确认阶段，并做本地 Git 提交。保留所有 phase IDs、要求、依赖和 gate；不可自行跳过失败 gate。
 - 变更需可逆，保留用户原始输入。常规 UI 编辑和 agent 编辑共享事务校验；agent 建议先展示 diff 再由产品用户应用。
-- 默认 ChatGPT Codex 登录；禁用继承 API key、自定义付费 provider、自动购额/重置、自动租云算力。不得修改 GPU 驱动或全局 Python 环境。
+- 2026-10-23 用户最新修订：URDFTools 默认使用网页 ChatGPT + 授权 web-codex-tunnel 插件的**用户发起请求/校验回写**，桌面端不再调用额度耗尽的 Codex CLI 推理；WebCodex 本身不是 Electron/Python 可直接调用的模型推理 API，不得宣称自动后台调用。人工审核 CAD 预览不变。禁用继承 API key、自定义付费 provider、自动购额/重置、自动租云算力。不得修改 GPU 驱动或全局 Python 环境。
 - 尺寸 SI、frame 和 provenance 明确；未知参数不当作零或默认真值。对机械设计的因果结论必须有对应实验；训练不收敛不自动归因 URDF。
 - 用户 2026-10-22 修订：不开发/运行 RL 训练器；导入用户或有许可公开的训练结果、视频，建立参照库并分析。后台队列仅做导入、指标、媒体处理和可选无训练物理探测。详见 docs/RESULTS_DATABASE.md。自制数据必须标 fixture，不当真实基准。
 - 前端采用 Electron/React/Three.js，本地 Python 服务；这是桌面软件研发，无需部署网站或开启外部托管。

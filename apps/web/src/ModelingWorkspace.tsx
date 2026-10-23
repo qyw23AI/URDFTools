@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CadWizard, type Configuration, type Discovery } from './CadWizard';
+import type { WebCodexTicket } from './WebCodexAgent';
 
 type Part = { name: string; material: string; density_kg_m3: number;
   profile: { kind: string; width_mm?: number; height_mm?: number; radius_mm?: number; holes?: unknown[] };
@@ -24,7 +25,12 @@ export function ModelingWorkspace() {
   const [modelConfig, setModelConfig] = useState<Configuration | null>(null);
   const [cadReturn, setCadReturn] = useState<CadReturnProposal | null>(null);
   const [agentInstruction, setAgentInstruction] = useState('');
-  const [agentProposal, setAgentProposal] = useState<Awaited<ReturnType<NonNullable<Window['urdftools']>['agentSuggest']>> | null>(null);
+  const [webTicket, setWebTicket] = useState<WebCodexTicket | null>(null);
+  const [webNotice, setWebNotice] = useState('');
+  const [agentProposal, setAgentProposal] = useState<{proposal_id: string;
+    diff: {added_parts: string[]; removed_parts: string[]; changed_parts: string[]};
+    recipe: ModelRecipe; rationale: string;
+    report: {parts: {name: string; mass_kg: number}[]}; status: 'preview_only'} | null>(null);
   const [name, setName] = useState('Base');
   const [width, setWidth] = useState(20);
   const [height, setHeight] = useState(10);
@@ -46,7 +52,7 @@ export function ModelingWorkspace() {
   }, []);
   function edit(next: ModelRecipe) {
     setHistory(previous => [...previous.slice(0, cursor + 1), clone(next)]);
-    setCursor(previous => previous + 1); setBuilt(null); setModelConfig(null); setCadReturn(null); setAgentProposal(null); setJson(''); setError('');
+    setCursor(previous => previous + 1); setBuilt(null); setModelConfig(null); setCadReturn(null); setAgentProposal(null); setWebTicket(null); setJson(''); setError('');
   }
   function addPart() {
     if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name) || recipe.parts.some(part => part.name === name)) {
@@ -88,11 +94,41 @@ export function ModelingWorkspace() {
   }
   async function suggestModel() {
     if (!window.urdftools || !built || built.revision !== revision) return;
-    setBusy(true); setError(''); setAgentProposal(null);
-    try { setAgentProposal(await window.urdftools.agentSuggest(agentInstruction, revision)); }
+    setBusy(true); setError(''); setAgentProposal(null); setWebTicket(null);
+    try {setWebTicket(await window.urdftools.webcodexCreateModel(agentInstruction, revision));
+      setWebNotice('已创建请求。网页 ChatGPT 需主动处理；桌面端不会后台调用模型。');}
     catch (cause) { setError(String(cause)); }
     finally { setBusy(false); }
   }
+  async function checkWebCodex() {
+    if (!window.urdftools || !webTicket) return;
+    setBusy(true); setError('');
+    try {
+      const latest = await window.urdftools.webcodexStatus(webTicket.request_id);
+      setWebTicket(latest);
+      if (latest.status === 'reply_validated' && latest.result?.status === 'preview_only' &&
+          latest.result.preview && latest.result.suggestion) {
+        const preview=latest.result.preview;
+        const suggestion=latest.result.suggestion;
+        setAgentProposal({
+          status: 'preview_only',
+          proposal_id: preview.proposal_id,
+          diff: preview.diff,
+          report: preview.report,
+          recipe: suggestion.recipe,
+          rationale: suggestion.rationale
+        });
+      }
+    } catch (cause) { setError(String(cause)); }
+    finally { setBusy(false); }
+  }
+  async function copyWebCodex() {
+    if (!window.urdftools || !webTicket?.prompt) return;
+    try {await window.urdftools.webcodexCopyPrompt(webTicket.prompt);
+      setWebNotice('提示已复制，请在 ChatGPT 网页已连接 WebCodex 的对话中粘贴发送。');
+    } catch (cause) {setError(String(cause));}
+  }
+
   async function acceptAgent() {
     if (!window.urdftools || !agentProposal) return;
     setBusy(true); setError('');
@@ -101,7 +137,7 @@ export function ModelingWorkspace() {
       setHistory(previous => [...previous.slice(0, cursor + 1), clone(agentProposal.recipe)]);
       setCursor(previous => previous + 1);
       setRevision(result.revision); setBuilt(result); setModelConfig(result.discovery.configuration);
-      setCadReturn(null); setAgentProposal(null);
+      setCadReturn(null); setAgentProposal(null); setWebTicket(null);
     } catch (cause) { setError(String(cause)); }
     finally { setBusy(false); }
   }
@@ -158,9 +194,19 @@ export function ModelingWorkspace() {
     {error && <p role="alert">{error}</p>}
     {built && <><p role="status">版本 {built.revision}：{built.assembly.parts.join('、')}；当前 STEP SHA-256 {built.assembly.sha256}</p>
       <h2>Agent 辅助建模</h2>
-      <p>仅发送当前 CAD 配方和下方指令给已登录的 ChatGPT/Codex。建议先在独立副本构建，审阅后才能接受；接受后可撤销或继续编辑参数。</p>
+      <p>不使用 Codex CLI 或额外模型 API。点击创建请求后，复制到已连接 @web-codex-tunnel 的 ChatGPT 网页对话；收到网页模型的结构化建议才会构建独立 CAD 预览，接受前不会替换原模型。</p>
       <textarea aria-label="Agent 建模指令" rows={3} maxLength={2000} value={agentInstruction} onChange={event => setAgentInstruction(event.target.value)} />
-      <button disabled={busy || !agentInstruction.trim()} onClick={() => void suggestModel()}>生成建模建议</button>
+      <button disabled={busy || !agentInstruction.trim()} onClick={() => void suggestModel()}>创建 WebCodex 建模请求</button>
+      {webTicket && <div data-webcodex-model-status={webTicket.status}>
+        <p>请求编号：<code>{webTicket.request_id}</code></p>
+        <p>{webTicket.status === 'reply_validated' ? 'ChatGPT 建模建议已通过本地预览校验。' : '等待 ChatGPT 网页通过 WebCodex 提交回复（不自动调用模型）。'}</p>
+        {webTicket.prompt && <>
+          <button disabled={busy} onClick={() => void copyWebCodex()}>复制 ChatGPT/WebCodex 提示</button>
+          <details><summary>查看提示和请求路径</summary><textarea aria-label="WebCodex 建模请求提示" readOnly rows={6} value={webTicket.prompt} /></details>
+        </>}
+        <button disabled={busy} onClick={() => void checkWebCodex()}>检查 ChatGPT 建模回复</button>
+        {webNotice && <p role="status">{webNotice}</p>}
+      </div>}
       {agentProposal && <section aria-label="Agent 建模建议" data-agent-status={agentProposal.status}>
         <p>{agentProposal.rationale}</p>
         <p>新增：{agentProposal.diff.added_parts.join('、') || '无'}；移除：{agentProposal.diff.removed_parts.join('、') || '无'}；修改：{agentProposal.diff.changed_parts.join('、') || '无'}</p>

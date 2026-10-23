@@ -167,6 +167,65 @@ function assertRenderer(event) {
   if (!window || event.sender !== window.webContents) throw new Error('无效窗口');
 }
 const modelProject = () => path.join(app.getPath('userData'), 'modeling', 'project');
+// WebCodex is a ChatGPT conversation tool, not a callable local model API.
+// Requests remain in a project-local gitignored queue. The user explicitly
+// copies the handoff prompt into a connected ChatGPT web conversation.
+const webcodexStore = () => smoke && process.env.URDFTOOLS_WEBCODEX_STORE ?
+  process.env.URDFTOOLS_WEBCODEX_STORE : path.join(root, 'artifacts', 'WebCodexAgent');
+function webcodexBridge(args) {
+  return runPythonWorker('.tools/model-venv/bin/python', 'scripts/webcodex_agent_bridge.py',
+    ['--store', webcodexStore(), ...args], 160000);
+}
+ipcMain.handle('webcodex-create-model', async (event, instruction, expectedRevision) => {
+  assertRenderer(event);
+  if (typeof instruction !== 'string' || !instruction.trim() || instruction.length > 2000 ||
+    !Number.isSafeInteger(expectedRevision) || expectedRevision < 1) throw new Error('无效建模 Agent 输入或版本');
+  return webcodexBridge(['create-model', '--instruction', instruction,
+    '--project', modelProject(), '--revision', String(expectedRevision)]);
+});
+ipcMain.handle('webcodex-create-analysis', async (event, instruction) => {
+  assertRenderer(event);
+  if (typeof instruction !== 'string' || !instruction.trim() || instruction.length > 2000)
+    throw new Error('分析说明不能为空且不超过 2000 字');
+  // This phase intentionally uses clearly labeled synthetic evaluation
+  // fixtures. It NEVER silently treats a user's imported model as equivalent.
+  return webcodexBridge(['create-analysis', '--instruction', instruction]);
+});
+ipcMain.handle('webcodex-create-import-analysis', async (event, operation, instruction) => {
+  assertRenderer(event);
+  if (typeof operation !== 'string' || !/^[a-f0-9-]{36}$/.test(operation) ||
+      typeof instruction !== 'string' || !instruction.trim() || instruction.length > 2000)
+    throw new Error('无效 URDF 导入或分析指令');
+  const base=path.join(app.getPath('userData'), 'imports', operation);
+  const reportPath=path.join(base, 'report.json');
+  const report=JSON.parse(await fs.promises.readFile(reportPath, 'utf8'));
+  if (report.operation_id!==operation || report.status!=='ready' ||
+      typeof report.selected_model!=='string' ||
+      !report.models.some(model=>model.path===report.selected_model && model.status==='ready'))
+    throw new Error('请先完成原始 URDF 模型导入');
+  const bundleRoot=path.resolve(base,'bundle');
+  const fullPath=path.resolve(bundleRoot,report.selected_model);
+  if (!fullPath.startsWith(bundleRoot+path.sep) ||
+      path.extname(fullPath).toLowerCase()!=='.urdf')
+    throw new Error('导入模型不是可访问的 URDF 文件');
+  const current=await fs.promises.realpath(fullPath);
+  if (!current.startsWith(bundleRoot+path.sep)) throw new Error('URDF 模型路径跨出导入资源');
+  return webcodexBridge(['create-urdf','--instruction',instruction,'--urdf',current]);
+});
+ipcMain.handle('webcodex-status', async (event, requestId) => {
+  assertRenderer(event);
+  if (typeof requestId !== 'string' || !/^[a-f0-9]{32}$/.test(requestId))
+    throw new Error('无效 WebCodex 请求编号');
+  return webcodexBridge(['status', '--id', requestId]);
+});
+ipcMain.handle('webcodex-copy', (event, prompt) => {
+  assertRenderer(event);
+  if (typeof prompt !== 'string' || prompt.length > 4500 || !prompt.includes('@web-codex-tunnel'))
+    throw new Error('只允许复制已声明的 WebCodex 提示');
+  require('electron').clipboard.writeText(prompt);
+  return true;
+});
+
 let agentBusy = false;
 async function agentRequest(action, payload) {
   if (agentBusy) throw new Error('已有建模建议正在处理');
@@ -181,12 +240,7 @@ async function agentRequest(action, payload) {
       { HOME: process.env.HOME, CODEX_HOME: process.env.CODEX_HOME });
   } finally { agentBusy = false; if (temporary) await fs.promises.rm(temporary, { recursive: true, force: true }); }
 }
-ipcMain.handle('agent-suggest', async (event, instruction, expectedRevision) => {
-  assertRenderer(event);
-  if (typeof instruction !== 'string' || !instruction.trim() || instruction.length > 2000 ||
-      !Number.isSafeInteger(expectedRevision) || expectedRevision < 1) throw new Error('无效的建模指令或版本');
-  return agentRequest('suggest', { instruction, expected_revision: expectedRevision });
-});
+// Legacy Codex CLI suggestion endpoint intentionally disabled: web bridge only.
 ipcMain.handle('agent-apply', async (event, proposalId) => {
   assertRenderer(event);
   if (typeof proposalId !== 'string' || !/^[0-9a-f]{32}$/.test(proposalId)) throw new Error('无效建议编号');
@@ -504,6 +558,52 @@ app.whenReady().then(() => {
         if (title !== '查看') throw new Error('Renderer did not mount');
         const isolated = await window.webContents.executeJavaScript(`typeof require === 'undefined' && window.urdftools.version === '0.1.0'`);
         if (!isolated) throw new Error('Renderer isolation/preload failed');
+        if (process.env.URDFTOOLS_WEBCODEX_SMOKE) {
+          const capabilities=await window.webContents.executeJavaScript("({create:typeof window.urdftools.webcodexCreateAnalysis,status:typeof window.urdftools.webcodexStatus,copy:typeof window.urdftools.webcodexCopyPrompt})");
+          if (Object.values(capabilities).some(value=>value!=='function'))
+            throw new Error('WebCodex Electron preload bridge absent');
+          await window.webContents.executeJavaScript("([...document.querySelectorAll('aside button')].find(button=>button.textContent.includes('创建网页 ChatGPT 分析请求'))).click()");
+          let pending=false;
+          for(let tries=0;tries<150;tries++) {
+            pending=await window.webContents.executeJavaScript("document.querySelector('[data-webcodex-status=\"awaiting_chatgpt_web_reply\"]')!==null");
+            if(pending) break;
+            await new Promise(resolve=>setTimeout(resolve,100));
+          }
+          if(!pending) throw new Error('React WebCodex request was not created');
+          const requestId=await window.webContents.executeJavaScript("document.querySelector('[data-webcodex-status] code')?.textContent");
+          if(!/^[0-9a-f]{32}$/.test(requestId)) throw new Error('Invalid WebCodex request id');
+          const pendingResponse=await webcodexBridge(['status','--id',requestId]);
+          if(pendingResponse.status!=='awaiting_chatgpt_web_reply' ||
+             !pendingResponse.prompt.includes('@web-codex-tunnel'))
+            throw new Error('WebCodex bridge pending status mismatch');
+          await window.webContents.executeJavaScript("([...document.querySelectorAll('aside button')].find(button=>button.textContent.includes('复制 WebCodex 对话提示'))).click()");
+          const {clipboard}=require('electron');
+          const copied=clipboard.readText();
+          if(!copied.includes(requestId) || !copied.includes('@web-codex-tunnel'))
+            throw new Error('WebCodex handoff was not copied');
+          if(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR)
+            fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR,'webcodex-agent.png'),
+                             (await window.webContents.capturePage()).toPNG());
+          const imported=await importRequest({action:'import',
+            source:path.join(root,'tests/fixtures/E00/quadruped_zero_axis.urdf')});
+          if(imported.status!=='ready') throw new Error('Imported URDF fixture failed');
+          const analysis=await window.webContents.executeJavaScript(
+            "window.urdftools.webcodexCreateImportedAnalysis("+
+            JSON.stringify(imported.operation_id)+",'请定位关节零轴并给出证据ID')");
+          const importedRow=JSON.parse(fs.readFileSync(analysis.request_path,'utf8'));
+          if(analysis.status!=='awaiting_chatgpt_web_reply' ||
+             importedRow.payload.bundle.evidence[0]?.rule!=='invalid_joint_axis' ||
+             importedRow.payload.original_urdf_not_sent!==true)
+            throw new Error('Imported URDF actual IPC/static evidence invalid');
+          console.log(JSON.stringify({event:'desktop_webcodex_imported_urdf_smoke',
+            source:'unverified_imported_fixture',rule:'invalid_joint_axis',
+            xml_not_submitted:true,local_file_checked:true}));
+          console.log(JSON.stringify({event:'desktop_webcodex_agent_smoke',
+            request_id:requestId,clipboard_verified:true,model_cli_calls:0,
+            web_chatgpt_requested:false,pending:true,source:'synthetic_fixture',
+            renderer_isolated:isolated}));
+        }
+
         if (process.env.URDFTOOLS_MODEL_RESTORE_SMOKE) {
           await window.webContents.executeJavaScript(`([...document.querySelectorAll('nav button')].find(button => button.textContent === '建模')).click()`);
           const deadline = Date.now() + 15000;
@@ -580,6 +680,26 @@ app.whenReady().then(() => {
           if (process.env.URDFTOOLS_VIEWER_S06_SMOKE) {
             console.log(JSON.stringify({ event: 'desktop_viewer_import_ready', model: process.env.URDFTOOLS_VIEWER_S06_SMOKE, fixture }));
             window.webContents.debugger.detach();
+          } else if (process.env.URDFTOOLS_Q00_VIEWER_SMOKE) {
+            await waitFor(`Number(document.querySelector('[data-mesh-count]')?.dataset.meshCount) >= 2`);
+            await waitFor(`document.querySelector('input[aria-label="OffsetPart_joint"]') !== null`);
+            const before = await window.webContents.executeJavaScript(
+              `document.querySelector('[data-joint-quaternion]')?.dataset.jointQuaternion`);
+            await window.webContents.executeJavaScript(
+              `document.querySelector('input[aria-label="OffsetPart_joint"]').focus()`);
+            window.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'End' });
+            window.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'End' });
+            await waitFor(`Number(document.querySelector('input[aria-label="OffsetPart_joint"]')?.value) > 0.99`);
+            const after = await window.webContents.executeJavaScript(
+              `document.querySelector('[data-joint-quaternion]')?.dataset.jointQuaternion`);
+            if (!after || before === after) throw new Error('STEP-exported joint did not rotate');
+            const meshCount = await window.webContents.executeJavaScript(
+              `Number(document.querySelector('[data-mesh-count]').dataset.meshCount)`);
+            fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'cad-roundtrip-viewer.png'),
+              (await window.webContents.capturePage()).toPNG());
+            window.webContents.debugger.detach();
+            console.log(JSON.stringify({event: 'desktop_q00_viewer_smoke', meshCount,
+              jointPoseChanged: true, exportedZip: fixture}));
           } else {
           await waitFor(`Number(document.querySelector('[data-mesh-count]')?.dataset.meshCount) >= 2`);
           await waitFor(`document.querySelector('input[aria-label="shoulder"]') !== null`);

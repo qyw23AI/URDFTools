@@ -1,5 +1,31 @@
 # URDFTools 项目进度
 
+## 2026-10-23 — Q00 跨模块端到端技术验收 3/3
+
+确认 WebCodex 无其他运行作业/活跃锁，保留全部历史未提交改动。新增 Q00 真实 Electron 联合烟测：从原创两零件 STEP 经 CAD 向导导出 URDF/ROS ZIP，重新导入、2 mesh/2 link/1 joint 查看及关节旋转，静态扫描 0 finding，独立 MuJoCo floating-base 总质量 0.003348 kg；另经真实建模 UI 改尺寸、撤销/重做及导出。负例覆盖零关节轴、ZIP 穿越、缺 STL、坏 ZIP、拒绝无权限文件；新 worker 重启恢复与未完整 IPC 请求取消无残留。离线不可用代理下本地 Electron 查看成功。正式 `.venv/bin/python scripts/accept_phase.py Q00` **3/3 gate 通过、0 failed/0 skipped**，TypeScript/Vite 生产构建成功。首轮缺 Node PATH 失败后改用项目固定 Node，失败记录保留。证据 `docs/acceptance/Q00.md`、`artifacts/acceptance/Q00.json`、`artifacts/Q00/`。限制：中途拷贝取消/恢复未覆盖、测试 STEP 为原创夹具而非用户机械装配、无真机/真实训练数据；下一阶段 Q01 离线发行及许可清单。
+
+
+## 2026-10-23 — D03 正式验收通过：网页 ChatGPT 通过 WebCodex 驱动 Agent
+
+用户不再使用额度已耗尽的本地 Codex CLI 模型，改用已连接 @web-codex-tunnel 的网页 ChatGPT 对话。新增不可变请求队列、受限证据工具、用户导入 URDF 本地静态诊断、CAD 建模版本与 SHA256 校验、独立预览与人工应用，桌面 Agent 侧栏、建模按钮及 Electron 受控 IPC 已接通，并从 UI 下线原 Codex CLI `agent-suggest` 入口。当前网页 ChatGPT 会话通过 WebCodex 实际完成 1 份证据约束诊断建议和 1 份 20→25mm Leg 单变量 CAD 建模预览，原模型 revision 1 未改变；并真实测试 Electron 请求生成、复制及回查。正式 `.venv/bin/python scripts/accept_phase.py D03` **4/4 gate 全过、21 项单元测试，0 failed/0 skipped**，无本地 Codex CLI 模型调用。证据见 `docs/acceptance/D03.md`、`artifacts/acceptance/D03.json` 和 `docs/WEBCODEX_AGENT_GUIDE.md`。这是**网页对话需用户主动交接**的模型辅助，不是桌面自动调用后台 ChatGPT 推理 API；示例结果不能视为真实机器人验证。D02 重新生成报告后有 1 份历史诊断请求对应的上游哈希变化：已保留历史响应并显式提示需重新请求，绝不冒充最新 CAD 结论。下一阶段 Q00 端到端回归与桌面发行。
+
+## 2026-10-23 — D03 证据归因强化与代理网络复验
+
+确认 WebCodex Runner 无项目作业、Git index 锁、活跃调度器持锁或近 10 分钟源码写入，保留既有未提交工作。修复 D03 推荐项可引用其他竞争原因证据的问题：建议只能引用其对应原因已登记的支持证据；新增误把 E04 控制仿真证据引用为机械设计依据的拒绝测试，现 **7/7 单元通过**，编译与 `git diff --check` 通过。发现本机代理 `127.0.0.1:7892` 正在监听，尝试显式 HTTPS_PROXY/HTTP_PROXY/ALL_PROXY；ChatGPT 登录有效、HTTP HEAD 可达，但模型请求仍返回 TLS/WebSocket 传输错误。正式 D03 仍 **1/2 gate，1 failed，0 skipped**，记录 `artifacts/D03/runs/20261023T040401566017Z/`，不伪造模型答复或将 D03 标记完成。下一步修复 Codex 实际网络路由后复验，再推进 Q00。
+
+
+## 2026-10-23 — D03 Agent 证据引用防护实现，真实登录生成阻塞
+
+实现证据受控检索、五类竞争因素完整引用/反证校验、仅人工确认的候选建议和真实 ChatGPT Codex CLI 只读调用；六项拒绝伪造证据/漏反证/自动 CAD 修改的测试通过。正式 D03 gate **1/2 通过、1 失败、0 skip**：ChatGPT 登录凭据有效，但最小化模型请求和正式请求均因 chatgpt.com TLS/WebSocket EOF 失败，未获得真实模型答复，不伪造建议与完成状态。见 docs/acceptance/D03.md、artifacts/acceptance/D03.json；恢复 Ubuntu 到 ChatGPT 的真实 TLS 连通后必须重跑 D03。
+
+## 2026-10-23 — D02 机械组报告和真实 FreeCAD 零件映射
+
+续做 D01 既有成果，完成只读诊断证据索引与明确审阅的 CAD part→URDF link/joint 映射、跨来源证据禁止归因、未匹配拓扑提示及存在性/哈希校验的本地视频和指标链接。真实 FreeCAD M02 风格 base/resized/topology 导出 STEP、OCP 检测 ArmLink 变化，BaseBracket 未匹配，中文 HTML 和 PDF 生成成功。保留无效 evidence:d00 与独立来源不相干的证据为 unknown，未称用户机械实际验证。正式 D02 **3/3 gate、6 项单元、0 skip**。证据 docs/acceptance/D02.md、artifacts/acceptance/D02.json、artifacts/D02/；下一阶段 D03 Agent 只读证据建议。
+
+## 2026-10-23 — D01 单变量 CAD 消融与外部复验建议
+
+基于 build123d/OCP 实际 B-rep 生成 100→120 mm 单变量腿长变体，重算质量 0.054→0.0648 kg、Iy 4.545e-5→7.83e-5 kg·m²、COM、碰撞盒及远端 joint frame；MuJoCo 3.16 真实编译 1 DOF，两份模型动态质量一致，固定 root 惯性被导入器丢弃已显式记录。外部复验读取磁盘结果并核对 hash、配对种子、协议和独立审核门禁；合成成绩不能升格为观察效果。正式 D01 **3/3 gate、5 项单元、0 skip**；D00 回归 2/2、4 项测试通过。见 `docs/acceptance/D01.md`、`artifacts/acceptance/D01.json`、`artifacts/D01/`。真实外部训练/用户 CAD 变体与 B00 审核集成仍缺失；下一阶段 D02 CAD 部件映射和机械组报告。
+
 ## 2026-10-23 — D00 受证据约束诊断图验收
 
 新增症状→来源证据→五类竞争因素→复验动作的确定性诊断图，联接 K01/K02 真实模型技能、B08 外部结果和 E04 MuJoCo 控制器探测。正式 D00 **2/2 gate、4 项测试、0 skip**；synthetic_fixture 性能差不认定机械设计缺陷，足底碰撞缺失给局部描述问题，奖励/协议冲突禁排名。详见 `docs/acceptance/D00.md`、`artifacts/acceptance/D00.json`。下一阶段 D01 外部受控复验建议和结果闭环。

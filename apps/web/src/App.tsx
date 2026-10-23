@@ -5,6 +5,7 @@ import { CadWizard, type Configuration, type Discovery } from './CadWizard';
 import { ModelingWorkspace, type ModelRecipe, type ModelApplyResult } from './ModelingWorkspace';
 import { ResultLibrary, type ResultComparison, type ResultList } from './ResultLibrary';
 import type { RobotImport } from './RobotViewer';
+import { WebCodexAgentSidebar, type WebCodexTicket } from './WebCodexAgent';
 
 const workspaces = ['查看', '转换', '建模', '评估'] as const;
 type Finding = {code: string; location: string; message: string};
@@ -19,8 +20,12 @@ declare global {
     chooseCadStep(): Promise<Discovery | null>; cadPreview(config: Configuration): Promise<RobotImport>;
     modelCurrent(): Promise<{revision: number; recipe: ModelRecipe; built?: ModelApplyResult | null; returnWarning?: string | null}>;
     modelApply(recipe: ModelRecipe, expectedRevision: number): Promise<ModelApplyResult>;
-    agentSuggest(instruction: string, expectedRevision: number): Promise<{proposal_id: string; diff: {added_parts: string[]; removed_parts: string[]; changed_parts: string[]}; recipe: ModelRecipe; rationale: string; report: {parts: {name: string; mass_kg: number}[]}; status: 'preview_only'}>;
     agentApply(proposalId: string): Promise<ModelApplyResult>;
+    webcodexCreateModel(instruction: string, revision: number): Promise<WebCodexTicket>;
+    webcodexCreateAnalysis(instruction: string): Promise<WebCodexTicket>;
+    webcodexCreateImportedAnalysis(operationId: string, instruction: string): Promise<WebCodexTicket>;
+    webcodexStatus(requestId: string): Promise<WebCodexTicket>;
+    webcodexCopyPrompt(prompt: string): Promise<boolean>;
     modelReconcile(config: Configuration): Promise<{proposal: import('./ModelingWorkspace').CadReturnProposal;
       exchange: {source_sha256: string; output_sha256: string; losses: string[]}} | null>;
     modelAcceptReturn(config: Configuration): Promise<Discovery>;
@@ -71,5 +76,5 @@ export function App() {
         {report.status === 'ready' && <RobotViewer report={report} />}
       </div>}
     </section> : workspace === '转换' ? <CadWizard /> : workspace === '建模' ? <ModelingWorkspace /> : <ResultLibrary />}</main>
-    <aside><h2>Agent</h2><p>尚未连接</p></aside><footer>本地运行 · SI 单位 · 版本 0.1.0</footer></div>;
+    <aside><WebCodexAgentSidebar desktopAvailable={desktopAvailable} importedOperationId={report?.status==='ready' ? report.operation_id : null} /></aside><footer>本地运行 · SI 单位 · 版本 0.1.0</footer></div>;
 }

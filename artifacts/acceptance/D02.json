@@ -1,0 +1,47 @@
+{
+  "phase": "D02",
+  "timestamp": "20261023T044728705813Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "mechanical-report-evidence-contracts",
+      "command": [
+        ".tools/model-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/d02",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/D02/runs/20261023T044728705813Z/mechanical-report-evidence-contracts.log",
+      "log_sha256": "8ba9bfb100fb146f07bff2510a013d29bb6abc351a13e713e08003e3f9afa11a",
+      "status": "passed"
+    },
+    {
+      "id": "real-FreeCAD-revision-and-HTML",
+      "command": [
+        ".tools/model-venv/bin/python",
+        "scripts/d02_mechanical_report_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/D02/runs/20261023T044728705813Z/real-FreeCAD-revision-and-HTML.log",
+      "log_sha256": "2500d7e5b6288771fa559d931988656c8e337535d902222cde167f7041ca5643",
+      "status": "passed"
+    },
+    {
+      "id": "unicode-local-PDF-export",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/d02_pdf_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/D02/runs/20261023T044728705813Z/unicode-local-PDF-export.log",
+      "log_sha256": "5d88a0608c428e67c4c329a7ab38074ce6b9a6abbd6058385c677f4cf910f6d1",
+      "status": "passed"
+    }
+  ]
+}

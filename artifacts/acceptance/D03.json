@@ -1,0 +1,61 @@
+{
+  "phase": "D03",
+  "timestamp": "20261023T053453673428Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "webcodex-agent-guard-and-CAD-preview",
+      "command": [
+        ".tools/model-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/d03",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/D03/runs/20261023T053453673428Z/webcodex-agent-guard-and-CAD-preview.log",
+      "log_sha256": "4a4e0f7652d696da13285b5758f70cdec5372a1876258563731086399029be21",
+      "status": "passed"
+    },
+    {
+      "id": "read-only-grounded-evidence-tools",
+      "command": [
+        "env",
+        "-u",
+        "PYTHONPATH",
+        ".tools/results-venv/bin/python",
+        "scripts/d03_evidence_tools_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/D03/runs/20261023T053453673428Z/read-only-grounded-evidence-tools.log",
+      "log_sha256": "060e844fc7d0aca405e7706ae73394fb88bc41c756269bb3a4676f2fce418284",
+      "status": "passed"
+    },
+    {
+      "id": "real-Electron-WebCodex-handoff",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/d03_webcodex_desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/D03/runs/20261023T053453673428Z/real-Electron-WebCodex-handoff.log",
+      "log_sha256": "585ae19be84b83cfeeccfd1d15b379dab9f3fc212cd89ee9a1017e092950e9c6",
+      "status": "passed"
+    },
+    {
+      "id": "actual-ChatGPT-web-WebCodex-roundtrip",
+      "command": [
+        ".tools/model-venv/bin/python",
+        "scripts/d03_webcodex_live_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/D03/runs/20261023T053453673428Z/actual-ChatGPT-web-WebCodex-roundtrip.log",
+      "log_sha256": "8d6026a43a6a5bd9b3965919fdbfa0cd4bc208857098f02ffbd38ae0ad0d03d1",
+      "status": "passed"
+    }
+  ]
+}

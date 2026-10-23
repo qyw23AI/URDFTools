@@ -1,0 +1,40 @@
+{
+  "phase": "Q00",
+  "timestamp": "20261023T050308289105Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "web-production-build",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/q00_build.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/Q00/runs/20261023T050308289105Z/web-production-build.log",
+      "log_sha256": "75d371365d5580a9662a120beb5bde586789eb17e61e373a88c61ddf900798d7",
+      "status": "passed"
+    },
+    {
+      "id": "step-desktop-model-viewer-static-mujoco-negative",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/q00_cross_module_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/Q00/runs/20261023T050308289105Z/step-desktop-model-viewer-static-mujoco-negative.log",
+      "log_sha256": "5a4e495710052c3c19b253b2b7947fdfdb1a68ec16e5ab1be8fdd236a43f7a1f",
+      "status": "passed"
+    },
+    {
+      "id": "cancel-restart-permission-regression",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/q00_resilience_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/Q00/runs/20261023T050308289105Z/cancel-restart-permission-regression.log",
+      "log_sha256": "94845757a339442c92f1cc5562b4c68f5ba77917c022fd1d41bd092f0143990e",
+      "status": "passed"
+    }
+  ]
+}

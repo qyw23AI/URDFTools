@@ -1,0 +1,47 @@
+{
+  "phase": "D01",
+  "timestamp": "20261023T030539099309Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "cad-ablation-contracts",
+      "command": [
+        ".tools/model-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/d01",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/D01/runs/20261023T030539099309Z/cad-ablation-contracts.log",
+      "log_sha256": "b75315054ed89b60c1d1defa450301c49082066b37cfc96f7ea77ab7c91a5022",
+      "status": "passed"
+    },
+    {
+      "id": "real-brep-leg-variation",
+      "command": [
+        ".tools/model-venv/bin/python",
+        "scripts/d01_ablation_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/D01/runs/20261023T030539099309Z/real-brep-leg-variation.log",
+      "log_sha256": "45b7fd19497cb222ceb00c78d4e80772c5d589f5379575f121e62a1ef91a1949",
+      "status": "passed"
+    },
+    {
+      "id": "real-mujoco-urdf-compile",
+      "command": [
+        ".tools/sim-venv/bin/python",
+        "scripts/d01_mujoco_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/D01/runs/20261023T030539099309Z/real-mujoco-urdf-compile.log",
+      "log_sha256": "eb4284f4b28c4836be311ed2befcec73a6d825fe3e66f4f39f8c8244a822b67b",
+      "status": "passed"
+    }
+  ]
+}

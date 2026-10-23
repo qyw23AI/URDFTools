@@ -1,6 +1,27 @@
 {
   "schema_version": 1,
   "phases": {
+    "Q00": [
+      {"id": "web-production-build", "kind": "command", "argv": ["{python}", "scripts/q00_build.py"], "timeout_seconds": 150},
+      {"id": "step-desktop-model-viewer-static-mujoco-negative", "kind": "command", "argv": ["{python}", "scripts/q00_cross_module_smoke.py"], "timeout_seconds": 750},
+      {"id": "cancel-restart-permission-regression", "kind": "command", "argv": ["{python}", "scripts/q00_resilience_smoke.py"], "timeout_seconds": 120}
+    ],
+    "D03": [
+      {"id": "webcodex-agent-guard-and-CAD-preview", "kind": "command", "argv": [".tools/model-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/d03", "-p", "test_*.py", "-v"]},
+      {"id": "read-only-grounded-evidence-tools", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "scripts/d03_evidence_tools_smoke.py"]},
+      {"id": "real-Electron-WebCodex-handoff", "kind": "command", "argv": ["{python}", "scripts/d03_webcodex_desktop_smoke.py"], "timeout_seconds": 150},
+      {"id": "actual-ChatGPT-web-WebCodex-roundtrip", "kind": "command", "argv": [".tools/model-venv/bin/python", "scripts/d03_webcodex_live_smoke.py"]}
+    ],
+    "D02": [
+      {"id": "mechanical-report-evidence-contracts", "kind": "command", "argv": [".tools/model-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/d02", "-p", "test_*.py", "-v"]},
+      {"id": "real-FreeCAD-revision-and-HTML", "kind": "command", "argv": [".tools/model-venv/bin/python", "scripts/d02_mechanical_report_smoke.py"]},
+      {"id": "unicode-local-PDF-export", "kind": "command", "argv": ["{python}", "scripts/d02_pdf_smoke.py"]}
+    ],
+    "D01": [
+      {"id": "cad-ablation-contracts", "kind": "command", "argv": [".tools/model-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/d01", "-p", "test_*.py", "-v"]},
+      {"id": "real-brep-leg-variation", "kind": "command", "argv": [".tools/model-venv/bin/python", "scripts/d01_ablation_smoke.py"]},
+      {"id": "real-mujoco-urdf-compile", "kind": "command", "argv": [".tools/sim-venv/bin/python", "scripts/d01_mujoco_smoke.py"]}
+    ],
     "D00": [
       {"id": "evidence-graph-contracts", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/d00", "-p", "test_*.py", "-v"]},
       {"id": "import-skill-real-probe-diagnosis", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "scripts/d00_diagnosis_smoke.py"]}
