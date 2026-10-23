@@ -1,6 +1,10 @@
 {
   "schema_version": 1,
   "phases": {
+    "D00": [
+      {"id": "evidence-graph-contracts", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/d00", "-p", "test_*.py", "-v"]},
+      {"id": "import-skill-real-probe-diagnosis", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "scripts/d00_diagnosis_smoke.py"]}
+    ],
     "B08": [
       {"id": "two-category-import-comparison-and-media", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/b08", "-p", "test_*.py", "-v"]},
       {"id": "four-electron-imports-video-and-restart", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "scripts/b08_desktop_smoke.py"], "timeout_seconds": 440}

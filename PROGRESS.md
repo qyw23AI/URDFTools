@@ -1,5 +1,9 @@
 # URDFTools 项目进度
 
+## 2026-10-23 — D00 受证据约束诊断图验收
+
+新增症状→来源证据→五类竞争因素→复验动作的确定性诊断图，联接 K01/K02 真实模型技能、B08 外部结果和 E04 MuJoCo 控制器探测。正式 D00 **2/2 gate、4 项测试、0 skip**；synthetic_fixture 性能差不认定机械设计缺陷，足底碰撞缺失给局部描述问题，奖励/协议冲突禁排名。详见 `docs/acceptance/D00.md`、`artifacts/acceptance/D00.json`。下一阶段 D01 外部受控复验建议和结果闭环。
+
 ## 2026-10-23 — B08 两类机器人外部结果与视频端到端验收
 
 四足 A1/自有模型、人形 G1/自有模型共 4 份合成实验包真实经过 Electron 入口、哈希资产库、规范化指标/种子结果、协议比较和视频帧时间关联；重启后恢复并在界面并排播放视频。正式 B08 **2/2 gate、3 项后端测试、4 次 Electron 导入、0 skip**；见 `docs/acceptance/B08.md` 与 `artifacts/acceptance/B08.json`。真实已审核参考成绩仍为 0，所有视频/成绩均为 synthetic_fixture；下一阶段 D00 证据约束诊断。

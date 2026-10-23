@@ -1,0 +1,42 @@
+{
+  "phase": "D00",
+  "timestamp": "20261023T024242270135Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "evidence-graph-contracts",
+      "command": [
+        "env",
+        "-u",
+        "PYTHONPATH",
+        ".tools/results-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/d00",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/D00/runs/20261023T024242270135Z/evidence-graph-contracts.log",
+      "log_sha256": "4843e2e8a2b6dbba7be9506698ae5e01c52a5183a210fac427ee5cbf27e7726d",
+      "status": "passed"
+    },
+    {
+      "id": "import-skill-real-probe-diagnosis",
+      "command": [
+        "env",
+        "-u",
+        "PYTHONPATH",
+        ".tools/results-venv/bin/python",
+        "scripts/d00_diagnosis_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/D00/runs/20261023T024242270135Z/import-skill-real-probe-diagnosis.log",
+      "log_sha256": "1506d65b97f9344a1e9f8e3ab4ff081f4c9e2a725c2dcf83c779397a4bbd0dfe",
+      "status": "passed"
+    }
+  ]
+}
