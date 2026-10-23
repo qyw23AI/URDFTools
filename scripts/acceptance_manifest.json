@@ -1,6 +1,9 @@
 {
   "schema_version": 1,
   "phases": {
+    "B03": [
+      {"id": "humanoid-support-semantics-and-real-model-links", "kind": "command", "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests/b03", "-p", "test_*.py", "-v"]}
+    ],
     "B02": [
       {"id": "quadruped-timeseries-and-real-model-links", "kind": "command", "argv": ["{python}", "-m", "unittest", "discover", "-s", "tests/b02", "-p", "test_*.py", "-v"]}
     ],
