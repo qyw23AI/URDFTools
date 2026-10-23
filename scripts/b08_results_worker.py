@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "python"))
 from urdftools.reference.registry import ModelRegistry
 from urdftools.results.catalog import ResultCatalog
 from urdftools.results.jobs import ImportFailure, ImportQueue, digest
+from urdftools.results.workflow import ResultWorkflow
 
 
 def inventory(source: Path, manifest: dict) -> dict:
@@ -22,8 +23,8 @@ def inventory(source: Path, manifest: dict) -> dict:
     if not isinstance(name, str) or not isinstance(files, list):
         raise ImportFailure("Invalid model path or file inventory")
     listed = {item.get("path"): item for item in files if isinstance(item, dict)}
-    if name not in listed or "experiment.json" not in listed:
-        raise ImportFailure("Model and experiment.json must be listed in bundle inventory")
+    if name not in listed or "experiment.json" not in listed or "evidence.json" not in listed:
+        raise ImportFailure("Model, experiment.json and evidence.json must be listed in bundle inventory")
     if not name.endswith(".urdf"):
         raise ImportFailure("Model asset must be URDF")
     for field in ("name", "version", "category", "origin"):
@@ -60,33 +61,47 @@ def import_bundle(store: Path, source: Path) -> dict:
                                           category=model["category"], origin=model["origin"],
                                           license_id=model["license"], expected_sha256=manifest["robot_hash"])
         association = catalog.link_model(result["run_id"], registered["id"], registry)
+        evidence = ResultWorkflow(queue).ingest(result["run_id"], job)
         return {"status": "imported", "bundle_id": manifest["bundle_id"], "run_id": result["run_id"],
                 "rows": result["rows"], "origin": queue.db.execute("SELECT origin FROM experiments WHERE run_id=?", (result["run_id"],)).fetchone()[0],
-                "model": association, "reference_performance": False}
+                "model": association, "evidence": evidence, "reference_performance": False}
 
 
 def list_runs(store: Path) -> dict:
     with ImportQueue(store / "results") as queue:
         ResultCatalog(queue)
+        ResultWorkflow(queue)
         rows = queue.db.execute("""SELECT e.run_id,e.algorithm,e.protocol,e.origin,e.robot_hash,e.metadata_json,
-                                 count(m.row_index) AS metrics FROM experiments e
+                                 count(m.row_index) AS metrics, x.run_id AS evidence_run FROM experiments e
                                  LEFT JOIN scalar_metrics m ON m.run_id=e.run_id
+                                 LEFT JOIN result_evidence x ON x.run_id=e.run_id
                                  GROUP BY e.run_id ORDER BY e.rowid DESC""").fetchall()
         return {"runs": [{"run_id": row["run_id"], "algorithm": row["algorithm"], "protocol": row["protocol"],
                           "origin": row["origin"], "robot_hash": row["robot_hash"], "metrics": row["metrics"],
-                          "category": json.loads(row["metadata_json"])["robot_category"]} for row in rows],
+                          "category": json.loads(row["metadata_json"])["robot_category"],
+                          "has_evidence": row["evidence_run"] is not None} for row in rows],
                 "verified_reference_count": 0}
+
+
+def compare_runs(store: Path, reference_id: str, candidate_id: str) -> dict:
+    with ImportQueue(store / "results") as queue:
+        return ResultWorkflow(queue).compare(reference_id, candidate_id)
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", choices=("import", "list"))
+    parser.add_argument("action", choices=("import", "list", "compare"))
     parser.add_argument("--store", type=Path, required=True)
     parser.add_argument("--source", type=Path)
+    parser.add_argument("--reference")
+    parser.add_argument("--candidate")
     args = parser.parse_args()
     if args.action == "import" and args.source is None:
         parser.error("import requires --source")
-    result = import_bundle(args.store, args.source) if args.action == "import" else list_runs(args.store)
+    if args.action == "compare" and (not args.reference or not args.candidate):
+        parser.error("compare requires --reference and --candidate")
+    result = (import_bundle(args.store, args.source) if args.action == "import" else
+              compare_runs(args.store, args.reference, args.candidate) if args.action == "compare" else list_runs(args.store))
     print(json.dumps(result, ensure_ascii=False))
 
 

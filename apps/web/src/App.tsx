@@ -3,7 +3,7 @@ import './style.css';
 import { RobotViewer } from './RobotViewer';
 import { CadWizard, type Configuration, type Discovery } from './CadWizard';
 import { ModelingWorkspace, type ModelRecipe, type ModelApplyResult } from './ModelingWorkspace';
-import { ResultLibrary, type ResultList } from './ResultLibrary';
+import { ResultLibrary, type ResultComparison, type ResultList } from './ResultLibrary';
 import type { RobotImport } from './RobotViewer';
 
 const workspaces = ['查看', '转换', '建模', '评估'] as const;
@@ -26,7 +26,8 @@ declare global {
     modelAcceptReturn(config: Configuration): Promise<Discovery>;
     saveCadConfig(config: Configuration): Promise<boolean>; loadCadConfig(): Promise<Configuration | null>;
     exportCadPackage(config: Configuration, densities: Record<string, number>): Promise<{path: string; sha256: string; validation: {mujoco_raw: {fixed_base_mass_excluded_kg: number}; mujoco_floating: {mass_kg: number}; training_ready: boolean}} | null>;
-    resultRuns(): Promise<ResultList>; resultImport(): Promise<{run_id: string; rows: number} | null>}; }
+    resultRuns(): Promise<ResultList>; resultImport(): Promise<{run_id: string; rows: number} | null>;
+    resultCompare(reference: string, candidate: string): Promise<ResultComparison>}; }
 }
 export function App() {
   const desktopAvailable = typeof window !== 'undefined' && typeof window.urdftools !== 'undefined';

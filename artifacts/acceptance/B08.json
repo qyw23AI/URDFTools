@@ -1,0 +1,42 @@
+{
+  "phase": "B08",
+  "timestamp": "20261023T023820292118Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "two-category-import-comparison-and-media",
+      "command": [
+        "env",
+        "-u",
+        "PYTHONPATH",
+        ".tools/results-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/b08",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/B08/runs/20261023T023820292118Z/two-category-import-comparison-and-media.log",
+      "log_sha256": "dc92c1521c5f1c30948271d7477b89f3dae37044e09237f42fded1973e9b50df",
+      "status": "passed"
+    },
+    {
+      "id": "four-electron-imports-video-and-restart",
+      "command": [
+        "env",
+        "-u",
+        "PYTHONPATH",
+        ".tools/results-venv/bin/python",
+        "scripts/b08_desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/B08/runs/20261023T023820292118Z/four-electron-imports-video-and-restart.log",
+      "log_sha256": "8ef42087ead327c7ced52f3637b570e7c646a2e9597a2126e2ce94ccb8757419",
+      "status": "passed"
+    }
+  ]
+}

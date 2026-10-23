@@ -11,10 +11,31 @@ const root = path.resolve(__dirname, '../..');
 const mimeTypes = { '.urdf': 'application/xml', '.obj': 'text/plain; charset=utf-8',
   '.stl': 'model/stl', '.dae': 'model/vnd.collada+xml', '.png': 'image/png',
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.bmp': 'image/bmp' };
+const resultMedia = new Map();
 function setupAssetProtocol() {
   protocol.handle('urdftools', async request => {
     try {
       const url = new URL(request.url);
+      if (url.hostname === 'result' && request.method === 'GET') {
+        const sha = url.pathname.slice(1);
+        const item = resultMedia.get(sha);
+        if (!/^[0-9a-f]{64}$/.test(sha) || !item) throw new Error('unknown result video');
+        const stat = await fs.promises.stat(item.path);
+        if (stat.size > 128 * 1024 * 1024) throw new Error('result video exceeds desktop playback limit');
+        const bytes = await fs.promises.readFile(item.path);
+        if (createHash('sha256').update(bytes).digest('hex') !== sha)
+          throw new Error('result video changed or exceeds desktop playback limit');
+        const range = request.headers.get('range');
+        const match = range && /^bytes=(\d+)-(\d*)$/.exec(range);
+        if (range && !match) return new Response(null, { status: 416 });
+        const start = match ? Number(match[1]) : 0;
+        const end = match && match[2] ? Math.min(Number(match[2]), bytes.length - 1) : bytes.length - 1;
+        if (start > end || start >= bytes.length) return new Response(null, { status: 416 });
+        const headers = { 'Content-Type': item.mime, 'Accept-Ranges': 'bytes', 'Content-Length': String(end-start+1),
+          'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
+        if (match) headers['Content-Range'] = `bytes ${start}-${end}/${bytes.length}`;
+        return new Response(bytes.subarray(start, end + 1), { status: match ? 206 : 200, headers });
+      }
       if (url.hostname !== 'asset' || request.method !== 'GET') throw new Error('invalid route');
       const parts = decodeURIComponent(url.pathname).split('/').slice(1);
       const [operation, container, ...relativeParts] = parts;
@@ -40,6 +61,8 @@ function setupAssetProtocol() {
   });
 }
 const smoke = process.argv.includes('--smoke');
+const resultStore = () => smoke && process.env.URDFTOOLS_B08_SMOKE_STORE ?
+  process.env.URDFTOOLS_B08_SMOKE_STORE : path.join(app.getPath('userData'), 'external-results');
 if (smoke) console.log(JSON.stringify({ event: 'desktop_start', electron: process.versions.electron }));
 let service;
 let window;
@@ -82,15 +105,33 @@ ipcMain.handle('choose-import', async (event, kind) => {
 });
 ipcMain.handle('result-runs', async event => {
   assertRenderer(event);
-  return runPythonWorker('.venv/bin/python', 'scripts/b08_results_worker.py',
-    ['list', '--store', path.join(app.getPath('userData'), 'external-results')]);
+  return runPythonWorker('.tools/results-venv/bin/python', 'scripts/b08_results_worker.py',
+    ['list', '--store', resultStore()]);
 });
 ipcMain.handle('result-import', async event => {
   assertRenderer(event);
-  const choice = await dialog.showOpenDialog(window, { properties: ['openDirectory'] });
+  const choice = smoke && process.env.URDFTOOLS_B08_SMOKE_SOURCE ?
+    { canceled: false, filePaths: [process.env.URDFTOOLS_B08_SMOKE_SOURCE] } :
+    await dialog.showOpenDialog(window, { properties: ['openDirectory'] });
   if (choice.canceled) return null;
-  return runPythonWorker('.venv/bin/python', 'scripts/b08_results_worker.py',
-    ['import', '--store', path.join(app.getPath('userData'), 'external-results'), '--source', choice.filePaths[0]], 300000);
+  return runPythonWorker('.tools/results-venv/bin/python', 'scripts/b08_results_worker.py',
+    ['import', '--store', resultStore(), '--source', choice.filePaths[0]], 300000);
+});
+ipcMain.handle('result-compare', async (event, reference, candidate) => {
+  assertRenderer(event);
+  for (const runId of [reference, candidate]) {
+    if (typeof runId !== 'string' || !runId || runId.length > 160) throw new Error('无效实验编号');
+  }
+  const result = await runPythonWorker('.tools/results-venv/bin/python', 'scripts/b08_results_worker.py',
+    ['compare', '--store', resultStore(),
+      '--reference', reference, '--candidate', candidate]);
+  for (const media of [...result.reference_media, ...result.candidate_media]) {
+    const sha = media.source_sha256;
+    if (!/^[0-9a-f]{64}$/.test(sha) || !['.mp4', '.webm'].includes(path.extname(media.path).toLowerCase())) continue;
+    resultMedia.set(sha, { path: path.join(resultStore(), 'results', 'blobs', sha.slice(0, 2), sha),
+      mime: path.extname(media.path).toLowerCase() === '.mp4' ? 'video/mp4' : 'video/webm' });
+  }
+  return result;
 });
 ipcMain.handle('select-import', (event, operation_id, model) => {
   if (!window || event.sender !== window.webContents || typeof operation_id !== 'string' || typeof model !== 'string') throw new Error('无效选择');
@@ -816,6 +857,11 @@ app.whenReady().then(() => {
           const runMediaSmoke = require(path.join(root, 'scripts/b07_desktop_smoke_hook.cjs'));
           await runMediaSmoke(window, process.env.URDFTOOLS_MEDIA_SMOKE,
             process.env.URDFTOOLS_MEDIA_REPORT, process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR);
+        }
+        if (process.env.URDFTOOLS_B08_SMOKE_SOURCE) {
+          const runResultsSmoke = require(path.join(root, 'scripts/b08_desktop_smoke_hook.cjs'));
+          await runResultsSmoke(window, process.env.URDFTOOLS_B08_SMOKE_RUN_ID,
+            process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR);
         }
         const image = await window.webContents.capturePage();
         const size = image.getSize();
