@@ -1,5 +1,9 @@
 # URDFTools 项目进度
 
+## 2026-10-23 — B07 本地视频与指标事件对照
+
+完成 PyAV 真实解码的帧时序/缺帧/偏移检查、报告 CLI，以及 Electron 评估工作区中的本地视频 SHA 核对与事件点击定位。正式 B07 **2/2 gate、2 项媒体测试、真实 Electron 视频播放和前端生产构建通过**；首轮 CSP 阻挡 blob 视频后只增加媒体源规则并复验。证据 `docs/acceptance/B07.md`、`artifacts/acceptance/B07.json`、`artifacts/B07/desktop/media-view.png`。大于 128 MiB 视频的界面核验和 B01 数据库直连仍待后续迭代；不从视频推断扭矩/能耗。下一阶段 B08 两类结果包完整烟测。
+
 ## 2026-10-23 — B06 外部日志适配与交换
 
 新增版本化 SB3 CSV、RSL-RL/Isaac Lab TensorBoard tag 映射及本地 MLflow 三列指标交换。正式 B06 **1/1 gate、2 项端到端测试、0 skip**；SB3 格式夹具和 TensorBoard 官方写入器文件经 B00/B01 入库，MLflow 本地往返值/时间一致，未映射字段显式报告。详见 `docs/acceptance/B06.md`、`artifacts/acceptance/B06.json`。未运行上游训练器或验证真实用户成绩；下一阶段 B07 视频时序与交互对照。

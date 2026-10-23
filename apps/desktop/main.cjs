@@ -800,6 +800,11 @@ app.whenReady().then(() => {
         await new Promise(resolve => setTimeout(resolve, 100));
         const selected = await window.webContents.executeJavaScript(`document.querySelector('h1').textContent`);
         if (selected !== '评估') throw new Error('React workspace interaction failed');
+        if (process.env.URDFTOOLS_MEDIA_SMOKE) {
+          const runMediaSmoke = require(path.join(root, 'scripts/b07_desktop_smoke_hook.cjs'));
+          await runMediaSmoke(window, process.env.URDFTOOLS_MEDIA_SMOKE,
+            process.env.URDFTOOLS_MEDIA_REPORT, process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR);
+        }
         const image = await window.webContents.capturePage();
         const size = image.getSize();
         if (size.width < 100 || size.height < 100 || image.isEmpty()) throw new Error('Renderer capture empty');

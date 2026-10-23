@@ -1,4 +1,5 @@
-# Isolated B01 format readers; generated from env -u PYTHONPATH pip freeze.
+# Isolated B01 format readers and B07 media decoder; versions pinned for local tests.
+av==19.0.2
 absl-py==2.5.1
 grpcio==1.84.1
 Markdown==3.11.2

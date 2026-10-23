@@ -1,6 +1,10 @@
 {
   "schema_version": 1,
   "phases": {
+    "B07": [
+      {"id": "actual-video-decode-and-event-time", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/b07", "-p", "test_*.py", "-v"]},
+      {"id": "electron-local-media-interaction", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "scripts/b07_desktop_smoke.py"], "timeout_seconds": 150}
+    ],
     "B06": [
       {"id": "offline-log-adapters-end-to-end", "kind": "command", "argv": ["env", "-u", "PYTHONPATH", ".tools/results-venv/bin/python", "-m", "unittest", "discover", "-s", "tests/b06", "-p", "test_*.py", "-v"]}
     ],

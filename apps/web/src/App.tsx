@@ -3,6 +3,7 @@ import './style.css';
 import { RobotViewer } from './RobotViewer';
 import { CadWizard, type Configuration, type Discovery } from './CadWizard';
 import { ModelingWorkspace, type ModelRecipe, type ModelApplyResult } from './ModelingWorkspace';
+import { MediaEvidence } from './MediaEvidence';
 import type { RobotImport } from './RobotViewer';
 
 const workspaces = ['查看', '转换', '建模', '评估'] as const;
@@ -65,6 +66,6 @@ export function App() {
         {report.findings.map((f, i) => <p role="alert" key={i}>{f.code} · {f.location}：{f.message}</p>)}
         {report.status === 'ready' && <RobotViewer report={report} />}
       </div>}
-    </section> : workspace === '转换' ? <CadWizard /> : workspace === '建模' ? <ModelingWorkspace /> : <p>此工作区功能尚未实现。</p>}</main>
+    </section> : workspace === '转换' ? <CadWizard /> : workspace === '建模' ? <ModelingWorkspace /> : <MediaEvidence />}</main>
     <aside><h2>Agent</h2><p>尚未连接</p></aside><footer>本地运行 · SI 单位 · 版本 0.1.0</footer></div>;
 }

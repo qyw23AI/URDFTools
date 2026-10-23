@@ -1,0 +1,42 @@
+{
+  "phase": "B07",
+  "timestamp": "20261023T011248474073Z",
+  "status": "passed",
+  "checks": [
+    {
+      "id": "actual-video-decode-and-event-time",
+      "command": [
+        "env",
+        "-u",
+        "PYTHONPATH",
+        ".tools/results-venv/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/b07",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/B07/runs/20261023T011248474073Z/actual-video-decode-and-event-time.log",
+      "log_sha256": "8e24508cbd7e7bbbbf104d5711a7e884a214b719f6cc0605027ea961bdb7f12e",
+      "status": "passed"
+    },
+    {
+      "id": "electron-local-media-interaction",
+      "command": [
+        "env",
+        "-u",
+        "PYTHONPATH",
+        ".tools/results-venv/bin/python",
+        "scripts/b07_desktop_smoke.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/B07/runs/20261023T011248474073Z/electron-local-media-interaction.log",
+      "log_sha256": "baf2b60905ff2a12594d3234d227aa1933c6975d4faf68743d76a2a818f1cbd3",
+      "status": "passed"
+    }
+  ]
+}
