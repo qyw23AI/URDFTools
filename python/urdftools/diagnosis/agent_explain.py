@@ -48,6 +48,25 @@ _VALID_CAUSES={"export_or_description","collision_or_contact",
 _MAX_OUTPUT=32_768
 
 
+def _explanation_output_schema():
+    """Constrain CLI output shape; semantic evidence checks remain authoritative."""
+    def obj(properties):
+        return {"type":"object","properties":properties,
+                "required":list(properties),"additionalProperties":False}
+    strings={"type":"array","items":{"type":"string"}}
+    cause=obj({"cause_id":{"type":"string"},"status":{"type":"string"},
+               "evidence_ids":strings,"counter_evidence_ids":strings,
+               "missing_data":strings,"interpretation":{"type":"string"},
+               "verification_action":{"type":"string"},"causal_claim":{"type":"boolean"}})
+    recommendation=obj({"cause_id":{"type":"string"},"action":{"type":"string"},
+                        "evidence_ids":strings,"requires_human_confirmation":{"type":"boolean"},
+                        "automatically_applied":{"type":"boolean"},"claim_scope":{"type":"string"}})
+    return obj({"schema_version":{"type":"integer"},"case_id":{"type":"string"},
+                "summary":{"type":"string"},"causes":{"type":"array","items":cause},
+                "recommendations":{"type":"array","items":recommendation},
+                "limitations":strings})
+
+
 def build_retrieval(diagnosis:dict, mechanical:dict)->dict:
     if diagnosis.get("schema_version")!=1 or mechanical.get("schema_version")!=1:
         raise ExplanationError("Versioned D00 and D02 reports required")
@@ -233,8 +252,11 @@ def codex_explain(bundle:dict,*,timeout:int=240)->dict:
             "EVIDENCE_CONTEXT:\n"+payload)
     with tempfile.TemporaryDirectory(prefix="urdftools-d03-readonly-") as temp:
         answer=Path(temp)/"explanation.json"
+        schema=Path(temp)/"schema.json"
+        schema.write_text(json.dumps(_explanation_output_schema(),ensure_ascii=False))
         cmd=[executable,"exec","--json","--ephemeral","--ignore-user-config",
              "--sandbox","read-only","--skip-git-repo-check","-C",temp,
+             "--output-schema",str(schema),
              "--output-last-message",str(answer),prompt]
         try:
             done=subprocess.run(cmd,cwd=temp,env=env,capture_output=True,text=True,timeout=timeout)

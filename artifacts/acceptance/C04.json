@@ -1,6 +1,6 @@
 {
   "phase": "C04",
-  "timestamp": "20261022T141107295617Z",
+  "timestamp": "20261022T184533044054Z",
   "status": "passed",
   "checks": [
     {
@@ -10,7 +10,7 @@
         "scripts/setup_freecad_worker.py"
       ],
       "exit_code": 0,
-      "log": "artifacts/C04/runs/20261022T141107295617Z/freecad-worker-lock.log",
+      "log": "artifacts/C04/runs/20261022T184533044054Z/freecad-worker-lock.log",
       "log_sha256": "9e1decd9cb9868bc17d3dd69e3e23de2acef733d3aeb146795d066b68e380baa",
       "status": "passed"
     },
@@ -28,8 +28,8 @@
         "-v"
       ],
       "exit_code": 0,
-      "log": "artifacts/C04/runs/20261022T141107295617Z/cad-exchange-contracts.log",
-      "log_sha256": "890a77c4e8c61e686b3198673f7eb2315f8ff8bd11314ba48c73cf711ddc96b3",
+      "log": "artifacts/C04/runs/20261022T184533044054Z/cad-exchange-contracts.log",
+      "log_sha256": "f972ab5b2fed3bd66b65b27c2ee3cd2a3bc34daff2e7afc7de94efd813120454",
       "status": "passed"
     },
     {
@@ -39,8 +39,8 @@
         "scripts/c04_desktop_smoke.py"
       ],
       "exit_code": 0,
-      "log": "artifacts/C04/runs/20261022T141107295617Z/freecad-desktop.log",
-      "log_sha256": "603f4ef9ed611d4ae91d7a04da431fe96098b15d022cfea174afa564ebcb46cc",
+      "log": "artifacts/C04/runs/20261022T184533044054Z/freecad-desktop.log",
+      "log_sha256": "969f3d701dc12b2fe74e084ccd69513981fed340e43382cb5a82c7a8ccf2ee8f",
       "status": "passed"
     }
   ]

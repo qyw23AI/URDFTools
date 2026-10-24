@@ -4,6 +4,7 @@ const { randomBytes, createHash } = require('node:crypto');
 const path = require('node:path');
 const readline = require('node:readline');
 const fs = require('node:fs');
+const { createCadDraftStore } = require('./cadDraftStore.cjs');
 protocol.registerSchemesAsPrivileged([{ scheme: 'urdftools', privileges: {
   standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: true
 } }]);
@@ -12,10 +13,34 @@ const mimeTypes = { '.urdf': 'application/xml', '.obj': 'text/plain; charset=utf
   '.stl': 'model/stl', '.dae': 'model/vnd.collada+xml', '.png': 'image/png',
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.bmp': 'image/bmp' };
 const resultMedia = new Map();
+const resultAssets = new Map();
+const cadMeshAssets = new Map();
 function setupAssetProtocol() {
   protocol.handle('urdftools', async request => {
     try {
       const url = new URL(request.url);
+      if (url.hostname === 'cad-mesh' && request.method === 'GET') {
+        const item = cadMeshAssets.get(url.pathname.slice(1));
+        if (!item) throw new Error('unknown CAD mesh');
+        const bytes = await fs.promises.readFile(item.path);
+        if (bytes.length !== item.size) throw new Error('CAD mesh changed');
+        return new Response(bytes, { status: 200, headers: {
+          'Content-Type': 'model/stl', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store'
+        } });
+      }
+      if (url.hostname === 'result-asset' && request.method === 'GET') {
+        const segments = url.pathname.split('/').slice(1).map(decodeURIComponent);
+        const runId = segments.shift();
+        const item = resultAssets.get(runId + ':' + segments.join('/'));
+        if (!item) throw new Error('unknown project asset');
+        const bytes = await fs.promises.readFile(item.path);
+        if (bytes.byteLength !== item.size || createHash('sha256').update(bytes).digest('hex') !== item.sha256)
+          throw new Error('project asset changed');
+        return new Response(bytes, { status: 200, headers: {
+          'Content-Type': mimeTypes[path.extname(item.relative).toLowerCase()] || 'application/octet-stream',
+          'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'
+        } });
+      }
       if (url.hostname === 'result' && request.method === 'GET') {
         const sha = url.pathname.slice(1);
         const item = resultMedia.get(sha);
@@ -55,7 +80,8 @@ function setupAssetProtocol() {
         'Content-Type': mimeTypes[path.extname(relative).toLowerCase()] || 'application/octet-stream',
         'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'
       } });
-    } catch {
+    } catch (cause) {
+      console.error(JSON.stringify({ event: 'asset_request_failed', url: request.url, error: String(cause) }));
       return new Response('Resource not available', { status: 404, headers: { 'Access-Control-Allow-Origin': '*' } });
     }
   });
@@ -103,10 +129,58 @@ ipcMain.handle('choose-import', async (event, kind) => {
     filters: kind === 'folder' ? [] : [{ name: 'URDF / ZIP', extensions: ['urdf', 'zip'] }] });
   return choice.canceled ? null : importRequest({ action: 'import', source: choice.filePaths[0] });
 });
+ipcMain.handle('import-example', event => {
+  if (!window || event.sender !== window.webContents) throw new Error('无效窗口');
+  return importRequest({ action: 'import', source: path.join(root, 'examples/robot_demo') });
+});
 ipcMain.handle('result-runs', async event => {
   assertRenderer(event);
   return runPythonWorker('.tools/results-venv/bin/python', 'scripts/b08_results_worker.py',
     ['list', '--store', resultStore()]);
+});
+ipcMain.handle('result-project', async (event, runId, name, isStandard) => {
+  assertRenderer(event);
+  if (typeof runId !== 'string' || !runId || runId.length > 160 ||
+      typeof name !== 'string' || !name.trim() || name.length > 120 || typeof isStandard !== 'boolean')
+    throw new Error('无效项目设置');
+  return runPythonWorker('.tools/results-venv/bin/python', 'scripts/b08_results_worker.py',
+    ['project', '--store', resultStore(), '--run-id', runId, '--name', name, ...(isStandard ? ['--standard'] : [])]);
+});
+ipcMain.handle('result-series', async (event, runId) => {
+  assertRenderer(event);
+  if (typeof runId !== 'string' || !runId || runId.length > 160) throw new Error('无效实验编号');
+  return runPythonWorker('.tools/results-venv/bin/python', 'scripts/b08_results_worker.py',
+    ['series', '--store', resultStore(), '--run-id', runId]);
+});
+ipcMain.handle('result-scene', async (event, runId) => {
+  assertRenderer(event);
+  if (typeof runId !== 'string' || !runId || runId.length > 160) throw new Error('无效实验编号');
+  const scene = await runPythonWorker('.tools/results-venv/bin/python', 'scripts/b08_results_worker.py',
+    ['scene', '--store', resultStore(), '--run-id', runId]);
+  for (const item of scene.assets) {
+    if (typeof item.path !== 'string' || !/^[0-9a-f]{64}$/.test(item.sha256) ||
+        !Number.isSafeInteger(item.size) || item.size < 0) continue;
+    resultAssets.set(runId + ':' + item.path, {
+      relative: item.path, sha256: item.sha256, size: item.size,
+      path: path.join(resultStore(), 'results', 'blobs', item.sha256.slice(0, 2), item.sha256)
+    });
+  }
+  return scene;
+});
+ipcMain.handle('result-pairs', async (event, candidate) => {
+  assertRenderer(event);
+  if (typeof candidate !== 'string' || !candidate || candidate.length > 160) throw new Error('无效候选项目');
+  return runPythonWorker('.tools/results-venv/bin/python', 'scripts/b08_results_worker.py',
+    ['pairs', '--store', resultStore(), '--candidate', candidate]);
+});
+ipcMain.handle('result-save-pair', async (event, candidate, reference, requestId, mode) => {
+  assertRenderer(event);
+  if ([candidate, reference].some(value => typeof value !== 'string' || !value || value.length > 160) ||
+      (requestId !== null && (typeof requestId !== 'string' || !/^[a-f0-9]{32}$/.test(requestId))) ||
+      (mode !== null && mode !== 'webcodex' && mode !== 'cli')) throw new Error('无效对比记录');
+  return runPythonWorker('.tools/results-venv/bin/python', 'scripts/b08_results_worker.py',
+    ['save-pair', '--store', resultStore(), '--candidate', candidate, '--reference', reference,
+      ...(requestId ? ['--request-id', requestId] : []), ...(mode ? ['--mode', mode] : [])]);
 });
 ipcMain.handle('result-import', async event => {
   assertRenderer(event);
@@ -116,6 +190,26 @@ ipcMain.handle('result-import', async event => {
   if (choice.canceled) return null;
   return runPythonWorker('.tools/results-venv/bin/python', 'scripts/b08_results_worker.py',
     ['import', '--store', resultStore(), '--source', choice.filePaths[0]], 300000);
+});
+ipcMain.handle('result-import-native', async (event, algorithm, chooseVideos) => {
+  assertRenderer(event);
+  if (typeof algorithm !== 'string' || !algorithm.trim() || algorithm.length > 80 ||
+      typeof chooseVideos !== 'boolean') throw new Error('请填写算法名称');
+  const source = await dialog.showOpenDialog(window, {
+    title: '选择 MyHIMLoco 或 WMP 训练目录（包含 config.json 和 TensorBoard 文件）',
+    properties: ['openDirectory']
+  });
+  if (source.canceled) return null;
+  let videos = null;
+  if (chooseVideos) {
+    const chosen = await dialog.showOpenDialog(window, {
+      title: '选择视频目录（可取消；训练目录内的视频会自动发现）', properties: ['openDirectory']
+    });
+    if (!chosen.canceled) videos = chosen.filePaths[0];
+  }
+  return runPythonWorker('.tools/results-venv/bin/python', 'scripts/b08_results_worker.py',
+    ['import-native', '--store', resultStore(), '--source', source.filePaths[0],
+      '--algorithm', algorithm.trim(), ...(videos ? ['--videos', videos] : [])], 300000);
 });
 ipcMain.handle('result-compare', async (event, reference, candidate) => {
   assertRenderer(event);
@@ -137,13 +231,37 @@ ipcMain.handle('select-import', (event, operation_id, model) => {
   if (!window || event.sender !== window.webContents || typeof operation_id !== 'string' || typeof model !== 'string') throw new Error('无效选择');
   return importRequest({ action: 'select', operation_id, model });
 });
+ipcMain.handle('viewer-settle', async (event, operation, modelName, joints, limits) => {
+  assertRenderer(event);
+  if (typeof operation !== 'string' || !/^[0-9a-f-]{36}$/.test(operation) ||
+      typeof modelName !== 'string' || !modelName.endsWith('.urdf') ||
+      !joints || typeof joints !== 'object' || Array.isArray(joints) || Object.keys(joints).length > 256 ||
+      Object.entries(joints).some(([name, value]) => typeof name !== 'string' || name.length > 160 ||
+        typeof value !== 'number' || !Number.isFinite(value) || Math.abs(value) > 100) ||
+      !limits || typeof limits !== 'object' || Array.isArray(limits) || Object.keys(limits).length > 256 ||
+      Object.entries(limits).some(([name, enabled]) => name.length > 160 || typeof enabled !== 'boolean'))
+    throw new Error('无效重力计算输入');
+  const base = path.join(app.getPath('userData'), 'imports', operation);
+  const record = JSON.parse(await fs.promises.readFile(path.join(base, 'report.json'), 'utf8'));
+  const asset = record.assets.find(item => item.path === modelName);
+  if (record.operation_id !== operation || record.status !== 'ready' || record.selected_model !== modelName ||
+      !asset) throw new Error('模型尚未准备好');
+  const modelFile = path.resolve(base, 'bundle', modelName);
+  if (!modelFile.startsWith(path.resolve(base, 'bundle') + path.sep)) throw new Error('模型路径越界');
+  const bytes = await fs.promises.readFile(modelFile);
+  if (bytes.length !== asset.size || createHash('sha256').update(bytes).digest('hex') !== asset.sha256)
+    throw new Error('已导入 URDF 的内容发生变化');
+  return runPythonWorker('.tools/sim-venv/bin/python', 'scripts/viewer_gravity_worker.py',
+    ['--model', modelFile, '--joints', JSON.stringify(joints), '--limits', JSON.stringify(limits)], 45000);
+});
 let cadSource = null;
 let cadExchangeDirectory = null;
+let cadMeshDirectory = null;
 let pendingCadReturn = null;
 function runPythonWorker(python, script, args, timeoutMs = 120000, extraEnv = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(path.join(root, python), [path.join(root, script), ...args],
-      { cwd: root, env: { PATH: process.env.PATH, ...extraEnv }, stdio: ['ignore', 'pipe', 'pipe'] });
+      { cwd: root, env: { PATH: process.env.PATH, PYTHONPATH: path.join(root, 'python'), ...extraEnv }, stdio: ['ignore', 'pipe', 'pipe'] });
     let output = ''; let errors = '';
     const deadline = setTimeout(() => child.kill('SIGKILL'), timeoutMs);
     child.stdout.on('data', data => {
@@ -168,30 +286,36 @@ function assertRenderer(event) {
 }
 const modelProject = () => path.join(app.getPath('userData'), 'modeling', 'project');
 // WebCodex is a ChatGPT conversation tool, not a callable local model API.
-// Requests remain in a project-local gitignored queue. The user explicitly
-// copies the handoff prompt into a connected ChatGPT web conversation.
+// Requests remain in a private local queue. The user explicitly sends the
+// handoff prompt into a connected ChatGPT web conversation.
 const webcodexStore = () => smoke && process.env.URDFTOOLS_WEBCODEX_STORE ?
-  process.env.URDFTOOLS_WEBCODEX_STORE : path.join(root, 'artifacts', 'WebCodexAgent');
-function webcodexBridge(args) {
+  process.env.URDFTOOLS_WEBCODEX_STORE : path.join(app.getPath('userData'), 'WebCodexAgent');
+function webcodexBridge(args, timeoutMs = 160000) {
+  const cliEnvironment = args[0] === 'run-cli' ?
+    { HOME: process.env.HOME, CODEX_HOME: process.env.CODEX_HOME } : {};
   return runPythonWorker('.tools/model-venv/bin/python', 'scripts/webcodex_agent_bridge.py',
-    ['--store', webcodexStore(), ...args], 160000);
+    ['--store', webcodexStore(), ...args], timeoutMs, cliEnvironment);
 }
-ipcMain.handle('webcodex-create-model', async (event, instruction, expectedRevision) => {
+function agentMode(mode) {
+  if (mode !== 'webcodex' && mode !== 'cli') throw new Error('无效 Agent 模式');
+  return mode;
+}
+ipcMain.handle('webcodex-create-model', async (event, instruction, expectedRevision, mode = 'webcodex') => {
   assertRenderer(event);
   if (typeof instruction !== 'string' || !instruction.trim() || instruction.length > 2000 ||
     !Number.isSafeInteger(expectedRevision) || expectedRevision < 1) throw new Error('无效建模 Agent 输入或版本');
-  return webcodexBridge(['create-model', '--instruction', instruction,
+  return webcodexBridge(['create-model', '--mode', agentMode(mode), '--instruction', instruction,
     '--project', modelProject(), '--revision', String(expectedRevision)]);
 });
-ipcMain.handle('webcodex-create-analysis', async (event, instruction) => {
+ipcMain.handle('webcodex-create-analysis', async (event, instruction, mode = 'webcodex') => {
   assertRenderer(event);
   if (typeof instruction !== 'string' || !instruction.trim() || instruction.length > 2000)
     throw new Error('分析说明不能为空且不超过 2000 字');
   // This phase intentionally uses clearly labeled synthetic evaluation
   // fixtures. It NEVER silently treats a user's imported model as equivalent.
-  return webcodexBridge(['create-analysis', '--instruction', instruction]);
+  return webcodexBridge(['create-analysis', '--mode', agentMode(mode), '--instruction', instruction]);
 });
-ipcMain.handle('webcodex-create-import-analysis', async (event, operation, instruction) => {
+ipcMain.handle('webcodex-create-import-analysis', async (event, operation, instruction, mode = 'webcodex') => {
   assertRenderer(event);
   if (typeof operation !== 'string' || !/^[a-f0-9-]{36}$/.test(operation) ||
       typeof instruction !== 'string' || !instruction.trim() || instruction.length > 2000)
@@ -210,7 +334,17 @@ ipcMain.handle('webcodex-create-import-analysis', async (event, operation, instr
     throw new Error('导入模型不是可访问的 URDF 文件');
   const current=await fs.promises.realpath(fullPath);
   if (!current.startsWith(bundleRoot+path.sep)) throw new Error('URDF 模型路径跨出导入资源');
-  return webcodexBridge(['create-urdf','--instruction',instruction,'--urdf',current]);
+  return webcodexBridge(['create-urdf','--mode',agentMode(mode),'--instruction',instruction,'--urdf',current]);
+});
+ipcMain.handle('webcodex-create-result-analysis', async (event, reference, candidate, instruction, mode = 'webcodex') => {
+  assertRenderer(event);
+  if (typeof reference !== 'string' || !reference || reference.length > 160 ||
+      typeof candidate !== 'string' || !candidate || candidate.length > 160 || reference === candidate ||
+      typeof instruction !== 'string' || !instruction.trim() || instruction.length > 2000)
+    throw new Error('无效的训练结果对比分析请求');
+  return webcodexBridge(['create-result-analysis', '--mode', agentMode(mode),
+    '--instruction', instruction, '--result-store', resultStore(),
+    '--reference', reference, '--candidate', candidate]);
 });
 ipcMain.handle('webcodex-status', async (event, requestId) => {
   assertRenderer(event);
@@ -218,12 +352,29 @@ ipcMain.handle('webcodex-status', async (event, requestId) => {
     throw new Error('无效 WebCodex 请求编号');
   return webcodexBridge(['status', '--id', requestId]);
 });
+ipcMain.handle('agent-cli-run', async (event, requestId) => {
+  assertRenderer(event);
+  if (typeof requestId !== 'string' || !/^[a-f0-9]{32}$/.test(requestId))
+    throw new Error('无效 Agent 请求编号');
+  return webcodexBridge(['run-cli', '--id', requestId], 300000);
+});
 ipcMain.handle('webcodex-copy', (event, prompt) => {
   assertRenderer(event);
   if (typeof prompt !== 'string' || prompt.length > 4500 || !prompt.includes('@web-codex-tunnel'))
     throw new Error('只允许复制已声明的 WebCodex 提示');
   require('electron').clipboard.writeText(prompt);
   return true;
+});
+ipcMain.handle('webcodex-open', async (event, requestId) => {
+  assertRenderer(event);
+  if (typeof requestId !== 'string' || !/^[a-f0-9]{32}$/.test(requestId))
+    throw new Error('无效 WebCodex 请求编号');
+  const ticket = await webcodexBridge(['status', '--id', requestId]);
+  if (ticket.status !== 'awaiting_chatgpt_web_reply' || !ticket.prompt)
+    throw new Error('此请求已完成或不可交接');
+  require('electron').clipboard.writeText(ticket.prompt);
+  await require('electron').shell.openExternal('https://chatgpt.com/');
+  return {request_id: requestId, copied: true, opened: true};
 });
 
 let agentBusy = false;
@@ -394,17 +545,16 @@ ipcMain.handle('model-accept-return', async (event, config) => {
     return checked;
   } finally { await fs.promises.rm(directory, { recursive: true, force: true }); }
 });
-ipcMain.handle('choose-cad-step', async event => {
-  assertRenderer(event);
-  const fixture = smoke ? (process.env.URDFTOOLS_CAD_EXCHANGE_SMOKE || process.env.URDFTOOLS_CAD_WIZARD_SMOKE) : null;
-  let original;
-  if (fixture) original = fixture;
-  else {
-    const choice = await dialog.showOpenDialog(window, { properties: ['openFile'],
-      filters: [{ name: 'STEP / STP / FreeCAD / IGES / BREP', extensions: ['step', 'stp', 'FCStd', 'igs', 'iges', 'brep', 'brp'] }] });
-    if (choice.canceled) return null;
-    original = choice.filePaths[0];
-  }
+const cadDraftStore = () => createCadDraftStore(path.join(app.getPath('userData'), 'cad-draft'));
+let cadDraftWrite = Promise.resolve();
+let cadDraftPending = 0;
+function queueCadDraftWrite(action) {
+  cadDraftPending += 1;
+  cadDraftWrite = cadDraftWrite.catch(() => {}).then(action).finally(() => { cadDraftPending -= 1; });
+  return cadDraftWrite;
+}
+async function importCadSource(original, persistDraft = true) {
+  if (typeof original !== 'string' || !original) throw new Error('请选择本地 CAD 文件');
   const extension = path.extname(original).toLowerCase();
   if (!['.step', '.stp', '.fcstd', '.igs', '.iges', '.brep', '.brp'].includes(extension)) throw new Error('不支持的 CAD 格式');
   let source = original;
@@ -429,14 +579,72 @@ ipcMain.handle('choose-cad-step', async event => {
       }
     }
     const result = await cadWorker([source]);
+    const meshDirectory = await fs.promises.mkdtemp(path.join(app.getPath('userData'), 'cad-mesh-'));
+    let meshParts;
+    try {
+      const meshResult = await runPythonWorker('.tools/cad-venv/bin/python', 'scripts/cad_part_meshes.py',
+        [source, meshDirectory], 300000);
+      const token = randomBytes(16).toString('hex');
+      meshParts = meshResult.parts.map(item => ({name: item.name,
+        url: `urdftools://cad-mesh/${token}/${item.file}`, color: item.color}));
+      if (meshParts.length !== result.draft.parts.length ||
+          meshParts.some((item, index) => item.name !== result.draft.parts[index].name))
+        throw new Error('CAD mesh parts do not match imported assembly');
+      cadMeshAssets.clear();
+      meshResult.parts.forEach(item => cadMeshAssets.set(`${token}/${item.file}`,
+        { path: path.join(meshDirectory, item.file), size: item.size }));
+    } catch (cause) {
+      await fs.promises.rm(meshDirectory, { recursive: true, force: true });
+      throw cause;
+    }
+    if (cadMeshDirectory) await fs.promises.rm(cadMeshDirectory, { recursive: true, force: true });
+    cadMeshDirectory = meshDirectory;
     if (cadExchangeDirectory) await fs.promises.rm(cadExchangeDirectory, { recursive: true, force: true });
     cadSource = source;
     cadExchangeDirectory = generatedDirectory;
     generatedDirectory = null;
-    return { ...result, exchangeReport };
+    if (persistDraft) await queueCadDraftWrite(() => cadDraftStore().begin(source, result.draft, exchangeReport));
+    return { ...result, exchangeReport, meshParts };
   } finally {
     if (generatedDirectory) await fs.promises.rm(generatedDirectory, { recursive: true, force: true });
   }
+}
+ipcMain.handle('choose-cad-step', async event => {
+  assertRenderer(event);
+  const fixture = smoke ? (process.env.URDFTOOLS_CAD_EXCHANGE_SMOKE || process.env.URDFTOOLS_CAD_WIZARD_SMOKE || process.env.URDFTOOLS_CAD_AXIS_SMOKE) : null;
+  if (fixture) return importCadSource(fixture);
+  const choice = await dialog.showOpenDialog(window, { properties: ['openFile'],
+    filters: [{ name: 'STEP / STP / FreeCAD / IGES / BREP', extensions: ['step', 'stp', 'FCStd', 'igs', 'iges', 'brep', 'brp'] }] });
+  if (choice.canceled) return null;
+  return importCadSource(choice.filePaths[0]);
+});
+ipcMain.handle('import-cad-file', async (event, source) => {
+  assertRenderer(event);
+  if (typeof source !== 'string' || !path.isAbsolute(source)) throw new Error('请拖入本地 CAD 文件');
+  return importCadSource(source);
+});
+ipcMain.handle('cad-draft-load', async event => {
+  assertRenderer(event);
+  await cadDraftWrite;
+  const record = await cadDraftStore().read();
+  if (!record) return null;
+  const discovery = await importCadSource(cadDraftStore().sourcePath(record), false);
+  if (discovery.draft.source_sha256 !== record.source_sha256)
+    throw new Error('CAD 暂存源文件已改变，请重新导入原始模型');
+  discovery.draft.source_name = record.source_name;
+  discovery.exchangeReport = record.exchange_report;
+  const ui = record.ui?.source_sha256 === record.source_sha256 &&
+    record.ui?.config?.source_sha256 === record.source_sha256 ? record.ui : null;
+  return { discovery, ui, updated_at: record.updated_at };
+});
+ipcMain.handle('cad-draft-save', async (event, ui) => {
+  assertRenderer(event);
+  return queueCadDraftWrite(() => cadDraftStore().save(ui));
+});
+ipcMain.handle('cad-draft-clear', async event => {
+  assertRenderer(event);
+  await queueCadDraftWrite(() => cadDraftStore().clear());
+  return true;
 });
 ipcMain.handle('cad-preview', async (event, config) => {
   assertRenderer(event);
@@ -448,7 +656,7 @@ ipcMain.handle('cad-preview', async (event, config) => {
     const configPath = path.join(directory, 'config.json');
     const previewPath = path.join(directory, 'preview.urdf');
     await fs.promises.writeFile(configPath, encoded, { mode: 0o600 });
-    await cadWorker([cadSource, '--config', configPath, '--preview', previewPath]);
+    await cadWorker([cadSource, '--config', configPath, '--preview', previewPath, '--mesh-preview']);
     return await importRequest({ action: 'import', source: previewPath });
   } finally {
     await fs.promises.rm(directory, { recursive: true, force: true });
@@ -505,7 +713,7 @@ ipcMain.handle('export-cad-package', async (event, config, densities) => {
     if (validation.status !== 'passed') throw new Error('独立交叉校验未通过');
     await fs.promises.copyFile(zipPath, temporaryDestination);
     await fs.promises.rename(temporaryDestination, destination);
-    return { path: destination, sha256: exported.sha256, validation };
+    return { path: destination, sha256: exported.sha256, validation, massProperties: exported.metadata?.links || [] };
   } finally {
     await fs.promises.rm(temporaryDestination, { force: true });
     await fs.promises.rm(directory, { recursive: true, force: true });
@@ -525,7 +733,7 @@ app.whenReady().then(() => {
   if (smoke) console.log(JSON.stringify({ event: 'electron_ready' }));
   const token = randomBytes(32).toString('hex');
   service = spawn(path.join(root, '.venv/bin/python'), ['-m', 'urdftools', 'serve'], {
-    cwd: root, env: { PATH: process.env.PATH, URDFTOOLS_SESSION_TOKEN: token }, stdio: ['ignore', 'pipe', 'pipe']
+    cwd: root, env: { PATH: process.env.PATH, PYTHONPATH: path.join(root, 'python'), URDFTOOLS_SESSION_TOKEN: token }, stdio: ['ignore', 'pipe', 'pipe']
   });
   const startup = setTimeout(() => fail('Service startup timeout'), 15000);
   service.on('error', fail);
@@ -544,7 +752,13 @@ app.whenReady().then(() => {
       }});
       window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
       window.webContents.on('will-navigate', event => event.preventDefault());
-      await window.loadFile(path.join(root, 'dist/web/index.html'));
+      window.webContents.on('render-process-gone', (_event, details) =>
+        console.error(JSON.stringify({ event: 'viewer_renderer_gone', reason: details.reason, exitCode: details.exitCode })));
+      if (!smoke) window.webContents.on('console-message', ({ level, message, sourceId, lineNumber }) => {
+        if (level === 'error') console.error(JSON.stringify({ event: 'viewer_console_error', message, sourceId, lineNumber }));
+      });
+      await window.loadFile(smoke && process.env.URDFTOOLS_SMOKE_WEB_DIR ?
+        path.join(process.env.URDFTOOLS_SMOKE_WEB_DIR, 'index.html') : path.join(root, 'dist/web/index.html'));
       if (smoke) {
         await window.webContents.executeJavaScript(`new Promise((resolve, reject) => {
           const until = Date.now() + 5000;
@@ -555,11 +769,65 @@ app.whenReady().then(() => {
           } check();
         })`);
         const title = await window.webContents.executeJavaScript('document.querySelector("h1").textContent');
-        if (title !== '查看') throw new Error('Renderer did not mount');
+        if (title !== '打开机器人模型') throw new Error('Renderer did not mount');
         const isolated = await window.webContents.executeJavaScript(`typeof require === 'undefined' && window.urdftools.version === '0.1.0'`);
         if (!isolated) throw new Error('Renderer isolation/preload failed');
+        if (process.env.URDFTOOLS_CAD_DRAFT_RESTORE_SMOKE) {
+          const until = Date.now() + 90000;
+          const verifyFont = Boolean(process.env.URDFTOOLS_FONT_RESTORE_SMOKE);
+          let restored = null;
+          while (Date.now() < until) {
+            restored = await window.webContents.executeJavaScript(`(() => ({
+              confirmed:document.querySelector('.cad-wizard')?.textContent.includes('1/1 个关节已确认'),
+              density:document.querySelector('input[aria-label="BasePart density"]')?.value,
+              step:document.querySelector('.cad-flow button[aria-current="step"]')?.textContent.trim(),
+              fontSize:document.querySelector('.text-size-value')?.textContent
+            }))()`);
+            if (restored.confirmed && restored.density === '2700' &&
+                restored.step?.includes('验证导出') && (!verifyFont || restored.fontSize === '110%')) break;
+            await new Promise(resolve => setTimeout(resolve, 80));
+          }
+          if (!restored?.confirmed || restored.density !== '2700' ||
+              !restored.step?.includes('验证导出') || (verifyFont && restored.fontSize !== '110%') ||
+              !cadSource?.includes('cad-draft'))
+            throw new Error('CAD draft restart restore mismatch: ' + JSON.stringify(restored));
+          console.log(JSON.stringify({event:'desktop_cad_draft_restore_smoke', restored, cachedSource:true}));
+        }
+        if (process.env.URDFTOOLS_WORKBENCH_SMOKE) {
+          await require(path.join(root, 'scripts/urdf_workbench_smoke_hook.cjs'))(window, process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR);
+        }
+        if (process.env.URDFTOOLS_Q01_SMOKE) {
+          await window.webContents.executeJavaScript("document.querySelector('button[aria-label=\"打开内置示例\"]').click()");
+          let loaded = false;
+          for (let tries = 0; tries < 240; tries++) {
+            loaded = await window.webContents.executeJavaScript(`(() => {
+              const v = document.querySelector('[data-import-status="ready"] [aria-label="三维机器人查看器"]');
+              return !!v && Number(v.dataset.treeLinkCount) === 2 &&
+                Number(v.dataset.treeJointCount) === 1 && Number(v.dataset.meshCount) >= 1;
+            })()`);
+            if (loaded) break;
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+          if (!loaded) throw new Error('Bundled example was not imported and rendered: ' +
+            await window.webContents.executeJavaScript("document.querySelector('main')?.textContent.slice(-700)"));
+          const summary = await window.webContents.executeJavaScript(`(() => {
+            const v = document.querySelector('[aria-label="三维机器人查看器"]');
+            return {links: Number(v.dataset.treeLinkCount), joints: Number(v.dataset.treeJointCount),
+              meshes: Number(v.dataset.meshCount), status: document.querySelector('[data-import-status]')?.dataset.importStatus};
+          })()`);
+          if (summary.status !== 'ready' || summary.links !== 2 || summary.joints !== 1 || summary.meshes < 1)
+            throw new Error('Bundled example semantic mismatch: ' + JSON.stringify(summary));
+          const screenshot = (await window.webContents.capturePage()).toPNG();
+          if (screenshot.length < 1000) throw new Error('Bundled example screenshot empty');
+          if (process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR)
+            fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'portable-example.png'), screenshot);
+          console.log(JSON.stringify({event:'q01_portable_example', ...summary, screenshotBytes:screenshot.length,
+            isolated, sandbox:window.webContents.getLastWebPreferences().sandbox}));
+          app.quit();
+          return;
+        }
         if (process.env.URDFTOOLS_WEBCODEX_SMOKE) {
-          const capabilities=await window.webContents.executeJavaScript("({create:typeof window.urdftools.webcodexCreateAnalysis,status:typeof window.urdftools.webcodexStatus,copy:typeof window.urdftools.webcodexCopyPrompt})");
+          const capabilities=await window.webContents.executeJavaScript("({create:typeof window.urdftools.webcodexCreateAnalysis,status:typeof window.urdftools.webcodexStatus,copy:typeof window.urdftools.webcodexCopyPrompt,open:typeof window.urdftools.webcodexOpen,cli:typeof window.urdftools.agentCliRun})");
           if (Object.values(capabilities).some(value=>value!=='function'))
             throw new Error('WebCodex Electron preload bridge absent');
           await window.webContents.executeJavaScript("([...document.querySelectorAll('aside button')].find(button=>button.textContent.includes('创建网页 ChatGPT 分析请求'))).click()");
@@ -595,6 +863,17 @@ app.whenReady().then(() => {
              importedRow.payload.bundle.evidence[0]?.rule!=='invalid_joint_axis' ||
              importedRow.payload.original_urdf_not_sent!==true)
             throw new Error('Imported URDF actual IPC/static evidence invalid');
+          const cliDraft=await window.webContents.executeJavaScript(
+            "window.urdftools.webcodexCreateAnalysis('检查五类原因','cli')");
+          const cliRow=JSON.parse(fs.readFileSync(cliDraft.request_path,'utf8'));
+          if(cliDraft.status!=='awaiting_codex_cli_run' || cliDraft.prompt!==null ||
+             cliRow.policy.provider!=='codex_cli_chatgpt' || cliRow.policy.no_codex_cli!==false)
+            throw new Error('Explicit CLI request mode or consent boundary invalid');
+          await window.webContents.executeJavaScript(
+            "document.querySelector('input[name=\"analysis-agent-mode\"][value=\"cli\"]')?.click()");
+          const cliSelected=await window.webContents.executeJavaScript(
+            "document.querySelector('input[name=\"analysis-agent-mode\"][value=\"cli\"]')?.checked && [...document.querySelectorAll('aside button')].some(b=>b.textContent.includes('运行 Codex CLI 分析'))");
+          if(!cliSelected) throw new Error('CLI mode is not selectable in Electron renderer');
           console.log(JSON.stringify({event:'desktop_webcodex_imported_urdf_smoke',
             source:'unverified_imported_fixture',rule:'invalid_joint_axis',
             xml_not_submitted:true,local_file_checked:true}));
@@ -602,6 +881,9 @@ app.whenReady().then(() => {
             request_id:requestId,clipboard_verified:true,model_cli_calls:0,
             web_chatgpt_requested:false,pending:true,source:'synthetic_fixture',
             renderer_isolated:isolated}));
+          console.log(JSON.stringify({event:'desktop_agent_dual_mode_smoke',
+            cli_request_created:true,cli_model_called:false,webcodex_request_created:true,
+            model_modes_selectable:true}));
         }
 
         if (process.env.URDFTOOLS_MODEL_RESTORE_SMOKE) {
@@ -609,7 +891,7 @@ app.whenReady().then(() => {
           const deadline = Date.now() + 15000;
           let restored = false;
           while (Date.now() < deadline) {
-            restored = await window.webContents.executeJavaScript(`document.querySelector('[aria-label="STEP 转换向导"]')?.textContent.includes('未确认关节：1') && document.querySelector('main')?.textContent.includes('returned.step')`);
+            restored = await window.webContents.executeJavaScript(`document.querySelector('[aria-label="STEP 转换向导"]')?.textContent.includes('0/1 个关节已确认') && document.querySelector('main')?.textContent.includes('returned.step')`);
             if (restored) break;
             await new Promise(resolve => setTimeout(resolve, 50));
           }
@@ -877,13 +1159,59 @@ app.whenReady().then(() => {
           await window.webContents.executeJavaScript(`([...document.querySelectorAll('button')].find(b => b.textContent === '选择 CAD 文件')).click()`);
           await waitForExchange(`document.querySelector('.cad-wizard aside')?.textContent.includes('STEP drops FreeCAD feature history') === true`);
           const details = await window.webContents.executeJavaScript(`document.querySelector('.cad-wizard').textContent`);
-          if (!details.includes('BaseBracket') || !details.includes('ArmLink') || !details.includes('未确认关节：1')) {
+          if (!details.includes('BaseBracket') || !details.includes('ArmLink') || !details.includes('0/1 个关节已确认')) {
             throw new Error('FreeCAD exchange failed to show two parts and explicit loss report');
           }
           const png = (await window.webContents.capturePage()).toPNG();
           fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'freecad-exchange.png'), png);
           console.log(JSON.stringify({ event: 'desktop_freecad_exchange_smoke', partCount: 2,
             lossVisible: true, screenshotBytes: png.length }));
+        }
+        if (process.env.URDFTOOLS_CAD_AXIS_SMOKE) {
+          const waitForAxis = async expression => {
+            const until = Date.now() + 120000;
+            while (Date.now() < until) {
+              if (await window.webContents.executeJavaScript(expression)) return;
+              await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            throw new Error('CAD real axis UI timeout: ' + expression + ' | ' +
+              await window.webContents.executeJavaScript("document.querySelector('.cad-wizard')?.textContent.slice(-900)"));
+          };
+          await window.webContents.executeJavaScript(`[...document.querySelectorAll('nav[aria-label="工作区"] button')].find(b => b.textContent === 'CAD转换URDF').click()`);
+          await window.webContents.executeJavaScript(`[...document.querySelectorAll('button')].find(b => b.textContent === '选择 CAD 文件').click()`);
+          await waitForAxis(`document.querySelector('[aria-label="选择零件 shenti"]') !== null`);
+          await window.webContents.executeJavaScript(`document.querySelector('[aria-label="选择零件 shenti"]').click()`);
+          await window.webContents.executeJavaScript(`document.querySelector('.cad-tree-toolbar .cad-primary').click()`);
+          await window.webContents.executeJavaScript(`document.querySelector('.cad-create-dialog .cad-primary').click()`);
+          await waitForAxis(`document.querySelector('[aria-label="选择零件 fake_servo_2_1"]') !== null`);
+          await window.webContents.executeJavaScript(`document.querySelector('[aria-label="选择零件 fake_servo_2_1"]').click()`);
+          await window.webContents.executeJavaScript(`document.querySelector('.cad-tree-toolbar .cad-primary').click()`);
+          await window.webContents.executeJavaScript(`document.querySelector('.cad-create-dialog .cad-primary').click()`);
+          await waitForAxis(`document.querySelector('[aria-label="编辑关节 link_001_joint"]') !== null`);
+          await window.webContents.executeJavaScript(`document.querySelector('[aria-label="编辑关节 link_001_joint"]').click()`);
+          await window.webContents.executeJavaScript(`[...document.querySelectorAll('.cad-joint-actions button')].find(b => b.textContent.includes('显示全部轴')).click()`);
+          await waitForAxis(`Number(document.querySelector('.cad-part-canvas')?.dataset.candidateCount) >= 1`);
+          const count = await window.webContents.executeJavaScript(`Number(document.querySelector('.cad-part-canvas').dataset.candidateCount)`);
+          const point = await window.webContents.executeJavaScript(`JSON.parse(document.querySelector('.cad-part-canvas').dataset.candidateScreenPositions)[0]`);
+          await window.webContents.executeJavaScript(`(() => {
+            const canvas=document.querySelector('.cad-part-canvas canvas'); const rect=canvas.getBoundingClientRect();
+            canvas.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,button:0,clientX:rect.left+${point[0]},clientY:rect.top+${point[1]}}));
+          })()`);
+          await waitForAxis(`document.querySelector('.cad-part-canvas')?.dataset.hoveredCandidate === '0'`);
+          fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'cad-real-axis-hover.png'),
+            (await window.webContents.capturePage()).toPNG());
+          await window.webContents.executeJavaScript(`(() => {
+            const canvas=document.querySelector('.cad-part-canvas canvas'); const rect=canvas.getBoundingClientRect();
+            const x=rect.left+${point[0]}, y=rect.top+${point[1]};
+            canvas.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,button:0,clientX:x,clientY:y}));
+            canvas.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,button:0,clientX:x,clientY:y}));
+          })()`);
+          await waitForAxis(`document.querySelector('.cad-part-canvas')?.dataset.candidateCount === '0'`);
+          const png = (await window.webContents.capturePage()).toPNG();
+          fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'cad-real-axis.png'), png);
+          console.log(JSON.stringify({event:'desktop_cad_real_axis_smoke',candidateCount:count,hovered:true,selected:true,
+            candidateScreen:point, modelPosition:await window.webContents.executeJavaScript(`document.querySelector('.cad-part-canvas').dataset.modelPosition`),
+            screenshotBytes:png.length}));
         }
         if (process.env.URDFTOOLS_CAD_WIZARD_SMOKE) {
           const waitForCad = async expression => {
@@ -898,24 +1226,134 @@ app.whenReady().then(() => {
           await window.webContents.executeJavaScript(`document.querySelectorAll('nav button')[1].click()`);
           await waitForCad(`document.querySelector('button') && [...document.querySelectorAll('button')].some(b => b.textContent === '选择 CAD 文件')`);
           await window.webContents.executeJavaScript(`([...document.querySelectorAll('button')].find(b => b.textContent === '选择 CAD 文件')).click()`);
+          await waitForCad(`document.querySelector('[aria-label="选择零件 BasePart"]') !== null`);
+          await window.webContents.executeJavaScript(`[...document.querySelectorAll('nav[aria-label="工作区"] button')].find(b => b.textContent === '评估').click()`);
+          await waitForCad(`document.querySelector('.tool-workspace[aria-label="评估"]:not([hidden])') !== null`);
+          await window.webContents.executeJavaScript(`[...document.querySelectorAll('nav[aria-label="工作区"] button')].find(b => b.textContent === 'CAD转换URDF').click()`);
+          await waitForCad(`document.querySelector('[aria-label="选择零件 BasePart"]') !== null && document.querySelector('[aria-label="CAD 转 URDF 工作区"]')?.textContent.includes('two_part_mm.step')`);
+          await window.webContents.executeJavaScript(`document.querySelector('[aria-label="选择零件 BasePart"]').click()`);
+          await window.webContents.executeJavaScript(`document.querySelector('.cad-tree-toolbar .cad-primary').click()`);
+          await waitForCad(`document.querySelector('[role="dialog"][aria-label="创建 Link"]') !== null`);
+          await window.webContents.executeJavaScript(`document.querySelector('.cad-create-dialog .cad-primary').click()`);
+          await waitForCad(`document.querySelector('[aria-label="选择零件 OffsetPart"]') !== null`);
+          await window.webContents.executeJavaScript(`document.querySelector('[aria-label="选择零件 OffsetPart"]').click()`);
+          await window.webContents.executeJavaScript(`document.querySelector('.cad-tree-toolbar .cad-primary').click()`);
+          await waitForCad(`document.querySelector('[role="dialog"][aria-label="创建 Link"]') !== null`);
+          await window.webContents.executeJavaScript(`(() => {
+            const el=document.querySelector('[aria-label="新 Link 名称"]');
+            const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;
+            setter.call(el,'OffsetPart'); el.dispatchEvent(new Event('input',{bubbles:true}));
+          })()`);
+          await waitForCad(`document.querySelector('[aria-label="新 Link 名称"]')?.value === 'OffsetPart'`);
+          await window.webContents.executeJavaScript(`document.querySelector('.cad-create-dialog .cad-primary').click()`);
+          await waitForCad(`document.querySelector('[aria-label="编辑关节 OffsetPart_joint"]') !== null`);
+          await window.webContents.executeJavaScript(`document.querySelector('[aria-label="显示 Link OffsetPart"]').click()`);
+          await waitForCad(`document.querySelector('[aria-label="隐藏 Link OffsetPart"]') !== null`);
+          await window.webContents.executeJavaScript(`document.querySelector('[aria-label="隐藏 Link OffsetPart"]').click()`);
+          await waitForCad(`document.querySelector('[aria-label="显示 Link OffsetPart"]') !== null`);
+          await window.webContents.executeJavaScript(`document.querySelector('[aria-label="编辑关节 OffsetPart_joint"]').click()`);
           await waitForCad(`document.querySelector('[aria-label="OffsetPart_joint type"]') !== null`);
+          await waitForCad(`document.querySelector('.cad-part-canvas')?.dataset.jointOrigin?.length > 0 && document.querySelector('.cad-part-canvas')?.dataset.jointAxis?.length > 0`);
+          await new Promise(resolve => setTimeout(resolve, 180));
+          fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'cad-joint-editor.png'), (await window.webContents.capturePage()).toPNG());
+          if (process.env.URDFTOOLS_FONT_SMOKE) {
+            const beforeFonts = await window.webContents.executeJavaScript(`(() => ({
+              panelZoom:parseFloat(getComputedStyle(document.querySelector('.cad-joint-work-window .floating-panel-body')).zoom),
+              titleHeight:document.querySelector('.cad-joint-work-window .floating-panel-head strong').getBoundingClientRect().height,
+              fixedButtonHeight:document.querySelector('.cad-flow button').getBoundingClientRect().height
+            }))()`);
+            await window.webContents.executeJavaScript(`(() => {
+              const handle=document.querySelector('.cad-joint-work-window .resize-ne');
+              handle.setPointerCapture=()=>{};
+              const rect=handle.getBoundingClientRect(), x=rect.left+rect.width/2, y=rect.top+rect.height/2;
+              handle.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:1,button:0,clientX:x,clientY:y}));
+              handle.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,pointerId:1,button:0,buttons:1,clientX:x+140,clientY:y-110}));
+              handle.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:1,button:0,clientX:x+140,clientY:y-110}));
+            })()`);
+            await waitForCad(`parseFloat(getComputedStyle(document.querySelector('.cad-joint-work-window .floating-panel-body')).zoom)>1.2`);
+            await window.webContents.executeJavaScript(`document.querySelector('[aria-label="放大固定栏字体"]').click()`);
+            await waitForCad(`document.querySelector('.text-size-value')?.textContent === '110%'`);
+            const afterFonts = await window.webContents.executeJavaScript(`(() => ({
+              panelZoom:parseFloat(getComputedStyle(document.querySelector('.cad-joint-work-window .floating-panel-body')).zoom),
+              titleHeight:document.querySelector('.cad-joint-work-window .floating-panel-head strong').getBoundingClientRect().height,
+              fixedButtonHeight:document.querySelector('.cad-flow button').getBoundingClientRect().height,
+              stored:localStorage.getItem('urdftools:fixed-text-scale:v1')
+            }))()`);
+            if (afterFonts.panelZoom <= beforeFonts.panelZoom * 1.2 ||
+                afterFonts.titleHeight <= beforeFonts.titleHeight * 1.2 ||
+                afterFonts.fixedButtonHeight <= beforeFonts.fixedButtonHeight * 1.05 ||
+                afterFonts.stored !== '1.1')
+              throw new Error('Font scaling interaction mismatch: ' + JSON.stringify({beforeFonts, afterFonts}));
+            fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'cad-font-scale.png'),
+              (await window.webContents.capturePage()).toPNG());
+            console.log(JSON.stringify({event:'desktop_font_scale_smoke',beforeFonts,afterFonts}));
+          }
+          await window.webContents.executeJavaScript(`(() => {
+            const canvas = document.querySelector('.cad-part-canvas canvas');
+            const bounds = canvas.getBoundingClientRect();
+            for (const fx of [0.35,0.4,0.45,0.5,0.55,0.6,0.65]) for (const fy of [0.45,0.5,0.55]) {
+              const x = bounds.left + bounds.width * fx, y = bounds.top + bounds.height * fy;
+              canvas.dispatchEvent(new PointerEvent('pointerdown', {bubbles: true, button: 0, clientX: x, clientY: y}));
+              canvas.dispatchEvent(new PointerEvent('pointerup', {bubbles: true, button: 0, clientX: x, clientY: y}));
+            }
+          })()`);
+          await waitForCad(`document.querySelector('.cad-controls [role="status"]')?.textContent.includes('已从') === true`);
+          const beforeDrag = await window.webContents.executeJavaScript(`(() => {
+            const el=document.querySelector('.cad-part-canvas');
+            return {model:el.dataset.modelQuaternion,camera:el.dataset.cameraPosition};
+          })()`);
+          await window.webContents.executeJavaScript(`(() => {
+            const canvas=document.querySelector('.cad-part-canvas canvas');
+            const bounds=canvas.getBoundingClientRect();
+            const x=bounds.left+bounds.width*0.5, y=bounds.top+bounds.height*0.5;
+            canvas.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,button:0,clientX:x,clientY:y}));
+            canvas.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,button:0,clientX:x+70,clientY:y+30}));
+            canvas.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,button:0,clientX:x+70,clientY:y+30}));
+          })()`);
+          await waitForCad(`document.querySelector('.cad-part-canvas')?.dataset.modelQuaternion !== '${beforeDrag.model}'`);
+          const afterDrag = await window.webContents.executeJavaScript(`(() => {
+            const el=document.querySelector('.cad-part-canvas');
+            return {model:el.dataset.modelQuaternion,camera:el.dataset.cameraPosition};
+          })()`);
+          if (beforeDrag.camera !== afterDrag.camera) throw new Error('CAD camera moved instead of robot');
+          const beforePan = await window.webContents.executeJavaScript(`document.querySelector('.cad-part-canvas').dataset.modelPosition`);
+          await window.webContents.executeJavaScript(`(() => {
+            const canvas=document.querySelector('.cad-part-canvas canvas');
+            const bounds=canvas.getBoundingClientRect();
+            const x=bounds.left+bounds.width*0.5, y=bounds.top+bounds.height*0.5;
+            canvas.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,button:2,clientX:x,clientY:y}));
+            canvas.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,button:2,clientX:x+80,clientY:y+25}));
+            canvas.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,button:2,clientX:x+80,clientY:y+25}));
+          })()`);
+          await waitForCad(`document.querySelector('.cad-part-canvas')?.dataset.modelPosition !== '${beforePan}'`);
           const discovered = await window.webContents.executeJavaScript(`document.querySelector('.cad-wizard').textContent`);
-          if (!discovered.includes('BasePart') || !discovered.includes('OffsetPart') ||
-              !discovered.includes('未确认关节：1')) throw new Error('CAD parts/candidate missing');
+          if (!discovered.includes('base_link') || !discovered.includes('OffsetPart') ||
+              !discovered.includes('0/1 个关节已确认')) throw new Error('CAD parts/candidate missing');
           await window.webContents.executeJavaScript(`(() => {
             const el=document.querySelector('[aria-label="OffsetPart_joint type"]');
             const setter=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set;
             setter.call(el,'revolute'); el.dispatchEvent(new Event('change',{bubbles:true}));
           })()`);
-          await waitForCad(`document.querySelector('[aria-label="OffsetPart_joint limits"]') !== null`);
-          await window.webContents.executeJavaScript(`document.querySelector('[aria-label="OffsetPart_joint confirmed"]').click()`);
+          await waitForCad(`document.querySelector('[aria-label="OffsetPart_joint 下限"]') !== null && document.querySelector('[aria-label="OffsetPart_joint 上限"]') !== null`);
+          await window.webContents.executeJavaScript(`[...document.querySelectorAll('button')].find(b => b.textContent === '确认完成')?.click()`);
+          await window.webContents.executeJavaScript(`[...document.querySelectorAll('.cad-panel-switches button')].find(b => b.textContent === '关节试转')?.click()`);
+          await waitForCad(`document.querySelector('[aria-label="试转 OffsetPart_joint"]') !== null`);
+          const beforeTrial = await window.webContents.executeJavaScript(`document.querySelector('.cad-part-canvas')?.dataset.motionMatrix`);
+          await window.webContents.executeJavaScript(`document.querySelector('[aria-label="试转 OffsetPart_joint"]').focus()`);
+          window.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'End' });
+          window.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'End' });
+          await waitForCad(`document.querySelector('.cad-part-canvas')?.dataset.motionMatrix !== '${beforeTrial}'`);
+          await window.webContents.executeJavaScript(`[...document.querySelectorAll('.cad-panel-switches button')].find(b => b.textContent === '关节试转')?.click()`);
+          await window.webContents.executeJavaScript(`[...document.querySelectorAll('.cad-flow button')].find(b => b.textContent.includes('验证导出'))?.click()`);
           await waitForCad(`Number(document.querySelector('[aria-label="三维机器人查看器"]')?.dataset.treeLinkCount) === 2`);
+          await window.webContents.executeJavaScript(`[...document.querySelectorAll('[role="tab"]')].find(tab => tab.textContent.trim() === '关节')?.click()`);
+          await waitForCad(`document.querySelector('input[aria-label="OffsetPart_joint"]') !== null`);
           const event = await window.webContents.executeJavaScript(`(() => {
             const v=document.querySelector('[aria-label="三维机器人查看器"]');
             const slider=document.querySelector('input[aria-label="OffsetPart_joint"]');
             return {linkCount:Number(v.dataset.treeLinkCount),jointCount:Number(v.dataset.treeJointCount),
               meshCount:Number(v.dataset.meshCount),jointMin:Number(slider?.min),jointMax:Number(slider?.max),
-              unconfirmed:document.querySelector('.cad-wizard').textContent.includes('未确认关节：0')};
+              unconfirmed:document.querySelector('.cad-wizard').textContent.includes('1/1 个关节已确认')};
           })()`);
           if (event.jointCount !== 1 || event.meshCount < 2 || event.jointMin !== -1 ||
               event.jointMax !== 1 || !event.unconfirmed) throw new Error('CAD preview mismatch: '+JSON.stringify(event));
@@ -925,11 +1363,17 @@ app.whenReady().then(() => {
           window.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'End' });
           await waitForCad(`document.querySelector('[data-joint-quaternion]')?.dataset.jointQuaternion !== '${initialQuaternion}'`);
           const zQuaternion = await window.webContents.executeJavaScript(`document.querySelector('[data-joint-quaternion]')?.dataset.jointQuaternion`);
+          await window.webContents.executeJavaScript(`[...document.querySelectorAll('.cad-flow button')].find(b => b.textContent.includes('配置 Link / Joint'))?.click()`);
+          await window.webContents.executeJavaScript(`document.querySelector('[aria-label="编辑关节 OffsetPart_joint"]')?.click()`);
+          await waitForCad(`document.querySelector('[aria-label="OffsetPart_joint type"]') !== null`);
           const axisInput = '[aria-label="OffsetPart_joint axis"]';
           await window.webContents.executeJavaScript(`(() => { const el=document.querySelector('${axisInput}'); el.focus(); el.value='1 0 0'; el.dispatchEvent(new FocusEvent('focusout',{bubbles:true})); el.blur(); })()`);
-          await waitForCad(`document.querySelector('.cad-wizard').textContent.includes('未确认关节：1')`);
-          await window.webContents.executeJavaScript(`document.querySelector('[aria-label="OffsetPart_joint confirmed"]').click()`);
+          await waitForCad(`document.querySelector('.cad-wizard').textContent.includes('0/1 个关节已确认')`);
+          await window.webContents.executeJavaScript(`[...document.querySelectorAll('button')].find(b => b.textContent === '确认完成')?.click()`);
+          await window.webContents.executeJavaScript(`[...document.querySelectorAll('.cad-flow button')].find(b => b.textContent.includes('验证导出'))?.click()`);
           await waitForCad(`Number(document.querySelector('[aria-label="三维机器人查看器"]')?.dataset.treeLinkCount) === 2`);
+          await window.webContents.executeJavaScript(`[...document.querySelectorAll('[role="tab"]')].find(tab => tab.textContent.trim() === '关节')?.click()`);
+          await waitForCad(`document.querySelector('input[aria-label="OffsetPart_joint"]') !== null`);
           await window.webContents.executeJavaScript(`document.querySelector('input[aria-label="OffsetPart_joint"]').focus()`);
           window.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'End' });
           window.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'End' });
@@ -951,15 +1395,19 @@ app.whenReady().then(() => {
                 el.dispatchEvent(new Event('change',{bubbles:true}));
               })()`);
             };
-            await window.webContents.executeJavaScript(`([...document.querySelectorAll('button')].find(b => b.textContent === '导出并交叉校验 URDF / ROS ZIP')).click()`);
+            await window.webContents.executeJavaScript(`[...document.querySelectorAll('button')].find(b => b.textContent.includes('导出 URDF / ROS ZIP 并检查'))?.click()`);
             await waitForCad(`[...document.querySelectorAll('[role="alert"]')].some(x => x.textContent.includes('缺少明确的材料密度'))`);
             await setNumber('BasePart density', 2700);
             await setNumber('OffsetPart density', 2700);
+            await window.webContents.executeJavaScript(`[...document.querySelectorAll('.cad-flow button')].find(b => b.textContent.includes('配置 Link / Joint'))?.click()`);
+            await window.webContents.executeJavaScript(`document.querySelector('[aria-label="编辑关节 OffsetPart_joint"]')?.click()`);
+            await waitForCad(`document.querySelector('[aria-label="OffsetPart_joint type"]') !== null`);
             await setNumber('OffsetPart_joint effort', 10);
             await setNumber('OffsetPart_joint velocity', 2);
-            await waitForCad(`document.querySelector('.cad-wizard').textContent.includes('未确认关节：1')`);
-            await window.webContents.executeJavaScript(`document.querySelector('[aria-label="OffsetPart_joint confirmed"]').click()`);
-            await window.webContents.executeJavaScript(`([...document.querySelectorAll('button')].find(b => b.textContent === '导出并交叉校验 URDF / ROS ZIP')).click()`);
+            await waitForCad(`document.querySelector('.cad-wizard').textContent.includes('0/1 个关节已确认')`);
+            await window.webContents.executeJavaScript(`[...document.querySelectorAll('button')].find(b => b.textContent === '确认完成')?.click()`);
+            await window.webContents.executeJavaScript(`[...document.querySelectorAll('.cad-flow button')].find(b => b.textContent.includes('验证导出'))?.click()`);
+            await window.webContents.executeJavaScript(`[...document.querySelectorAll('button')].find(b => b.textContent.includes('导出 URDF / ROS ZIP 并检查'))?.click()`);
             await waitForCad(`[...document.querySelectorAll('[role="status"]')].some(x => x.textContent.includes('导出完成'))`);
             const output = process.env.URDFTOOLS_CAD_EXPORT_SMOKE;
             const size = fs.statSync(output).size;
@@ -968,10 +1416,26 @@ app.whenReady().then(() => {
             fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, 'cad-export.png'), (await window.webContents.capturePage()).toPNG());
             console.log(JSON.stringify({ event: 'desktop_cad_export_smoke', zipBytes: size, summary }));
           }
+          if (process.env.URDFTOOLS_CAD_DRAFT_SMOKE) {
+            const checkpoint = path.join(app.getPath('userData'), 'cad-draft', 'draft.json');
+            const deadline = Date.now() + 15000;
+            let saved;
+            while (Date.now() < deadline) {
+              try { saved = JSON.parse(await fs.promises.readFile(checkpoint, 'utf8')); }
+              catch { /* waiting for the first atomic write */ }
+              if (saved?.ui?.config?.joints?.[0]?.confirmed && saved.ui.densities?.BasePart === '2700' &&
+                  saved.ui.step === 'export') break;
+              await new Promise(resolve => setTimeout(resolve, 50));
+            }
+            if (!saved?.ui?.config?.joints?.[0]?.confirmed || saved.ui.densities?.BasePart !== '2700')
+              throw new Error('CAD draft did not save Link/Joint and density settings');
+            console.log(JSON.stringify({event:'desktop_cad_draft_smoke', saved:true,
+              source:saved.source_name, jointCount:saved.ui.config.joints.length}));
+          }
         }
-        await window.webContents.executeJavaScript(`document.querySelectorAll('nav button')[3].click()`);
+        await window.webContents.executeJavaScript(`[...document.querySelectorAll('nav button')].find(button => button.textContent === '评估').click()`);
         await new Promise(resolve => setTimeout(resolve, 100));
-        const selected = await window.webContents.executeJavaScript(`document.querySelector('h1').textContent`);
+        const selected = await window.webContents.executeJavaScript(`document.querySelector('.tool-workspace h1')?.textContent`);
         if (selected !== '评估') throw new Error('React workspace interaction failed');
         if (process.env.URDFTOOLS_MEDIA_SMOKE) {
           const runMediaSmoke = require(path.join(root, 'scripts/b07_desktop_smoke_hook.cjs'));
@@ -998,4 +1462,14 @@ app.whenReady().then(() => {
   });
 }).catch(fail);
 app.on('window-all-closed', () => app.quit());
+let cadDraftQuitWaited = false;
+app.on('before-quit', event => {
+  if (!cadDraftPending || cadDraftQuitWaited) return;
+  event.preventDefault();
+  cadDraftQuitWaited = true;
+  Promise.race([cadDraftWrite.catch(() => {}), new Promise(resolve => setTimeout(resolve, 5000))])
+    .finally(() => app.quit());
+});
 app.on('will-quit', stopService);
+
+require('./workbench.cjs')({ipcMain, app, dialog, assertRenderer, importRequest, runPythonWorker, modelProject});

@@ -246,3 +246,38 @@ def write_package_directory(step: str | Path, config: Mapping[str, Any], densiti
         digest.update(name.encode()+b'\0'+hashlib.sha256(files[name]).digest())
     return {'path': str(target), 'sha256': digest.hexdigest(),
             'metadata': metadata, 'files': sorted(files)}
+
+
+def write_visual_preview(step: str | Path, draft: Mapping[str, Any],
+                         config: Mapping[str, Any], destination: str | Path) -> None:
+    """Write an editable URDF preview with real CAD visual triangles, no guessed physics."""
+    from .wizard import preview_urdf
+    validate_configuration(draft, config, require_confirmed=True)
+    target = Path(destination)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    origins = _link_origins(config)
+    source_parts = {part.name: part for part in load_step(str(step))}
+    required = {name for link in config['links'] for name in link['parts']}
+    if set(source_parts) != required:
+        raise ExportError('CAD parts changed while building visual preview')
+    root = ET.fromstring(preview_urdf(draft, config))
+    for link in config['links']:
+        element = next(item for item in root.findall('link') if item.get('name') == link['name'])
+        for visual in element.findall('visual'):
+            name = visual.get('name')
+            if name not in source_parts:
+                raise ExportError(f'Preview part missing: {name}')
+            part = source_parts[name]
+            mesh = target.parent / 'meshes' / f'{name}.stl'
+            mesh.parent.mkdir(parents=True, exist_ok=True)
+            vertices, faces = part.mesh()
+            mesh.write_bytes(_binary_stl(vertices, faces, origins[link['name']]))
+            visual.find('origin').set('xyz', '0 0 0')
+            geometry = visual.find('geometry')
+            for child in list(geometry):
+                geometry.remove(child)
+            ET.SubElement(geometry, 'mesh', filename=f'meshes/{name}.stl')
+            if part.color is not None:
+                material = ET.SubElement(visual, 'material', name=f'{name}_preview')
+                ET.SubElement(material, 'color', rgba=_vec([*part.color, 1]))
+    target.write_bytes(ET.tostring(root, encoding='utf-8', xml_declaration=True) + b'\n')

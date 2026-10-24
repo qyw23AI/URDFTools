@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT/"python"))
@@ -153,6 +154,44 @@ class WebCodexAgentBridgeTests(unittest.TestCase):
             self.bridge.submit(task["request_id"],envelope(self.bridge,task,response))
         self.assertEqual(self.bridge.status(task["request_id"])["status"],
                          "awaiting_chatgpt_web_reply")
+
+    def test_explicit_cli_diagnosis_uses_same_grounding_and_provider_binding(self):
+        task=self.bridge.create_diagnosis(instruction="分析受限证据",
+            diagnosis_file=SOURCE_D00,mechanical_file=SOURCE_D02,mode="cli")
+        self.assertEqual(task["status"],"awaiting_codex_cli_run")
+        self.assertIsNone(task["prompt"])
+        row=json.loads(Path(task["request_path"]).read_text())
+        self.assertFalse(row["policy"]["no_codex_cli"])
+        answer=grounded_answer(row["payload"]["bundle"])
+        with self.assertRaisesRegex(WebBridgeError,"provider does not match"):
+            self.bridge.submit(task["request_id"],envelope(self.bridge,task,answer))
+        with patch("urdftools.diagnosis.agent_explain.codex_explain",
+                   return_value={**answer,"verification":{"source":"test"}}) as invoked:
+            completed=self.bridge.run_codex_cli(task["request_id"])
+        invoked.assert_called_once()
+        self.assertEqual(completed["status"],"reply_validated")
+        self.assertEqual(completed["result"]["advice"]["verification"]["source"],
+                         "codex_cli_chatgpt")
+        self.assertFalse(completed["result"]["changes_applied"])
+        self.assertEqual(json.loads((self.dir/"bridge"/task["request_id"]/
+                         "result.json").read_text())["provider"],"codex_cli_chatgpt")
+
+    def test_explicit_cli_model_preview_preserves_original_revision(self):
+        project=self.dir/"cli-project"
+        apply_project(project,recipe(),expected_revision=0)
+        task=self.bridge.create_model(instruction="加宽 Leg",model_project=project,
+                                      expected_revision=1,mode="cli")
+        before=(project/"current.json").read_bytes()
+        answer={"schema_version":1,"action":"replace_recipe","expected_revision":1,
+                "recipe":recipe(25),"rationale":"只修改 Leg 宽度；需要人工检查"}
+        with patch("urdftools.agent.providers.CodexCliProvider.suggest",
+                   return_value=answer) as invoked:
+            completed=self.bridge.run_codex_cli(task["request_id"])
+        invoked.assert_called_once()
+        self.assertEqual(completed["result"]["status"],"preview_only")
+        self.assertEqual((project/"current.json").read_bytes(),before)
+        self.assertEqual(completed["result"]["preview"]["diff"]["changed_parts"],
+                         ["Leg"])
 
 
     def test_user_imported_urdf_static_evidence_without_raw_cad_bytes(self):

@@ -11,19 +11,19 @@ URDFTools 是本地优先的机器人设计工作台。用户流程是导入/绘
 
 ## 2. 技术选择
 
-| 层 | 决策 | 理由与边界 |
-|---|---|---|
-| 桌面容器 | Electron + TypeScript；Linux AppImage 与便携 tar 包 | 统一 Chromium 的文件夹拖入和 WebGL 行为，无需本机 Rust；最终安装 `.desktop`。体积比原生壳大，发行时评估依赖体积。 |
-| 界面 | React + Vite + TypeScript；Three.js + `urdf-loader`；图表采用轻量开源库 | 实现四区统一交互。研究 `fan-ziqi/robot_viewer` 的可复用实现；以适配器/明确来源文件复用，避免把整站直接嵌入造成两套状态。 |
-| 本地服务 | Python 3.12，FastAPI，Pydantic，SQLite WAL | Python 生态连接 CAD/动力学/RL。稳定 JSON schema 生成 TS 类型；监听回环地址，随机会话凭据，桌面主进程负责生命周期。 |
-| 几何 | OpenCascade/OCP；优先适配 `step2urdf` 的可验证能力，build123d 生成参数化实体 | 不用三角网格推导有材料的 CAD 精确质量；单位、密度、装配变换全部显式。CAD 内核在独立工作进程运行。 |
-| 重量级人工 CAD | FreeCAD/RobotCAD 可选本地桥 | 本应用提供常用草图/参数化零件与机器人装配；完整机械 CAD 的高级编辑复用 FreeCAD，并保存可往返 STEP/FCStd。 |
-| 机器人数据 | 自有 RobotDocument，yourdfpy 独立导入/交叉验证；trimesh 辅助网格处理 | 独立于显示库和模拟器；保留扩展元素、来源及转换损失报告。 |
-| 动力学 | MuJoCo + Pinocchio；CoACD 作为可选碰撞分解 | 用 MuJoCo 执行动力学，Pinocchio 交叉验证 FK、惯量、重力及雅可比；不将碰撞代理当作质量分布。 |
-| 结果适配 | JSON/CSV/Parquet/TensorBoard；MLflow/SB3/RSL-RL 日志适配 | 不执行训练，不加载策略权重；保存算法/引擎/预算/种子/地形/控制协议差异。 |
-| 结果 | SQLite 索引 + 本地内容寻址文件；JSON/CSV/Parquet/MP4/HTML | 不把视频、模型权重、用户 CAD 放到源码 Git；每项保存哈希和来源。默认不上传。 |
-| Agent | Codex CLI/provider adapter + 本地模型 adapter；受约束 JSON tool calls；可用 MCP stdio facade | 与 UI 共享工具，不由模型绕过校验修改生产资产。第三方 API 接口可做未启用的扩展点。 |
-| 自动开发 | 现有 Python 调度器，systemd 用户 timer 每小时；先执行 S00 加固 | 每任务单独 `codex exec -m ... -c model_reasoning_effort=...`；真实模型由命令和 CLI 会话元数据记录。 |
+| 层             | 决策                                                                                         | 理由与边界                                                                                                                 |
+| -------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| 桌面容器       | Electron + TypeScript；Linux AppImage 与便携 tar 包                                          | 统一 Chromium 的文件夹拖入和 WebGL 行为，无需本机 Rust；最终安装 `.desktop`。体积比原生壳大，发行时评估依赖体积。        |
+| 界面           | React + Vite + TypeScript；Three.js + `urdf-loader`；图表采用轻量开源库                    | 实现四区统一交互。研究 `fan-ziqi/robot_viewer` 的可复用实现；以适配器/明确来源文件复用，避免把整站直接嵌入造成两套状态。 |
+| 本地服务       | Python 3.12，FastAPI，Pydantic，SQLite WAL                                                   | Python 生态连接 CAD/动力学/RL。稳定 JSON schema 生成 TS 类型；监听回环地址，随机会话凭据，桌面主进程负责生命周期。         |
+| 几何           | OpenCascade/OCP；优先适配 `step2urdf` 的可验证能力，build123d 生成参数化实体               | 不用三角网格推导有材料的 CAD 精确质量；单位、密度、装配变换全部显式。CAD 内核在独立工作进程运行。                          |
+| 重量级人工 CAD | FreeCAD/RobotCAD 可选本地桥                                                                  | 本应用提供常用草图/参数化零件与机器人装配；完整机械 CAD 的高级编辑复用 FreeCAD，并保存可往返 STEP/FCStd。                  |
+| 机器人数据     | 自有 RobotDocument，yourdfpy 独立导入/交叉验证；trimesh 辅助网格处理                         | 独立于显示库和模拟器；保留扩展元素、来源及转换损失报告。                                                                   |
+| 动力学         | MuJoCo + Pinocchio；CoACD 作为可选碰撞分解                                                   | 用 MuJoCo 执行动力学，Pinocchio 交叉验证 FK、惯量、重力及雅可比；不将碰撞代理当作质量分布。                                |
+| 结果适配       | JSON/CSV/Parquet/TensorBoard；MLflow/SB3/RSL-RL 日志适配                                     | 不执行训练，不加载策略权重；保存算法/引擎/预算/种子/地形/控制协议差异。                                                    |
+| 结果           | SQLite 索引 + 本地内容寻址文件；JSON/CSV/Parquet/MP4/HTML                                    | 不把视频、模型权重、用户 CAD 放到源码 Git；每项保存哈希和来源。默认不上传。                                                |
+| Agent          | Codex CLI/provider adapter + 本地模型 adapter；受约束 JSON tool calls；可用 MCP stdio facade | 与 UI 共享工具，不由模型绕过校验修改生产资产。第三方 API 接口可做未启用的扩展点。                                          |
+| 自动开发       | 现有 Python 调度器，systemd 用户 timer 每小时；先执行 S00 加固                               | 每任务单独 `codex exec -m ... -c model_reasoning_effort=...`；真实模型由命令和 CLI 会话元数据记录。                      |
 
 开源代码/资产的许可须在固定提交后复核，维护 `third_party/manifest.json` 与 notices。仓库级许可证不代表所有模型资产都同许可。未证实许可的参考站只借鉴交互，不能复制其代码或素材。
 

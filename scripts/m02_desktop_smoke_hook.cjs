@@ -18,7 +18,7 @@ module.exports=async function runReturnSmoke(window, artifactDir) {
   const relinked=await js(`document.querySelector('[aria-label="FreeCAD 回流差异"]')?.textContent`);
   if(!relinked.includes('Base → Base') || !relinked.includes('Arm → Arm'))throw new Error('Same-part relink missing');
   await click('接受回流并重新确认关节');
-  await waitFor(`document.querySelector('[aria-label="STEP 转换向导"]')?.textContent.includes('未确认关节：1')`);
+  await waitFor(`document.querySelector('[aria-label="STEP 转换向导"]')?.textContent.includes('0/1 个关节已确认')`);
   process.env.URDFTOOLS_MODEL_RETURN_SMOKE=process.env.URDFTOOLS_MODEL_TOPOLOGY_SMOKE;
   await click('比较 FreeCAD 回流');
   await waitFor(`document.querySelector('[data-return-status="conflict"]') !== null`);

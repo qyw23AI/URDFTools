@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<robot name="urdftools_portable_demo">
+  <link name="base_link">
+    <inertial><origin xyz="0 0 0"/><mass value="1"/><inertia ixx="0.003" ixy="0" ixz="0" iyy="0.003" iyz="0" izz="0.003"/></inertial>
+    <visual><geometry><box size="0.18 0.12 0.06"/></geometry><material name="blue"><color rgba="0.2 0.45 0.9 1"/></material></visual>
+    <collision><geometry><box size="0.18 0.12 0.06"/></geometry></collision>
+  </link>
+  <link name="arm_link">
+    <inertial><origin xyz="0 0 0.1"/><mass value="0.2"/><inertia ixx="0.0004" ixy="0" ixz="0" iyy="0.0004" iyz="0" izz="0.0002"/></inertial>
+    <visual><origin xyz="0 0 0.1"/><geometry><mesh filename="meshes/tetra.obj" scale="1 1 1"/></geometry></visual>
+    <collision><origin xyz="0 0 0.1"/><geometry><box size="0.08 0.08 0.2"/></geometry></collision>
+  </link>
+  <joint name="hinge" type="revolute">
+    <parent link="base_link"/><child link="arm_link"/>
+    <origin xyz="0 0 0.05" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.2" upper="1.2" effort="8" velocity="2"/>
+  </joint>
+</robot>

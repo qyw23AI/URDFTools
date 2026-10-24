@@ -30,7 +30,8 @@ def main():
         event=next((e for e in events if e.get("event")=="desktop_webcodex_agent_smoke"),None)
         rendering=next((e for e in events if e.get("event")=="desktop_smoke"),None)
         imported=next((e for e in events if e.get("event")=="desktop_webcodex_imported_urdf_smoke"),None)
-        if not event or not rendering or not imported:
+        dual=next((e for e in events if e.get("event")=="desktop_agent_dual_mode_smoke"),None)
+        if not event or not rendering or not imported or not dual:
             raise AssertionError(f"Real Electron smoke event missing, exit={exit_code}: {log[-2400:]}")
         request=temp/"webcodex-requests"/event["request_id"]/"request.json"
         if (exit_code or not request.is_file() or not event["clipboard_verified"] or
@@ -39,12 +40,15 @@ def main():
         raw=json.loads(request.read_text())
         assert raw["kind"]=="diagnosis" and raw["payload"]["synthetic_fixture"]
         assert imported["rule"]=="invalid_joint_axis" and imported["xml_not_submitted"]
+        assert dual["cli_request_created"] and dual["webcodex_request_created"]
+        assert dual["model_modes_selectable"] and not dual["cli_model_called"]
         assert not (request.parent/"result.json").exists()
         assert (folder/"webcodex-agent.png").stat().st_size>2000
     print(json.dumps({"status":"passed","electron_isolated":True,
                       "renderer_created_request":True,"clipboard_handoff":True,
                       "imported_urdf_static_evidence":True,
                       "private_consent_step":True,"codex_cli_calls":0,
+                      "cli_request_mode_verified":True,
                       "no_fabricated_model_output":True,
                       "screenshot":"artifacts/D03/desktop/webcodex-agent.png"}))
 

@@ -1,0 +1,54 @@
+{
+  "phase": "Q01",
+  "timestamp": "20261023T060823467518Z",
+  "status": "failed",
+  "checks": [
+    {
+      "id": "portable-production-build",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/q00_build.py"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/Q01/runs/20261023T060823467518Z/portable-production-build.log",
+      "log_sha256": "084ec3039f79ef990a7fd595a9ae28a3d430575b1b4db446681d614c668a43c3",
+      "status": "passed"
+    },
+    {
+      "id": "portable-archive-with-pinned-runtime",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/q01_portable.py",
+        "build"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/Q01/runs/20261023T060823467518Z/portable-archive-with-pinned-runtime.log",
+      "log_sha256": "832a574b5202d909aa8a8c50dd05cddb05d916e363b18ae8182299158c0655fc",
+      "status": "passed"
+    },
+    {
+      "id": "fresh-home-extracted-Electron-example",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/q01_portable.py",
+        "smoke"
+      ],
+      "exit_code": 0,
+      "log": "artifacts/Q01/runs/20261023T060823467518Z/fresh-home-extracted-Electron-example.log",
+      "log_sha256": "c08f780960a1a5e996fbe1dcb63720677daf75e7a24973033ff43ca9c0d56acf",
+      "status": "passed"
+    },
+    {
+      "id": "bundled-third-party-license-closure",
+      "command": [
+        "/home/qyw/URDFTools/.venv/bin/python",
+        "scripts/q01_portable.py",
+        "audit"
+      ],
+      "exit_code": 1,
+      "log": "artifacts/Q01/runs/20261023T060823467518Z/bundled-third-party-license-closure.log",
+      "log_sha256": "5689aefe8401cfb2ccd58a53e68debb49289395e19eded9a63782807b4f5fda0",
+      "status": "failed"
+    }
+  ]
+}

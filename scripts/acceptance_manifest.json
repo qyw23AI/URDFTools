@@ -1,6 +1,12 @@
 {
   "schema_version": 1,
   "phases": {
+    "Q01": [
+      {"id": "portable-production-build", "kind": "command", "argv": ["{python}", "scripts/q00_build.py"], "timeout_seconds": 150},
+      {"id": "portable-archive-with-pinned-runtime", "kind": "command", "argv": ["{python}", "scripts/q01_portable.py", "build"], "timeout_seconds": 1200},
+      {"id": "fresh-home-extracted-Electron-example", "kind": "command", "argv": ["{python}", "scripts/q01_portable.py", "smoke"], "timeout_seconds": 600},
+      {"id": "bundled-third-party-license-closure", "kind": "command", "argv": ["{python}", "scripts/q01_portable.py", "audit"], "timeout_seconds": 120}
+    ],
     "Q00": [
       {"id": "web-production-build", "kind": "command", "argv": ["{python}", "scripts/q00_build.py"], "timeout_seconds": 150},
       {"id": "step-desktop-model-viewer-static-mujoco-negative", "kind": "command", "argv": ["{python}", "scripts/q00_cross_module_smoke.py"], "timeout_seconds": 750},

@@ -216,9 +216,20 @@ def inspect_step(path: str | Path) -> dict[str, Any]:
     # Cross-check the assembly-aware reader against the pinned step2urdf part adapter.
     # The adapter intentionally returns a flat part list; it is not used as the hierarchy source.
     adapter_parts = load_step(str(source))
-    tree_names = sorted(sanitize(part["name"]) for part in parts)
-    adapter_names = sorted(part.name for part in adapter_parts)
-    adapter_status = "matched" if len(parts) == len(adapter_parts) and tree_names == adapter_names else "mismatch"
+    # Some exporters give assembly instances generic NAUO labels while the flat
+    # reader retains the product names. Compare the actual placed geometry in
+    # traversal order before treating that naming difference as a mismatch.
+    def same_bounds(tree_part: dict[str, Any], adapter_part: Any) -> bool:
+        bounds = tree_part.get("bounds")
+        if not bounds or adapter_part.bbox_min is None or adapter_part.bbox_max is None:
+            return False
+        return all(abs(float(actual) - float(expected)) <= 1e-4
+                   for key, values in (("min_mm", adapter_part.bbox_min), ("max_mm", adapter_part.bbox_max))
+                   for actual, expected in zip(bounds[key], values))
+
+    adapter_status = "matched" if len(parts) == len(adapter_parts) and all(
+        same_bounds(tree, adapter) for tree, adapter in zip(parts, adapter_parts)
+    ) else "mismatch"
     adapter_summaries = []
     for part in adapter_parts:
         bounds = None

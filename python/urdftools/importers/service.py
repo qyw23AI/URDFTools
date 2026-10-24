@@ -85,7 +85,19 @@ def mesh_check(path, limit):
         tree = xml(path, limit)
         if tree.tag.split('}')[-1] != 'COLLADA' or not any(n.tag.split('}')[-1] == 'geometry' for n in tree.iter()):
             raise ValueError('DAE requires COLLADA geometry')
-        return {'format': 'dae', 'validation': 'XML structure only'}
+        textures = []
+        for image in (node for node in tree.iter() if node.tag.split('}')[-1] == 'image'):
+            for node in image:
+                if node.tag.split('}')[-1] != 'init_from' or not node.text:
+                    continue
+                name = node.text.strip()
+                if '://' in name or Path(name).is_absolute() or '\\' in name or not name:
+                    raise ValueError('DAE texture must use a local relative path')
+                texture = (path.parent / name).resolve()
+                if not texture.is_file():
+                    raise ValueError('DAE texture missing: ' + name)
+                textures.append(name)
+        return {'format': 'dae', 'validation': 'geometry and local textures present', 'textures': textures}
     raise ValueError('Unsupported mesh format: ' + kind)
 
 
@@ -175,6 +187,14 @@ class ImportService:
 
     def ingest(self, source):
         source = Path(source).absolute()
+        copy_source = source
+        if source.is_file() and source.suffix.lower() == '.urdf':
+            # Common ROS layout: robot/urdf/model.urdf + robot/meshes/*.
+            # Importing only the XML loses DAE textures and the sibling meshes.
+            if source.parent.name.lower() == 'urdf' and (source.parent.parent / 'meshes').is_dir():
+                copy_source = source.parent.parent
+            elif (source.parent / 'meshes').is_dir():
+                copy_source = source.parent
         operation = str(uuid4())
         report = dict(operation_id=operation, status='failed', source_name=source.name,
                       models=[], findings=[], assets=[], package_map={}, selected_model=None)
@@ -185,9 +205,9 @@ class ImportService:
             try:
                 if source.is_symlink():
                     raise ImportFailure('symlink', source.name, 'Source symlink is forbidden')
-                if source.is_dir() and self.storage.resolve().is_relative_to(source.resolve()):
+                if copy_source.is_dir() and self.storage.resolve().is_relative_to(copy_source.resolve()):
                     raise ImportFailure('storage_overlap', source.name, 'Import storage must be outside the source folder')
-                report['assets'] = self._copy(source, bundle)
+                report['assets'] = self._copy(copy_source, bundle)
                 packages = {}
                 for manifest in sorted(bundle.rglob('package.xml')):
                     try:
@@ -197,13 +217,45 @@ class ImportService:
                         packages.setdefault(name, []).append(manifest.parent)
                     except (ValueError, ET.ParseError) as exc:
                         report['findings'].append(dict(code='package_xml', location=manifest.relative_to(bundle).as_posix(), message=str(exc), severity='error'))
+                # Some published robot folders use package:// without a
+                # package.xml. Bind only packages whose referenced files have
+                # one unambiguous root inside the copied bundle.
+                for model_file in sorted(bundle.rglob('*.urdf')):
+                    try:
+                        tree = xml(model_file, self.limits.xml_bytes)
+                    except (ValueError, ET.ParseError, OSError):
+                        continue
+                    for element in tree.iter():
+                        if element.tag not in ('mesh', 'texture'):
+                            continue
+                        uri = element.get('filename', '')
+                        if not uri.startswith('package://'):
+                            continue
+                        package, separator, relative = uri[10:].partition('/')
+                        if not separator or package in packages:
+                            continue
+                        try:
+                            safe_relative = safe_name(relative)
+                        except ImportFailure:
+                            continue
+                        candidates = [directory for directory in (bundle, *bundle.rglob('*'))
+                                      if directory.is_dir() and (directory / safe_relative).is_file()]
+                        if len(candidates) == 1:
+                            packages[package] = candidates
                 report['package_map'] = {name: [p.relative_to(bundle).as_posix() for p in paths] for name, paths in packages.items()}
                 for model in sorted(bundle.rglob('*')):
                     if model.suffix.lower() == '.urdf' and model.is_file():
                         report['models'].append(self._model(model, bundle, packages))
                 if not report['models']:
                     raise ImportFailure('no_models', source.name, 'No URDF models found')
-                if len(report['models']) > 1:
+                if source.is_file() and source.suffix.lower() == '.urdf' and copy_source != source:
+                    selected_path = source.relative_to(copy_source).as_posix()
+                    chosen = next((item for item in report['models'] if item['path'] == selected_path), None)
+                    if chosen is None:
+                        raise ImportFailure('selected_model_missing', selected_path, 'Chosen URDF was not included')
+                    report['selected_model'] = selected_path
+                    report['status'] = chosen['status']
+                elif len(report['models']) > 1:
                     report['status'] = 'selection_required'
                 else:
                     report['selected_model'] = report['models'][0]['path']

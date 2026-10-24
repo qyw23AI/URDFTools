@@ -16,15 +16,20 @@ def main() -> int:
     parser.add_argument('step', type=Path)
     parser.add_argument('--config', type=Path, help='Reuse an edited config JSON')
     parser.add_argument('--preview', type=Path, help='Write visual-only preview URDF; all joints must be confirmed')
+    parser.add_argument('--mesh-preview', action='store_true', help='Use tessellated CAD visuals in the preview')
     args = parser.parse_args()
     try:
         draft = inspect_conversion_draft(args.step)
         config = json.loads(args.config.read_text()) if args.config else default_configuration(draft)
         summary = validate_configuration(draft, config)
         if args.preview:
-            output = preview_urdf(draft, config)
-            args.preview.parent.mkdir(parents=True, exist_ok=True)
-            args.preview.write_text(output)
+            if args.mesh_preview:
+                from urdftools.cad.exporter import write_visual_preview
+                write_visual_preview(args.step, draft, config, args.preview)
+            else:
+                output = preview_urdf(draft, config)
+                args.preview.parent.mkdir(parents=True, exist_ok=True)
+                args.preview.write_text(output)
         print(json.dumps({'draft': draft, 'configuration': config, 'validation': summary,
                           'preview_path': str(args.preview) if args.preview else None}, ensure_ascii=False))
         return 0

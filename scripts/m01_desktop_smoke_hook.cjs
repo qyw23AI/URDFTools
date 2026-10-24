@@ -32,18 +32,20 @@ module.exports = async function runModelSmoke(window, artifactDir) {
   await click('生成 CAD 与 URDF 预览来源');
   console.log(JSON.stringify({event:'m01_step',step:'build'}));
   await waitFor(`document.querySelector('[aria-label="STEP 转换向导"]') !== null`);
-  const jointName = await js('document.querySelector(".cad-joint legend")?.textContent.split(" · ")[0]');
+  await click('应用分组并设置关节 →');
+  const jointName = await js('document.querySelector(".cad-joint-editor h3")?.textContent');
   if (!jointName) throw new Error('Model joint was not created');
   await js(`(() => {const s=document.querySelector('select[aria-label=${JSON.stringify(jointName+' type')}]');s.value='revolute';s.dispatchEvent(new Event('change',{bubbles:true}));})()`);
   await input(jointName+' effort', '8');
   await input(jointName+' velocity', '3');
-  await js(`(() => {const s=document.querySelector('input[aria-label=${JSON.stringify(jointName+' confirmed')}]');s.click()})()`);
+  await js(`document.querySelector('.cad-joint-editor .cad-primary')?.click()`);
+  await js(`document.querySelector('.cad-progress-line button')?.click()`);
   console.log(JSON.stringify({event:'m01_step',step:'preview'}));
   await waitFor('Number(document.querySelector("[data-joint-gizmo-count]")?.dataset.jointGizmoCount) === 1');
   await input('Base density','2700');
   await input('Arm density','7800');
-  await click('导出并交叉校验 URDF / ROS ZIP');
-  await waitFor('document.querySelector("main")?.textContent.includes("导出完成：")');
+  await click('导出 URDF / ROS ZIP 并检查');
+  await waitFor('document.querySelector("main")?.textContent.includes("导出完成")');
   const result = { revision: await js('document.querySelector("[aria-label=机器人建模工作台]")?.textContent.match(/版本 (\\d+)：/)?.[1]'),
     gizmos: await js('Number(document.querySelector("[data-joint-gizmo-count]")?.dataset.jointGizmoCount)'),
     zipBytes: fs.statSync(process.env.URDFTOOLS_CAD_EXPORT_SMOKE).size };

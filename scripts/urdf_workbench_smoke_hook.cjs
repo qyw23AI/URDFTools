@@ -1,0 +1,61 @@
+module.exports = async function runWorkbenchSmoke(window, output) {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const run = async source => {try{return await window.webContents.executeJavaScript(source);}catch(error){throw new Error('Renderer expression ' + source.slice(0,120) + ': ' + error);}};
+  window.webContents.on('console-message', ({level,message}) => console.log(JSON.stringify({event:'workbench_console',level,message})));
+  const step = name => console.log(JSON.stringify({event:'workbench_step',name}));
+  const wait = async (source, label) => {
+    const until = Date.now() + 60000;
+    while (Date.now() < until) {
+      if (await run(source)) return;
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    throw new Error(label + ': ' + await run("document.querySelector('main')?.textContent.slice(-800)"));
+  };
+  step('import-example');
+  await run("document.querySelector('button[aria-label=\"打开内置示例\"]').click()");
+  await wait("document.querySelector('[data-assets-loaded]')?.dataset.assetsLoaded === 'true'", 'example import');
+  step('joint-code');
+  await run("document.querySelector('[data-structure-node=\"joint:hinge\"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))");
+  await wait("document.querySelector('#urdf-source')?.selectionStart >= 0 && document.querySelector('#urdf-source')?.value.slice(document.querySelector('#urdf-source').selectionStart,document.querySelector('#urdf-source').selectionEnd).includes('joint name=\"hinge\"')", 'joint-to-code');
+  step('edit-code');
+  await run(`(() => {const textarea=document.querySelector('#urdf-source'); const setter=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set;setter.call(textarea,textarea.value.replace('name="urdftools_portable_demo"','name="edited_demo"'));textarea.dispatchEvent(new Event('input',{bubbles:true}));return true;})()`);
+  await wait("[...document.querySelectorAll('.urdf-code-panel button')].some(b=>b.textContent==='应用并预览'&&!b.disabled)", 'editor dirty');
+  await run("[...document.querySelectorAll('.urdf-code-panel button')].find(b=>b.textContent==='应用并预览').click()");
+  await wait("document.querySelector('.workbench-notice')?.textContent.includes('代码已校验')", 'URDF save');
+  step('library-import');
+  await run("[...document.querySelectorAll('.workbench-toolbar button')].find(b=>b.textContent==='CAD 模块库').click()");
+  await run("[...document.querySelectorAll('.floating-panel button')].find(b=>b.textContent==='导入 STEP / STL / OBJ').click()");
+  await wait("document.querySelector('.cad-library-item') !== null", 'CAD library import');
+  step('stage-cad');
+  await run(`(() => {
+    const item=document.querySelector('.cad-library-item');
+    const canvas=document.querySelector('.robot-canvas');
+    const transfer=new DataTransfer();
+    item.dispatchEvent(new DragEvent('dragstart',{bubbles:true,dataTransfer:transfer}));
+    canvas.dispatchEvent(new DragEvent('dragover',{bubbles:true,cancelable:true,dataTransfer:transfer}));
+    canvas.dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:transfer}));
+    return transfer.getData('application/x-urdf-cad').length > 0;
+  })()`);
+  await wait("document.querySelector('[data-tree-link-count]')?.dataset.treeLinkCount === '3'", 'staged CAD geometry');
+  step('pick-centers');
+  await run("[...document.querySelectorAll('.floating-panel button')].find(b=>b.textContent==='原模型根部中心').click()");
+  await run("[...document.querySelectorAll('.floating-panel button')].find(b=>b.textContent==='新模块中心').click()");
+  step('commit-connection');
+  await run("[...document.querySelectorAll('.floating-panel button')].find(b=>b.textContent==='确认连接').click()");
+  await wait("document.querySelector('.workbench-notice')?.textContent.includes('连接已保存')", 'joint commit');
+  await wait("document.querySelector('[data-tree-joint-count]')?.dataset.treeJointCount === '2'", 'joint rendered');
+  step('export');
+  await run("[...document.querySelectorAll('.workbench-toolbar button')].find(b=>b.textContent==='导出 URDF 包').click()");
+  await wait("document.querySelector('.workbench-notice')?.textContent.includes('已导出')", 'URDF export');
+  step('agent-library');
+  await run("[...document.querySelectorAll('.workbench-toolbar button')].find(b=>b.textContent==='Agent 生成 CAD').click()");
+  await wait("[...document.querySelectorAll('.modeling-workspace button')].some(b=>b.textContent==='建立起始 CAD')", 'agent panel');
+  await run("[...document.querySelectorAll('.modeling-workspace button')].find(b=>b.textContent==='建立起始 CAD').click()");
+  await wait("[...document.querySelectorAll('.modeling-workspace button')].some(b=>b.textContent==='将当前 CAD 加入模块库'&&!b.disabled)", 'agent starter CAD');
+  await run("[...document.querySelectorAll('.modeling-workspace button')].find(b=>b.textContent==='将当前 CAD 加入模块库').click()");
+  await wait("document.querySelector('.modeling-workspace')?.textContent.includes('已加入 CAD 模块库')", 'agent CAD library');
+  await wait("window.urdftools.cadLibraryList().then(entries=>entries.length===2)", 'saved CAD entry');
+  fs.writeFileSync(path.join(output,'workbench.png'),(await window.webContents.capturePage()).toPNG());
+  console.log(JSON.stringify({event:'urdf_workbench_smoke',jointCodeLocated:true,sourceEdited:true,cadLibraryImported:true,agentCadSaved:true,links:3,joints:2,exported:true}));
+};
