@@ -455,3 +455,7 @@ TypeScript/Vite 构建通过；真实 Electron 导入用户 mybot_v3（18 Link/1
 
 根据用户截图，Link 栏改为结构树与逐项可见性控制，中央创建弹窗指定 Link 名称和父 Link，树中点击 Joint 才打开下方 Joint 设置栏；双击可重命名。模型支持右键平移。轴自动识别改成父子零件圆柱面对轴，按零件配对每对最多一轴；“显示全部轴”呈红色透明候选环，悬停蓝色并显示方向箭头，点击后才应用。缺少共同几何证据时不假称已识别轴，改用两点或精确参数。双零件 Electron C03 完整导出回归通过；用户真实 43 零件 STEP 中的 `shenti` ↔ `fake_servo_2_1` 配对识别 1 轴，桌面悬停与选定烟测通过。证据见 `docs/acceptance/C03.md`、`artifacts/C03/desktop/real-axis-report.json`。所有实际机械轴仍需用户逐项确认。
 最终 C03 阶段门禁 4/4 通过、0 failed、0 skipped；生产构建和轴候选 3 项测试通过。
+
+## 2026-10-25 — URDF 工作区选中旋转关节的轴向标记
+
+查看器选中 revolute/continuous 关节时，在实际关节原点绘制红色圆环，并以蓝色箭头指向 URDF 轴的正方向。标记按关节当前世界姿态逐帧更新；切换到 Link 或非旋转关节时隐藏。TypeScript/Vite 构建及 Go2、G1 真实 Electron S06 回归通过，验证轴方向为单位向量、关节调节后仍存在、切换 Link 后消失。截图见 `artifacts/S06/desktop/go2-selected-axis.png` 与 `artifacts/S06/desktop/g1-selected-axis.png`。

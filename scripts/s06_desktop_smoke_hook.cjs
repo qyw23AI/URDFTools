@@ -62,6 +62,16 @@ module.exports = async function runS06ViewerSmoke(window, path, fs, modelLabel) 
   if (!slider || !slider.name || !Number.isFinite(slider.min) || !Number.isFinite(slider.max) || !(slider.max > slider.min)) {
     throw new Error('S06 ' + modelLabel + ' has no valid movable-joint slider');
   }
+  await evaluate("document.querySelector(" + JSON.stringify(`[data-structure-node="joint:${slider.name}"]`) + ")?.dispatchEvent(new MouseEvent('click',{bubbles:true}))");
+  await waitFor("document.querySelector('.robot-canvas')?.dataset.jointAxisName === " + JSON.stringify(slider.name));
+  const axisMarker = await evaluate("(() => { const scene=document.querySelector('.robot-canvas'); return {origin:scene.dataset.jointAxisOrigin?.split(',').map(Number),direction:scene.dataset.jointAxisDirection?.split(',').map(Number)}; })()");
+  if (axisMarker.origin?.length !== 3 || axisMarker.direction?.length !== 3 ||
+      ![...axisMarker.origin, ...axisMarker.direction].every(Number.isFinite) ||
+      Math.abs(Math.hypot(...axisMarker.direction) - 1) > 0.001)
+    throw new Error('Selected revolute joint axis is invalid: ' + JSON.stringify(axisMarker));
+  fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, modelLabel + '-selected-axis.png'),
+    Buffer.from((await evaluate("document.querySelector('.robot-canvas canvas').toDataURL('image/png')")).split(',')[1], 'base64'));
+  console.log(JSON.stringify({event:'viewer_joint_axis_marker', model:modelLabel, joint:slider.name, ...axisMarker}));
   const beforeQuaternion = await evaluate("document.querySelector('[data-joint-quaternion]')?.dataset.jointQuaternion");
   await evaluate("document.querySelector('.joint-panel input[type=\"range\"]').focus()");
   window.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'End' });
@@ -69,6 +79,12 @@ module.exports = async function runS06ViewerSmoke(window, path, fs, modelLabel) 
   await waitFor("Math.abs(Number(document.querySelector('.joint-panel input[type=\"range\"]')?.value) - " + slider.max + ") < 0.011");
   const afterQuaternion = await evaluate("document.querySelector('[data-joint-quaternion]')?.dataset.jointQuaternion");
   if (!afterQuaternion || afterQuaternion === beforeQuaternion) throw new Error('S06 ' + modelLabel + ' joint control did not change pose');
+  await waitFor("document.querySelector('.robot-canvas')?.dataset.jointAxisName === " + JSON.stringify(slider.name));
+  const axisAfter = await evaluate("document.querySelector('.robot-canvas')?.dataset.jointAxisDirection?.split(',').map(Number)");
+  if (axisAfter?.length !== 3 || !axisAfter.every(Number.isFinite) || Math.abs(Math.hypot(...axisAfter) - 1) > 0.001)
+    throw new Error('Joint axis marker was lost after changing pose: ' + JSON.stringify(axisAfter));
+  await evaluate("document.querySelector('[data-structure-node^=\"link:\"]')?.dispatchEvent(new MouseEvent('click',{bubbles:true}))");
+  await waitFor("!document.querySelector('.robot-canvas')?.dataset.jointAxisName");
   const afterJoint = await evaluate("document.querySelector('[data-physics-fingerprint]')?.dataset.physicsFingerprint");
   if (afterJoint !== baseline.physicsFingerprint) throw new Error('Joint movement changed raw URDF physics fields');
   await evaluate("document.querySelector('[data-structure-node=\"joint:" + slider.name + "\"]')?.dispatchEvent(new MouseEvent('click',{bubbles:true}))");

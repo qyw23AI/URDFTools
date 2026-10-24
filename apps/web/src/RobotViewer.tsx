@@ -479,6 +479,8 @@ export function RobotViewer({ report, compareReports = [], textureEnabled = {}, 
     let floor: THREE.Mesh | undefined;
     let shadowFloor: THREE.Mesh | undefined;
     let linkOutline: THREE.Box3Helper | undefined;
+    let jointAxisMarker: THREE.Group | undefined;
+    let jointAxisRadius = 0.055;
     const owned: THREE.Object3D[] = [];
     const gizmos: THREE.AxesHelper[] = [];
     const element = host.current;
@@ -635,6 +637,60 @@ export function RobotViewer({ report, compareReports = [], textureEnabled = {}, 
       linkOutline = new THREE.Box3Helper(new THREE.Box3(), 0xf34747);
       linkOutline.visible = false;
       scene.add(linkOutline);
+      // The marker lives in scene space so its mesh never changes the robot's
+      // bounds or intercepts a click intended for a link or joint handle.
+      jointAxisMarker = new THREE.Group();
+      jointAxisMarker.name = 'Selected revolute joint axis';
+      const axisRing = new THREE.Mesh(new THREE.TorusGeometry(1, 0.055, 10, 64),
+        new THREE.MeshBasicMaterial({ color: 0xf34747, depthTest: false, depthWrite: false, toneMapped: false }));
+      axisRing.name = 'Rotation axis ring';
+      axisRing.renderOrder = 1100;
+      const axisArrow = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1),
+        new THREE.Vector3(0, 0, 0), 3, 0x219bff, 0.85, 0.45);
+      axisArrow.name = 'Positive rotation axis';
+      axisArrow.traverse(object => {
+        object.renderOrder = 1101;
+        if (object instanceof THREE.Mesh || object instanceof THREE.Line) {
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
+          materials.forEach(material => { material.depthTest = false; material.depthWrite = false; });
+        }
+      });
+      jointAxisMarker.add(axisRing, axisArrow);
+      jointAxisMarker.visible = false;
+      scene.add(jointAxisMarker);
+      const axisOrigin = new THREE.Vector3();
+      const axisDirection = new THREE.Vector3();
+      const axisQuaternion = new THREE.Quaternion();
+      const markerNormal = new THREE.Vector3(0, 0, 1);
+      const updateJointAxisMarker = () => {
+        const selectedNow = selectedObjectRef.current;
+        const current = robotRef.current;
+        const joint = selectedNow?.type === 'joint' ? current?.joints[selectedNow.name] : undefined;
+        if (!jointAxisMarker || !joint || !['revolute', 'continuous'].includes(joint.jointType)) {
+          if (jointAxisMarker) jointAxisMarker.visible = false;
+          delete element.dataset.jointAxisName;
+          delete element.dataset.jointAxisOrigin;
+          delete element.dataset.jointAxisDirection;
+          return;
+        }
+        joint.getWorldPosition(axisOrigin);
+        joint.getWorldQuaternion(axisQuaternion);
+        axisDirection.copy(joint.axis).applyQuaternion(axisQuaternion).normalize();
+        if (axisDirection.lengthSq() < 0.5) {
+          jointAxisMarker.visible = false;
+          delete element.dataset.jointAxisName;
+          delete element.dataset.jointAxisOrigin;
+          delete element.dataset.jointAxisDirection;
+          return;
+        }
+        jointAxisMarker.position.copy(axisOrigin);
+        jointAxisMarker.quaternion.setFromUnitVectors(markerNormal, axisDirection);
+        jointAxisMarker.scale.setScalar(jointAxisRadius);
+        jointAxisMarker.visible = true;
+        element.dataset.jointAxisName = joint.name;
+        element.dataset.jointAxisOrigin = axisOrigin.toArray().map(value => value.toFixed(5)).join(',');
+        element.dataset.jointAxisDirection = axisDirection.toArray().map(value => value.toFixed(5)).join(',');
+      };
       const updateHighlight = () => {
         const selectedNow = selectedObjectRef.current;
         const current = robotRef.current;
@@ -684,6 +740,7 @@ export function RobotViewer({ report, compareReports = [], textureEnabled = {}, 
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
         controls.update();
+        updateJointAxisMarker();
         renderer.render(scene, camera);
         raf = requestAnimationFrame(render);
       };
@@ -761,6 +818,7 @@ export function RobotViewer({ report, compareReports = [], textureEnabled = {}, 
         setPhysicsRows(rows);
         const bounds = overallVisualBounds(currentRobot);
         setOverallBounds(bounds ? tuple(bounds.getSize(new THREE.Vector3())) : null);
+        jointAxisRadius = THREE.MathUtils.clamp((bounds?.getSize(new THREE.Vector3()).length() ?? 0.6) * 0.055, 0.035, 0.13);
         setMeshCount(visibleMeshCount(currentRobot));
         let mapped = 0;
         currentRobot.traverse(object => { if (object instanceof THREE.Mesh && !isURDFCollider(object.parent || object)) {
@@ -1109,6 +1167,13 @@ export function RobotViewer({ report, compareReports = [], textureEnabled = {}, 
       passiveModelsRef.current = [];
       preGravityPassiveRef.current = [];
       linkOutline?.geometry.dispose(); if (linkOutline) (linkOutline.material as THREE.Material).dispose();
+      jointAxisMarker?.traverse(object => {
+        if (object instanceof THREE.Mesh || object instanceof THREE.Line) {
+          object.geometry.dispose();
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
+          materials.forEach(material => material.dispose());
+        }
+      });
       jointMarkers.forEach(marker => { marker.geometry.dispose(); (marker.material as THREE.Material).dispose(); });
       floor?.geometry.dispose(); if (floor) (floor.material as THREE.Material).dispose();
       shadowFloor?.geometry.dispose(); if (shadowFloor) (shadowFloor.material as THREE.Material).dispose();
@@ -1550,6 +1615,8 @@ export function RobotViewer({ report, compareReports = [], textureEnabled = {}, 
                   angleUnit === 'deg' ? `${(joint.value * 180 / Math.PI).toFixed(1)}°` : `${joint.value.toFixed(3)} rad`;
               })()}
             </output>}
+          {selectedObject?.type === 'joint' && joints.some(joint => joint.name === selectedObject.name && joint.unit === 'rad') &&
+            <p className="hint">红色圆环标示旋转轴，蓝色箭头指向 URDF 定义的轴正方向。</p>}
           {linkTree.length ? <StructureGraph roots={linkTree} selected={selectedObject} onSelect={selectStructure}
             jointValues={Object.fromEntries(joints.map(joint => [joint.name, { value: joint.value, unit: joint.unit }]))}
             angleUnit={angleUnit} /> : <p>尚无可显示的结构树。</p>}
