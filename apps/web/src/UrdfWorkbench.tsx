@@ -15,7 +15,8 @@ export function UrdfWorkbench({ initialReport, compareEntries = [], activeCompar
   const [xml,setXml]=useState(''); const [saved,setSaved]=useState('');
   const [selected,setSelected]=useState<NodeSelection|null>(null);
   const [library,setLibrary]=useState<LibraryEntry[]>([]);
-  const [panels,setPanels]=useState({code:false,library:false,agent:false,compare:false});
+  const [panels,setPanels]=useState({code:Boolean(initialReport),library:Boolean(initialReport),agent:Boolean(initialReport),compare:Boolean(initialReport)});
+  const openedPanelsAfterImport=useRef(Boolean(initialReport));
   const [unit,setUnit]=useState<'mm'|'m'>('mm');
   const [busy,setBusy]=useState(false); const [error,setError]=useState(''); const [notice,setNotice]=useState('');
   const [pending,setPending]=useState<{child:string;joint:string;original:string[]}|null>(null);
@@ -26,6 +27,11 @@ export function UrdfWorkbench({ initialReport, compareEntries = [], activeCompar
   const editor=useRef<HTMLTextAreaElement>(null);
   const dirty=xml!==saved;
   useEffect(()=>{setReport(initialReport);setHistory(initialReport?[initialReport]:[]);setCursor(0);setPending(null);setPoints([]);setSelected(null);},[initialReport]);
+  useEffect(()=>{
+    if(!initialReport||openedPanelsAfterImport.current)return;
+    openedPanelsAfterImport.current=true;
+    setPanels({code:true,library:true,agent:true,compare:true});
+  },[initialReport]);
   useEffect(()=>{
     let active=true;
     if(!report){setXml('');setSaved('');return;}
@@ -40,7 +46,7 @@ export function UrdfWorkbench({ initialReport, compareEntries = [], activeCompar
     editor.current.focus();editor.current.setSelectionRange(range.start,range.end);
     editor.current.scrollTop=Math.max(0,(xml.slice(0,range.start).split('\n').length-4)*20);
   },[selected,panels.code]);
-  const select=useCallback((next:NodeSelection)=>{setSelected(next);setPanels(p=>({...p,code:true,library:false,agent:false}));},[]);
+  const select=useCallback((next:NodeSelection)=>{setSelected(next);setPanels(p=>({...p,code:true}));},[]);
   const pick=useCallback((point:SurfacePoint)=>{
     if(!pending)return;
     setError('');
@@ -74,16 +80,16 @@ export function UrdfWorkbench({ initialReport, compareEntries = [], activeCompar
   return <div className="urdf-workbench" onDragOver={event=>{if(event.dataTransfer.types.includes('application/x-urdf-cad')){event.preventDefault();event.stopPropagation();}}}
     onDrop={event=>{const id=event.dataTransfer.getData('application/x-urdf-cad');if(!id)return;event.preventDefault();event.stopPropagation();const entry=library.find(e=>e.id===id);if(entry)void run(()=>add(entry));}}>
     <div className="workbench-toolbar" aria-label="URDF 编辑工具">
-      <button onClick={()=>setPanels(p=>({...p,code:!p.code,library:false,agent:false}))} aria-pressed={panels.code}>URDF 代码</button>
-      <button onClick={()=>setPanels(p=>({...p,library:!p.library,code:false,agent:false}))} aria-pressed={panels.library}>CAD 模块库</button>
+      <button onClick={()=>setPanels(p=>({...p,code:!p.code}))} aria-pressed={panels.code}>URDF 代码</button>
+      <button onClick={()=>setPanels(p=>({...p,library:!p.library}))} aria-pressed={panels.library}>CAD 模块库</button>
       <button onClick={()=>setPanels(p=>({...p,compare:!p.compare}))} aria-pressed={panels.compare}>对比查看 {compareEntries.length || ''}</button>
-      <button onClick={()=>setPanels(p=>({...p,agent:!p.agent,code:false,library:false}))} aria-pressed={panels.agent}>Agent 生成 CAD</button>
+      <button onClick={()=>setPanels(p=>({...p,agent:!p.agent}))} aria-pressed={panels.agent}>Agent 生成 CAD</button>
       <button disabled={busy||dirty||!!pending||cursor<=0} onClick={()=>{setCursor(cursor-1);setReport(history[cursor-1]);onReportChange?.(history[cursor-1]);}}>撤销</button>
       <button disabled={busy||dirty||!!pending||cursor>=history.length-1} onClick={()=>{setCursor(cursor+1);setReport(history[cursor+1]);onReportChange?.(history[cursor+1]);}}>重做</button>
       <button disabled={!report||busy||dirty||!!pending} onClick={()=>void run(async()=>{const result=await window.urdftools!.workbenchExport(report!.operation_id);if(result)setNotice('已导出 URDF 和全部引用资源');})}>导出 URDF 包</button>
     </div>
     {report ? <RobotViewer report={report} textureEnabled={textureEnabled} compareReports={compareEntries.filter(entry=>entry.id!==activeCompareId)} onSelect={select} picking={!!pending} onSurfacePick={pick}/> : <div className="empty-stage"><h2>URDF 查看与构建</h2><p>打开机器人模型，或从 CAD 模块库添加第一个模块</p><p>左键旋转 · 右键平移 · 滚轮缩放</p></div>}
-    {panels.compare && <FloatingPanel title="对比查看" initial={{x:Math.max(310,window.innerWidth-390),y:75,width:340,height:365}} onClose={()=>setPanels(p=>({...p,compare:false}))} className="compare-window">
+    {panels.compare && <FloatingPanel title="对比查看" initial={{x:16,y:75,width:300,height:165}} dockSide="left" dockOrder={3} onClose={()=>setPanels(p=>({...p,compare:false}))} className="compare-window">
       <section aria-label="URDF 对比查看" className="comparison-panel">
         <p>拖入多个 URDF、ZIP 或模型文件夹；所有模型会在同一网格地面并排显示。选择后，结构、关节、代码和测量只操作该模型。</p>
         {!compareEntries.length && <p>尚未加入模型。</p>}
@@ -95,7 +101,7 @@ export function UrdfWorkbench({ initialReport, compareEntries = [], activeCompar
       </section>
     </FloatingPanel>}
     {(busy||error||notice) && <div className="workbench-notice" role={error?'alert':'status'}>{busy?'正在校验并加载模型…':error||notice}</div>}
-    {panels.code && <FloatingPanel title="编辑 · URDF" initial={{x:28,y:105,width:520,height:550}} onClose={()=>setPanels(p=>({...p,code:false}))} className="urdf-code-panel">
+    {panels.code && <FloatingPanel title="编辑 · URDF" initial={{x:16,y:105,width:320,height:285}} dockSide="left" dockOrder={2} onClose={()=>setPanels(p=>({...p,code:false}))} className="urdf-code-panel">
       <div className="workbench-actions"><span>{dirty?'未应用':'已载入'}{selected?' · '+selected.name:''}</span>
         <button disabled={!dirty||busy||!!pending} onClick={()=>void run(async()=>{commit(await apply(xml));setNotice('代码已校验并保存为新版本');})}>应用并预览</button>
         <button disabled={!dirty||busy} onClick={()=>setXml(saved)}>还原编辑</button>
@@ -105,7 +111,7 @@ export function UrdfWorkbench({ initialReport, compareEntries = [], activeCompar
       <p className="hint">点击模型关节或结构节点，自动定位并选中对应代码。应用失败会保留草稿和上一版模型。</p>
       {deleteOpen && <div role="alert"><p>删除 {selected?.name} 及其全部后代 Link / Joint？可撤销。</p><button disabled={busy} onClick={()=>void run(async()=>{if(selected)commit(await apply(removeBranch(xml,selected)));setDeleteOpen(false);})}>确认删除</button><button onClick={()=>setDeleteOpen(false)}>取消</button></div>}
     </FloatingPanel>}
-    {panels.library && <FloatingPanel title="CAD 模块库" initial={{x:20,y:100,width:320,height:480}} onClose={()=>setPanels(p=>({...p,library:false}))}>
+    {panels.library && <FloatingPanel title="CAD 模块库" initial={{x:20,y:100,width:300,height:200}} dockSide="left" dockOrder={4} onClose={()=>setPanels(p=>({...p,library:false}))}>
       <p>导入后保存在本机。拖入场景或点击“添加”。</p>
       <label>STL / OBJ 原始单位 <select value={unit} onChange={e=>setUnit(e.target.value as 'mm'|'m')}><option value="mm">毫米</option><option value="m">米</option></select></label>
       <button disabled={busy||!window.urdftools} onClick={()=>void run(async()=>{const entry=await window.urdftools!.cadLibraryImport(unit);if(entry)await refreshLibrary();})}>导入 STEP / STL / OBJ</button>
@@ -116,7 +122,7 @@ export function UrdfWorkbench({ initialReport, compareEntries = [], activeCompar
         <button disabled={busy} onClick={()=>void run(async()=>{await window.urdftools!.cadLibraryRemove(entry.id);await refreshLibrary();})}>移出库</button></div>
       </article>)}
     </FloatingPanel>}
-    {pending && <FloatingPanel title="连接 CAD 模块" initial={{x:20,y:90,width:335,height:310}}>
+    {pending && <FloatingPanel title="连接 CAD 模块" initial={{x:20,y:90,width:300,height:260}} dockSide="right" dockOrder={4}>
       <p>{points.length===0?'① 点击原模型上的连接位置':points.length===1?'② 点击新模块上的连接位置':'③ 两个连接位置已选好，确认后按表面法向对齐'}</p>
       <p>原模型：{points[0]?.link||'待选择'}<br/>新模块：{points[1]?.link||pending.child}</p>
       <div className="workbench-actions"><button disabled={points.length!==0} onClick={()=>setPoints([{link:pending.original[0],point:[0,0,0],normal:[0,0,1]}])}>原模型根部中心</button>
@@ -127,7 +133,7 @@ export function UrdfWorkbench({ initialReport, compareEntries = [], activeCompar
       <button disabled={points.length!==2||busy} onClick={()=>void run(async()=>{const text=connectModule(await sourceXml(report!,true),pending.joint,points[0],points[1],jointType,axis);const next=await apply(text);commit(next);setPending(null);setPoints([]);setNotice('连接已保存，可撤销或在代码中修改');})}>确认连接</button>
       <button disabled={busy} onClick={()=>setPoints([])}>重新选点</button><button disabled={busy} onClick={cancelConnection}>取消添加</button>
     </FloatingPanel>}
-    {panels.agent && <FloatingPanel title="Agent · CAD 模块" initial={{x:28,y:95,width:460,height:560}} onClose={()=>setPanels(p=>({...p,agent:false}))}>
+    {panels.agent && <FloatingPanel title="Agent · CAD 模块" initial={{x:28,y:95,width:320,height:240}} dockSide="left" dockOrder={5} onClose={()=>setPanels(p=>({...p,agent:false}))}>
       <ModelingWorkspace libraryOnly onLibraryChange={()=>void refreshLibrary().catch(e=>setError(String(e)))}/>
     </FloatingPanel>}
   </div>;

@@ -38,6 +38,46 @@ module.exports = async function runS06ViewerSmoke(window, path, fs, modelLabel) 
     throw new Error('Wrong selected reference model: ' + baseline.selectedModel);
   }
 
+  await waitFor("document.querySelectorAll('.urdf-panel-dock .floating-panel.is-docked').length === 10");
+  const dockLayout = await evaluate(`(() => {
+    const read = side => [...document.querySelectorAll('.urdf-panel-dock.panel-dock-' + side + ' .floating-panel')]
+      .sort((a, b) => Number(a.style.order) - Number(b.style.order))
+      .map(panel => ({ title: panel.dataset.panelTitle, placement: panel.dataset.panelPlacement,
+        top: panel.getBoundingClientRect().top, bottom: panel.getBoundingClientRect().bottom }));
+    return { left: read('left'), right: read('right') };
+  })()`);
+  const leftTitles = ['文件 · 导入模型', '显示与姿态', '编辑 · URDF', '对比查看', 'CAD 模块库', 'Agent · CAD 模块'];
+  const rightTitles = ['结构树', '关节控制', '质量与惯量', '几何测量'];
+  for (const [side, expected] of [['left', leftTitles], ['right', rightTitles]]) {
+    const actual = dockLayout[side];
+    if (JSON.stringify(actual.map(panel => panel.title)) !== JSON.stringify(expected) ||
+        actual.some(panel => panel.placement !== 'dock') ||
+        actual.some((panel, index) => index > 0 && panel.top < actual[index - 1].bottom - 1)) {
+      throw new Error('S06 panels do not start in a non-overlapping ' + side + ' dock: ' + JSON.stringify(actual));
+    }
+  }
+  fs.writeFileSync(path.join(process.env.URDFTOOLS_SMOKE_ARTIFACT_DIR, modelLabel + '-docked-layout.png'),
+    (await window.webContents.capturePage()).toPNG());
+  for (const [label, placement] of [['左侧 ¼ 屏', 'left'], ['右侧 ¼ 屏', 'right'], ['底部 ¼ 屏', 'bottom']]) {
+    await evaluate(`document.querySelector('button[aria-label="选择放大位置显示与姿态"]').click()`);
+    await evaluate(` [...document.querySelectorAll('[aria-label="显示与姿态放大位置"] button')]
+      .find(button => button.textContent.trim() === ${JSON.stringify(label)})?.click()`);
+    await waitFor(`document.querySelector('[data-panel-title="显示与姿态"]')?.dataset.panelPlacement === ${JSON.stringify(placement)}`);
+    const quarter = await evaluate(`(() => {
+      const panel = document.querySelector('[data-panel-title="显示与姿态"]');
+      const workspace = document.querySelector('.viewer-workspace');
+      const p = panel.getBoundingClientRect(), w = workspace.getBoundingClientRect();
+      return {x:p.x,y:p.y,width:p.width,height:p.height,workspaceWidth:w.width,workspaceHeight:w.height};
+    })()`);
+    if (placement === 'bottom' ?
+        quarter.width < quarter.workspaceWidth * 0.9 || quarter.height < quarter.workspaceHeight * 0.18 :
+        quarter.width < quarter.workspaceWidth * 0.21 || quarter.height < quarter.workspaceHeight * 0.6) {
+      throw new Error('S06 ' + placement + ' quarter-panel size is wrong: ' + JSON.stringify(quarter));
+    }
+    await evaluate(`document.querySelector('button[aria-label="还原显示与姿态"]').click()`);
+    await waitFor(`document.querySelector('[data-panel-title="显示与姿态"]')?.dataset.panelPlacement === 'dock'`);
+  }
+
   const selectedJoint = await evaluate("(() => { const button=document.querySelector('[data-structure-node^=\"joint:\"]'); if (!button) return null; button.dispatchEvent(new MouseEvent('click', {bubbles:true})); return button.dataset.structureNode; })()");
   if (!selectedJoint) throw new Error('S06 ' + modelLabel + ' structure tree contains no joint');
   await waitFor("document.querySelector('[data-selected-node]')?.dataset.selectedNode === " + JSON.stringify(selectedJoint));

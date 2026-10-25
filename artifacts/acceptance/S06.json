@@ -1,6 +1,6 @@
 {
   "phase": "S06",
-  "timestamp": "20261024T190304261472Z",
+  "timestamp": "20261025T005650805847Z",
   "status": "passed",
   "checks": [
     {
@@ -11,11 +11,11 @@
         "--directory",
         "tests/s06",
         "--report",
-        "/home/qyw/URDFTools/artifacts/S06/runs/20261024T190304261472Z/real-reference-models.json"
+        "/home/qyw/URDFTools/artifacts/S06/runs/20261025T005650805847Z/real-reference-models.json"
       ],
       "exit_code": 0,
-      "log": "artifacts/S06/runs/20261024T190304261472Z/real-reference-models.log",
-      "log_sha256": "6168f77cae7982e20bde57cfdb0ea12f8974849f418f824a361bff4b70f16232",
+      "log": "artifacts/S06/runs/20261025T005650805847Z/real-reference-models.log",
+      "log_sha256": "78c65af023c3761047fbfe4fb4a949e442e338f6235e8e1f8ee52a3c6bc70a2b",
       "counts": {
         "discovered": 3,
         "executed": 3,
@@ -35,8 +35,8 @@
         "scripts/s06_real_models_smoke.py"
       ],
       "exit_code": 0,
-      "log": "artifacts/S06/runs/20261024T190304261472Z/real-model-viewer-e2e.log",
-      "log_sha256": "4c7977134269734351ad3c6df885afa3f1f5b0e731f126d2c95cdc470ebe3505",
+      "log": "artifacts/S06/runs/20261025T005650805847Z/real-model-viewer-e2e.log",
+      "log_sha256": "4b83a16b3bb66a3ca8f8f2b3fd1cf22cf3de1da40e8733b50f142fe4d080dd47",
       "status": "passed"
     }
   ]

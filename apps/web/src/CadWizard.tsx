@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { RobotViewer, type RobotImport } from './RobotViewer';
 import { CadPartCanvas } from './CadPartCanvas';
-import { FloatingPanel } from './FloatingPanel';
+import { FloatingPanel, PanelDockProvider } from './FloatingPanel';
 import { findJointCandidates, inferJoint, type JointAxisCandidate } from './cadJointInference';
 
 type Part = { name: string; center_m: number[]; bounds_min_m: number[]; bounds_max_m: number[];
@@ -47,7 +47,7 @@ export function CadWizard({ initialDiscovery, modeling = false, onConfigurationC
     Object.fromEntries((initialDiscovery?.configuration.joints || []).map(joint =>
       [joint.child, joint.parent === initialDiscovery?.configuration.root ? 'base_link' : joint.parent])));
   const [step, setStep] = useState<'import' | 'links' | 'joints' | 'export'>(initialDiscovery ? 'links' : 'import');
-  const [panels, setPanels] = useState({link: true, joint: false, motion: false});
+  const [panels, setPanels] = useState({link: true, joint: false, motion: Boolean(initialDiscovery)});
   const [jointValues, setJointValues] = useState<Record<string, number>>({});
   const [groupingApplied, setGroupingApplied] = useState(Boolean(initialDiscovery));
   const [activeJointIndex, setActiveJointIndex] = useState(0);
@@ -118,7 +118,7 @@ export function CadWizard({ initialDiscovery, modeling = false, onConfigurationC
     setDraft(result.draft); setMeshParts(result.meshParts); setConfig(result.configuration); setExchangeReport(result.exchangeReport); setPreview(null); setDensities({}); setExportReport(null);
     setSelectedPart(null); setStep('links'); setActiveJointIndex(0);
     setSelectedParts([]); setHiddenParts([]); setNewLinkName('base_link'); setNewLinkParent('base_link'); setParentNames({}); setGroupNames({});
-    setPanels({link: true, joint: false, motion: false}); setJointValues({}); setGroupingApplied(false);
+    setPanels({link: true, joint: false, motion: true}); setJointValues({}); setGroupingApplied(false);
     setLinkDialogOpen(false); setShowAxisCandidates(false); setRenaming(null);
   }
   function togglePart(name: string) {
@@ -297,7 +297,7 @@ export function CadWizard({ initialDiscovery, modeling = false, onConfigurationC
     setShowAxisCandidates(false); setError(`已选择 ${candidate.parentPart} 与 ${candidate.childPart} 的共同轴，请试转并确认。`);
   }
   function pickJointPoint(part: string, point: [number, number, number]) {
-    if (step !== 'joints' || !groupingApplied || !panels.joint || panels.motion || !selectedJoint || !config) return;
+    if (step !== 'joints' || !groupingApplied || !panels.joint || !selectedJoint || !config) return;
     if (![...(childLink?.parts || []), ...(parentLink?.parts || [])].includes(part)) {
       setError(`请在 ${selectedJoint.parent} 或 ${selectedJoint.child} 的零件上选择连接点`); return;
     }
@@ -379,6 +379,7 @@ export function CadWizard({ initialDiscovery, modeling = false, onConfigurationC
         setDraggingCad(false); }}
     onDrop={event => { event.preventDefault(); setDraggingCad(false); const file = event.dataTransfer.files[0];
       if (file) void importDropped(file); }}>
+    <PanelDockProvider className="cad-panel-dock">
     {draggingCad && <div className="cad-drop-overlay">松开鼠标，导入 CAD 文件</div>}
     <nav className="cad-flow" aria-label="CAD 转 URDF 步骤">
       <button type="button" className={step === 'import' ? 'active' : ''} aria-current={step === 'import' ? 'step' : undefined}
@@ -432,7 +433,7 @@ export function CadWizard({ initialDiscovery, modeling = false, onConfigurationC
         {draft?.warning && <p role="status">{draft.warning}</p>}
       </section>}
       {assembling && panels.link && draft && config && <FloatingPanel title="Link / Joint 工作台"
-        initial={{x: Math.max(16, window.innerWidth - 370), y: 16, width: 350, height: Math.min(570, window.innerHeight - 175)}}
+        initial={{x: 16, y: 16, width: 350, height: 500}} dockSide="left" dockOrder={0}
         className="cad-work-window" onClose={() => setPanels(previous => ({...previous, link: false}))}>
         <section className="cad-flow-panel" onPointerDown={() => setStep('links')}>
         <small className="cad-eyebrow">步骤 2 · Link / Joint 工作台</small>
@@ -457,8 +458,8 @@ export function CadWizard({ initialDiscovery, modeling = false, onConfigurationC
         {exchangeReport && <details><summary>CAD 格式转换说明</summary><ul>{exchangeReport.losses.map(loss => <li key={loss}>{loss}</li>)}</ul></details>}
         </section></FloatingPanel>}
       {assembling && panels.joint && selectedJoint && draft && config && <FloatingPanel title={`Joint 设置 · ${selectedJoint.name}`}
-        initial={{x: 16, y: Math.max(16, window.innerHeight - 475), width: Math.min(820, window.innerWidth - 32), height: 275}}
-        className="cad-work-window cad-joint-work-window" halfSide="left"
+        initial={{x: 16, y: 16, width: 380, height: 470}} dockSide="right" dockOrder={0}
+        className="cad-work-window cad-joint-work-window"
         onClose={() => { setPanels(previous => ({...previous, joint: false})); setShowAxisCandidates(false); setStep('links'); }}>
         <section className="cad-flow-panel" onPointerDown={() => setStep('joints')}>
         {!groupingApplied && <p role="status">请先创建 base_link 和子 Link；每个子 Link 会立即生成连接 Joint。</p>}
@@ -552,7 +553,7 @@ export function CadWizard({ initialDiscovery, modeling = false, onConfigurationC
           <button onClick={() => setStep('export')}>查看导出准备 →</button></div>
         </>}
         </section></FloatingPanel>}
-      {assembling && panels.motion && config && <FloatingPanel title="关节试转" initial={{x: 730, y: 16, width: 310, height: 420}}
+      {assembling && panels.motion && config && <FloatingPanel title="关节试转" initial={{x: 16, y: 520, width: 310, height: 220}} dockSide="left" dockOrder={1}
         className="cad-work-window" onClose={() => setPanels(previous => ({...previous, motion: false}))}>
         <section className="cad-flow-panel cad-motion-panel">
           <h2>检查可动关节</h2><p>确认关节后拖动滑块，在主模型中检查连接和转轴。</p>
@@ -617,7 +618,7 @@ export function CadWizard({ initialDiscovery, modeling = false, onConfigurationC
           links={groupingApplied ? config?.links : undefined} joints={groupingApplied ? config?.joints : undefined} jointValues={jointValues}
           onSelect={step === 'links' ? togglePart : setSelectedPart}
           onLoadError={message => setError(message)}
-          onPick={pickJointPoint} pickingJoint={step === 'joints' && groupingApplied && panels.joint && !panels.motion}
+          onPick={pickJointPoint} pickingJoint={step === 'joints' && groupingApplied && panels.joint}
           jointOrigin={step === 'joints' && panels.joint ? selectedJoint?.origin_m : undefined}
           jointAxis={selectedJoint?.axis} parentParts={parentLink?.parts} childParts={childLink?.parts}
           axisCandidates={step === 'joints' && panels.joint && showAxisCandidates ? allAxisCandidates : []}
@@ -626,5 +627,6 @@ export function CadWizard({ initialDiscovery, modeling = false, onConfigurationC
           '点击零件选中或取消；黑色为已选中。创建 Link 后零件自动隐藏，可随时显示全部。'}</p></div> :
       <div className="empty-stage"><div className="empty-stage-mark">⌖</div><h2>CAD → URDF</h2>
         <p>导入装配后，这里显示零件位置与可视化关节编辑。</p></div>}</div>
+    </PanelDockProvider>
   </section>;
 }

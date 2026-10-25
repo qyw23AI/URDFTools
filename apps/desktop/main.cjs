@@ -1336,7 +1336,7 @@ app.whenReady().then(() => {
           })()`);
           await waitForCad(`document.querySelector('[aria-label="OffsetPart_joint 下限"]') !== null && document.querySelector('[aria-label="OffsetPart_joint 上限"]') !== null`);
           await window.webContents.executeJavaScript(`[...document.querySelectorAll('button')].find(b => b.textContent === '确认完成')?.click()`);
-          await window.webContents.executeJavaScript(`[...document.querySelectorAll('.cad-panel-switches button')].find(b => b.textContent === '关节试转')?.click()`);
+          await window.webContents.executeJavaScript(`(() => { const button=[...document.querySelectorAll('.cad-panel-switches button')].find(b => b.textContent === '关节试转'); if (button?.getAttribute('aria-pressed') === 'false') button.click(); })()`);
           await waitForCad(`document.querySelector('[aria-label="试转 OffsetPart_joint"]') !== null`);
           const beforeTrial = await window.webContents.executeJavaScript(`document.querySelector('.cad-part-canvas')?.dataset.motionMatrix`);
           await window.webContents.executeJavaScript(`document.querySelector('[aria-label="试转 OffsetPart_joint"]').focus()`);

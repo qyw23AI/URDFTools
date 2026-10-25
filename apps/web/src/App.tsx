@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import './style.css';
 import { UrdfWorkbench, type LibraryEntry } from './UrdfWorkbench';
-import { FloatingPanel } from './FloatingPanel';
+import { FloatingPanel, PanelDockProvider } from './FloatingPanel';
 import { CadWizard, type CadDraftSnapshot, type Configuration, type Discovery } from './CadWizard';
 import type { ModelRecipe, ModelApplyResult } from './ModelingWorkspace';
 import { ResultLibrary, type ResultComparison, type ResultList, type ResultSeries } from './ResultLibrary';
@@ -153,7 +153,8 @@ export function App() {
         if (window.urdftools) void importDropped(files);
         else setError('请在桌面应用中导入本地文件');
       }}>
-      {filesOpen && <FloatingPanel title="文件 · 导入模型" initial={{ x: 16, y: 70, width: 300, height: 370 }} onClose={() => setFilesOpen(false)} className="file-window" halfSide="left">
+      <PanelDockProvider className="urdf-panel-dock">
+      {filesOpen && <FloatingPanel title="文件 · 导入模型" initial={{ x: 16, y: 70, width: 300, height: 330 }} onClose={() => setFilesOpen(false)} className="file-window" dockSide="left" dockOrder={0}>
       <div className="import-panel"><div className="panel-heading"><div><small>01 / 文件</small><h1>打开机器人模型</h1></div></div>
       <p className="import-help">可一次拖入多个 URDF、ZIP 或模型文件夹，并排查看与检查。</p>
       <div className="import-actions"><button disabled={busy || !desktopAvailable} onClick={() => void run(() => window.urdftools!.chooseImport('folder'))}>选择文件夹</button>
@@ -195,6 +196,7 @@ export function App() {
             setActiveCompareId(id);
           }
         }} /></div>
+      </PanelDockProvider>
     </section>
       <section className="tool-workspace cad-tool-workspace" hidden={workspace !== 'CAD转换URDF'}
         aria-label="CAD转换URDF"><CadWizard /></section>

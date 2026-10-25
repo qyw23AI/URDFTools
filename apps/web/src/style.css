@@ -407,3 +407,26 @@ button:disabled{opacity:.48;cursor:not-allowed}
 .text-size-control button:hover:not(:disabled),.text-size-control button:focus-visible{background:#285a73}
 .text-size-control .text-size-value{min-width:43px;color:#9fd8f2;font-variant-numeric:tabular-nums}
 @media(max-width:850px){.app-header{gap:8px}.header-actions{gap:6px}.app-header nav button{padding:7px 9px}}
+
+/* Imported models open with ordered inspectors in two scrollable side rails. */
+.panel-dock{position:absolute;z-index:30;display:flex;flex-direction:column;gap:8px;width:clamp(230px,23vw,350px);padding:0 0 8px;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;pointer-events:auto}
+.panel-dock-left{left:8px}.panel-dock-right{right:8px}
+.viewer-workspace>.panel-dock{top:calc(112px * var(--fixed-text-scale,1));bottom:8px}
+.cad-full-workspace>.panel-dock{top:calc(62px * var(--fixed-text-scale,1));bottom:8px}
+.panel-dock .floating-panel.is-docked{position:relative;flex:none;left:auto;top:auto;width:100%;min-width:0;max-width:100%;max-height:none;margin:0;box-shadow:0 7px 22px #0007}
+.panel-dock .floating-panel.is-floating,.panel-dock .floating-panel.is-maximized{position:fixed;max-width:none;max-height:none;box-shadow:0 20px 55px #000c}
+.panel-dock:has(.is-floating,.is-maximized){z-index:90}
+.panel-dock .floating-panel.is-maximized{background:#17232df9}
+.panel-dock .floating-panel-head{position:relative;flex:none}
+.panel-dock .floating-panel-head strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.panel-placement-menu{position:absolute;z-index:15;top:100%;right:5px;display:grid;gap:3px;width:125px;padding:5px;border:1px solid #638294;border-radius:8px;background:#132935;box-shadow:0 10px 25px #0009}
+.panel-placement-menu button{min-height:30px;padding:4px 6px;text-align:left;font-size:11px;white-space:nowrap}
+.cad-dialog-backdrop{z-index:120}
+.cad-panel-dock .cad-joint-editor,.cad-panel-dock .cad-joint-editor:not(:has(>.cad-joint-limits)){grid-template-columns:repeat(2,minmax(0,1fr))}
+.cad-panel-dock .cad-joint-editor>.cad-joint-limits,.cad-panel-dock .cad-joint-editor>.cad-point-card,.cad-panel-dock .cad-joint-editor>.cad-axis-candidates{grid-column:1/-1}
+.cad-panel-dock .cad-joint-editor>.cad-motion-row,.cad-panel-dock .cad-joint-editor>details,.cad-panel-dock .cad-joint-editor>button{grid-column:1/-1}
+.cad-panel-dock .cad-point-card{grid-template-columns:1fr}
+.cad-panel-dock .cad-joint-actions{grid-column:1;grid-row:auto;justify-content:flex-start}
+.cad-panel-dock .floating-panel.is-maximized[data-panel-placement=bottom] .cad-joint-editor{grid-template-columns:repeat(6,minmax(0,1fr))}
+.cad-panel-dock .floating-panel.is-maximized[data-panel-placement=bottom] .cad-joint-editor>.cad-point-card{grid-column:1/-1}
+@media(max-width:960px){.panel-dock{width:clamp(220px,29vw,280px)}.viewer-workspace>.panel-dock{top:calc(118px * var(--fixed-text-scale,1))}}

@@ -443,7 +443,7 @@ export function RobotViewer({ report, compareReports = [], textureEnabled = {}, 
   const [viewResetCount, setViewResetCount] = useState(0);
   const [jointRotation, setJointRotation] = useState('');
   const [jointGizmoCount, setJointGizmoCount] = useState(0);
-  const [panels, setPanels] = useState({ display: true, structure: true, joints: true, physics: false, measure: false });
+  const [panels, setPanels] = useState({ display: true, structure: true, joints: true, physics: true, measure: true });
   const [gravityEnabled, setGravityEnabled] = useState(false);
   const [gravityMessage, setGravityMessage] = useState('');
   const [visualGroundMin, setVisualGroundMin] = useState<number | null>(null);
@@ -1536,7 +1536,7 @@ export function RobotViewer({ report, compareReports = [], textureEnabled = {}, 
       <div className="viewer-scene-layer">
         <div ref={host} className="robot-canvas" aria-label="机器人三维场景" />
         <p className="hint" data-assets-status>{error ? '模型资源加载异常：请查看错误提示' : assetsLoaded ? `URDF 已加载 · ${meshFilesLoaded} 个网格实例 · ${textureCount} 个贴图表面` : '正在解析 URDF 并加载网格资源…'}</p>
-        {panels.display && <FloatingPanel title="显示与姿态" initial={{ x: 14, y: 18, width: 265, height: 260 }}
+        {panels.display && <FloatingPanel title="显示与姿态" initial={{ x: 14, y: 18, width: 280, height: 245 }} dockSide="left" dockOrder={1}
           onClose={() => setPanels(current => ({ ...current, display: false }))}>
         <fieldset className="viewer-toggles">
           <legend>模型显示</legend>
@@ -1586,7 +1586,7 @@ export function RobotViewer({ report, compareReports = [], textureEnabled = {}, 
             </article>)}</div>
           </section>}
         {error && <p role="alert" className="viewer-runtime-error">{error}</p>}
-        {panels.measure && <FloatingPanel title="几何测量" initial={{ x: 20, y: 300, width: 310, height: 255 }}
+        {panels.measure && <FloatingPanel title="几何测量" initial={{ x: 20, y: 300, width: 300, height: 175 }} dockSide="right" dockOrder={3}
           onClose={() => setPanels(current => ({ ...current, measure: false }))}>
         <section aria-label="几何测量" className="analysis-panel">
           <h3>几何测量</h3>
@@ -1600,7 +1600,7 @@ export function RobotViewer({ report, compareReports = [], textureEnabled = {}, 
           <p className="hint">尺寸来自加载后的视觉网格包围盒，不是 CAD 精确尺寸；网格比例、单位错误仍需单独检查。</p>
         </section></FloatingPanel>}
       </div>
-      {panels.structure && <FloatingPanel title="结构树" initial={{ x: Math.max(330, window.innerWidth - 610), y: 18, width: 540, height: 470 }}
+      {panels.structure && <FloatingPanel title="结构树" initial={{ x: 350, y: 18, width: 340, height: 310 }} dockSide="right" dockOrder={0}
         onClose={() => setPanels(current => ({ ...current, structure: false }))} className="structure-window">
         <section aria-label="机器人结构树" className="analysis-panel">
           <div className="structure-panel-heading"><h3>结构树 · {linkCount} Link / {Object.keys(robotRef.current?.joints ?? {}).length} Joint</h3>
@@ -1621,7 +1621,7 @@ export function RobotViewer({ report, compareReports = [], textureEnabled = {}, 
             jointValues={Object.fromEntries(joints.map(joint => [joint.name, { value: joint.value, unit: joint.unit }]))}
             angleUnit={angleUnit} /> : <p>尚无可显示的结构树。</p>}
         </section></FloatingPanel>}
-      {panels.physics && <FloatingPanel title="质量与惯量" initial={{ x: 150, y: 100, width: 440, height: 340 }}
+      {panels.physics && <FloatingPanel title="质量与惯量" initial={{ x: 350, y: 100, width: 330, height: 185 }} dockSide="right" dockOrder={2}
         onClose={() => setPanels(current => ({ ...current, physics: false }))}>
         <section aria-label="质量与惯量" className="analysis-panel">
           <h3>质量、质心与惯量</h3>
@@ -1638,7 +1638,7 @@ export function RobotViewer({ report, compareReports = [], textureEnabled = {}, 
             </tr>)}</tbody>
           </table></div>
         </section></FloatingPanel>}
-      {panels.joints && <FloatingPanel title="关节控制" initial={{ x: Math.max(330, window.innerWidth - 370), y: 465, width: 300, height: 300 }}
+      {panels.joints && <FloatingPanel title="关节控制" initial={{ x: 350, y: 340, width: 320, height: 250 }} dockSide="right" dockOrder={1}
         onClose={() => setPanels(current => ({ ...current, joints: false }))} className="joints-window">
         <section aria-label="关节控制" className="analysis-panel"><h3>关节控制（{joints.length}）</h3>
           {joints.some(joint => joint.hasLimit) && <button type="button" aria-label="一键切换全部关节限位"

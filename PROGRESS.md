@@ -459,3 +459,7 @@ TypeScript/Vite 构建通过；真实 Electron 导入用户 mybot_v3（18 Link/1
 ## 2026-10-25 — URDF 工作区选中旋转关节的轴向标记
 
 查看器选中 revolute/continuous 关节时，在实际关节原点绘制红色圆环，并以蓝色箭头指向 URDF 轴的正方向。标记按关节当前世界姿态逐帧更新；切换到 Link 或非旋转关节时隐藏。TypeScript/Vite 构建及 Go2、G1 真实 Electron S06 回归通过，验证轴方向为单位向量、关节调节后仍存在、切换 Link 后消失。截图见 `artifacts/S06/desktop/go2-selected-axis.png` 与 `artifacts/S06/desktop/g1-selected-axis.png`。
+
+## 2026-10-25 — 双工作区交互栏停靠与四分之一屏放大
+
+URDF 工作区导入模型后，文件、显示、代码、对比、CAD 库与 Agent 栏按顺序停靠左侧；结构、关节、物理与测量栏停靠右侧。CAD 转换完成导入后，Link 与试转栏在左、选中的 Joint 设置栏在右，保留从 Link 树选 Joint 才打开设置的交互。两侧栏可独立滚动，初始窗口不互相覆盖；拖动可脱离侧栏，八方向拉伸保持可用。各栏的放大菜单可选左侧、右侧或底部四分之一屏，放大时允许覆盖其他栏，还原后回到原位置。生产构建和 Go2、G1 真实 Electron S06 回归通过，回归检查初始顺序、无重叠、三种放大尺寸与还原；截图见 `artifacts/S06/desktop/{go2,g1}-docked-layout.png`。CAD 桌面流程已截图复核 Link/Joint/试转栏初始位置，完整 C03 门禁结果见 `docs/acceptance/C03.md`。
