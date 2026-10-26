@@ -750,6 +750,25 @@ app.whenReady().then(() => {
         offscreen: smoke,
         preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false
       }});
+      // Electron's built-in Ctrl+- zoom persisted at the webContents level and the
+      // corresponding Ctrl++ accelerator varies by keyboard layout (often Ctrl+Shift+=).
+      // Start at 100% and handle both directions here so panels cannot get stranded small.
+      window.webContents.setZoomLevel(0);
+      window.webContents.on('before-input-event', (inputEvent, input) => {
+        if (input.type !== 'keyDown' || (!input.control && !input.meta) || input.alt) return;
+        const key = String(input.key || '').toLowerCase();
+        const code = String(input.code || '').toLowerCase();
+        const zoomOut = key === '-' || key === '_' || key === 'subtract' || code === 'minus' || code === 'numpadsubtract';
+        const zoomIn = key === '+' || key === '=' || key === 'add' || code === 'equal' || code === 'numpadadd';
+        if (key === '0' || code === 'digit0' || code === 'numpad0') {
+          inputEvent.preventDefault();
+          window.webContents.setZoomLevel(0);
+        } else if (zoomOut || zoomIn) {
+          inputEvent.preventDefault();
+          const current = window.webContents.getZoomLevel();
+          window.webContents.setZoomLevel(Math.max(-3, Math.min(4, current + (zoomIn ? 0.5 : -0.5))));
+        }
+      });
       window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
       window.webContents.on('will-navigate', event => event.preventDefault());
       window.webContents.on('render-process-gone', (_event, details) =>
